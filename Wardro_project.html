@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wardro — Fashion Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- LOGO -->
+<div id="s-logo">
+  <div class="logo-splash-wrap">
+    <svg class="logo-splash-svg" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow-f"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Jacket outline — draws itself -->
+      <path d="M70 18 L30 38 L22 55 L35 55 L35 115 L105 115 L105 55 L118 55 L110 38 Z"
+        fill="none" stroke="#C8A864" stroke-width="2.5" stroke-linejoin="round"
+        stroke-dasharray="400" stroke-dashoffset="400" filter="url(#glow-f)">
+        <animate attributeName="stroke-dashoffset" from="400" to="0" dur="1.8s" begin="0.3s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
+        <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="0.3s" fill="freeze"/>
+      </path>
+      <!-- Lapel -->
+      <path d="M70 18 L52 48 L70 42 L88 48 Z"
+        fill="rgba(200,168,100,.0)" stroke="#C8A864" stroke-width="2" stroke-linejoin="round"
+        stroke-dasharray="120" stroke-dashoffset="120">
+        <animate attributeName="stroke-dashoffset" from="120" to="0" dur="1s" begin="1.2s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
+        <animate attributeName="fill" from="rgba(200,168,100,0)" to="rgba(200,168,100,.15)" dur="0.6s" begin="2s" fill="freeze"/>
+      </path>
+      <!-- W letter — fades in from bottom -->
+      <text x="38" y="92" font-family="serif" font-size="28" font-weight="300" fill="#C8A864" opacity="0">
+        W
+        <animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="1.6s" fill="freeze"/>
+        <animateTransform attributeName="transform" type="translate" from="0 12" to="0 0" dur="0.7s" begin="1.6s" fill="freeze" calcMode="spline" keySplines="0.34 1.56 0.64 1"/>
+      </text>
+      <!-- R letter -->
+      <text x="82" y="92" font-family="serif" font-size="28" font-weight="300" fill="#C8A864" opacity="0">
+        R
+        <animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="1.8s" fill="freeze"/>
+        <animateTransform attributeName="transform" type="translate" from="0 12" to="0 0" dur="0.7s" begin="1.8s" fill="freeze" calcMode="spline" keySplines="0.34 1.56 0.64 1"/>
+      </text>
+      <!-- Circuit lines — appear last -->
+      <g opacity="0">
+        <animate attributeName="opacity" from="0" to="0.4" dur="0.5s" begin="2.2s" fill="freeze"/>
+        <line x1="55" y1="60" x2="55" y2="72" stroke="#C8A864" stroke-width=".8"/>
+        <line x1="51" y1="66" x2="59" y2="66" stroke="#C8A864" stroke-width=".8"/>
+        <circle cx="55" cy="60" r="1.5" fill="#C8A864" opacity=".8"/>
+        <circle cx="55" cy="72" r="1.5" fill="#C8A864" opacity=".8"/>
+        <line x1="85" y1="60" x2="85" y2="72" stroke="#C8A864" stroke-width=".8"/>
+        <circle cx="85" cy="66" r="1.5" fill="#C8A864" opacity=".8"/>
+      </g>
+      <!-- Particle sparks -->
+      <circle cx="70" cy="18" r="2" fill="#EDD080" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="0.4s" begin="0.3s" fill="freeze"/>
+        <animate attributeName="r" values="2;6;2" dur="0.4s" begin="0.3s" fill="freeze"/>
+      </circle>
+      <circle cx="35" cy="55" r="1.5" fill="#EDD080" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="0.4s" begin="0.9s" fill="freeze"/>
+        <animate attributeName="r" values="1.5;5;1.5" dur="0.4s" begin="0.9s" fill="freeze"/>
+      </circle>
+      <circle cx="105" cy="55" r="1.5" fill="#EDD080" opacity="0">
+        <animate attributeName="opacity" values="0;1;0" dur="0.4s" begin="0.9s" fill="freeze"/>
+        <animate attributeName="r" values="1.5;5;1.5" dur="0.4s" begin="0.9s" fill="freeze"/>
+      </circle>
+    </svg>
+    <div class="logo-splash-brand">
+      <div class="logo-splash-mark">WARD<em>ro</em></div>
+      <div class="logo-splash-sub">Clothing Catalog & AI Stylist</div>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="s-onboard">
+  <div class="ob-slides">
+    <div class="ob-slide active" id="ob0" style="position:relative;overflow:hidden">
+      <!-- Slow-mo parallax background images -->
+      <div id="ob-parallax-bg" style="position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none">
+        <div class="ob-bg-img" style="position:absolute;width:60%;height:70%;top:5%;right:-5%;
+          background:url('https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=60&auto=format&fit=crop') center/cover;
+          border-radius:12px;opacity:.12;transform:translateY(0px);filter:blur(1px)"></div>
+        <div class="ob-bg-img" style="position:absolute;width:45%;height:55%;bottom:8%;left:-3%;
+          background:url('https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=300&q=60&auto=format&fit=crop') center/cover;
+          border-radius:10px;opacity:.1;transform:translateY(0px);filter:blur(1px)"></div>
+        <div class="ob-bg-img" style="position:absolute;width:30%;height:40%;top:35%;left:8%;
+          background:url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=60&auto=format&fit=crop') center/cover;
+          border-radius:8px;opacity:.08;transform:translateY(0px);filter:blur(2px)"></div>
+      </div>
+      <!-- Content -->
+      <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center">
+        <div class="ob-hook-wrap">
+          <div class="ob-pct-ring">
+            <svg class="ob-ring-svg" viewBox="0 0 200 200">
+              <circle class="ob-ring-bg" cx="100" cy="100" r="82"/>
+              <circle class="ob-ring-fill" cx="100" cy="100" r="82" id="ob-ring-fill"/>
+            </svg>
+            <div class="ob-pct-inner">
+              <span class="ob-big-num" id="ob-counter">0</span>
+              <span class="ob-pct-sign">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="ob-hook-line">من الملابس تُنسى<br>بعد ارتدائها <em>مرة واحدة</em></div>
+      </div>
+    </div>
+    <div class="ob-slide" id="ob1">
+      <div style="height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:32px">
+        <div class="ob-art-2">
+          <div class="ob-brain-ring">
+            <span class="ob-brain-glyph">◈</span>
+            <div class="ob-orbit ob-orbit-1">👕</div>
+            <div class="ob-orbit ob-orbit-2">📏</div>
+            <div class="ob-orbit ob-orbit-3">💰</div>
+          </div>
+        </div>
+      </div>
+      <div class="ob-eyebrow">الحل</div>
+      <div class="ob-title">ذكاء يفهم<br><em>كل تفصيلة</em></div>
+      <div class="ob-body">طولك، بنيتك، ذوقك، ميزانيتك — الذكاء الاصطناعي يقرأ كل هذا ويعمل في صمت.</div>
+    </div>
+    <div class="ob-slide" id="ob2">
+      <div style="height:160px;display:flex;align-items:flex-end;justify-content:center;position:relative;margin-bottom:32px">
+        <div style="display:flex;align-items:flex-end;gap:10px">
+          <div class="ob-mini-card"><div class="ob-card-vis"><div class="ob-card-piece" style="background:#1C2C4A;height:42px"></div><div class="ob-card-piece" style="background:#A09070;height:30px"></div></div><div class="ob-card-foot"><span class="ob-card-price">4200</span><span class="ob-card-pct">91%</span></div></div>
+          <div class="ob-mini-card" style="position:relative"><div class="ob-card-vis"><div class="ob-card-piece" style="background:#5C3010;height:52px"></div><div class="ob-card-piece" style="background:#2A4A7A;height:38px"></div><div class="ob-card-piece" style="background:#1A1A1A;height:28px"></div></div><div class="ob-card-foot"><span class="ob-card-price">6800</span><span class="ob-card-pct">98%</span></div><div class="ob-check">✓</div></div>
+          <div class="ob-mini-card"><div class="ob-card-vis"><div class="ob-card-piece" style="background:#D8D4CC;height:38px"></div><div class="ob-card-piece" style="background:#1A1A1A;height:48px"></div></div><div class="ob-card-foot"><span class="ob-card-price">3900</span><span class="ob-card-pct">94%</span></div></div>
+        </div>
+      </div>
+      <div class="ob-eyebrow">النتيجة</div>
+      <div class="ob-title">تنسيقات كاملة<br><em>من مخزون متجرك</em></div>
+      <div class="ob-body">الزبون يختار بثقة. البائع يبيع أكثر. كل شيء من ما هو موجود فعلاً في المتجر.</div>
+    </div>
+  </div>
+  <div class="ob-bottom">
+    <div class="ob-dots">
+      <div class="ob-dot on" id="d0"></div>
+      <div class="ob-dot" id="d1"></div>
+      <div class="ob-dot" id="d2"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="ob-skip" onclick="skipOnboard()">تخطى</button>
+      <button class="ob-next" id="ob-next" onclick="nextSlide()">التالي <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- SPLASH -->
+<div id="s-splash" class="screen-center active">
+  <div class="splash-inner">
+    <div class="logo-mark">WARD<em>ro</em></div>
+    <div class="logo-sub">Fashion Intelligence</div>
+    <div class="role-prompt">من أنت؟</div>
+    <div class="role-cards">
+      <div class="role-card" onclick="goCustomer()"><span class="role-icon">🛍</span><span class="role-name">زبون</span><span class="role-desc">اكتشف تنسيقات مناسبة لك</span></div>
+      <div class="role-card" onclick="goSeller()"><span class="role-icon">🏪</span><span class="role-name">بائع</span><span class="role-desc">أدر مخزونك بذكاء</span></div>
+    </div>
+    <div class="splash-footer"><span class="live-dot"></span>النخبة ستور — الجزائر</div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="s-profile" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="navigateTo('s-splash','slide')">←</button>
+    <span class="top-title">ملفك الشخصي</span>
+    <span class="top-badge">WARDRO AI</span>
+  </div>
+  <div class="form-body">
+    <div>
+      <div class="form-section-title">قياساتك</div>
+      <div class="two-col-fields">
+        <div class="field-group"><span class="field-label">الطول (سم)</span><input class="field-input" type="number" id="ht" value="178" min="150" max="210" inputmode="numeric"></div>
+        <div class="field-group"><span class="field-label">العمر</span><input class="field-input" type="number" id="ag" value="22" min="15" max="65" inputmode="numeric"></div>
+      </div>
+    </div>
+    <div><div class="form-section-title">البنية الجسدية</div>
+      <div class="tag-group" id="build-tags">
+        <span class="tag" data-v="نحيف">نحيف</span><span class="tag on" data-v="متوسط">متوسط</span><span class="tag" data-v="رياضي">رياضي</span><span class="tag" data-v="ممتلئ">ممتلئ</span>
+      </div>
+    </div>
+    <div><div class="form-section-title">ذوقك في الموضة</div>
+      <div class="tag-group" id="style-tags">
+        <span class="tag on" data-v="كاجوال مريح">كاجوال</span><span class="tag" data-v="سمارت كاجوال">سمارت</span><span class="tag" data-v="أنيق فورمال">فورمال</span><span class="tag" data-v="ستريت وير">ستريت</span>
+      </div>
+    </div>
+    <div>
+      <div class="form-section-title">ميزانيتك</div>
+      <div class="budget-display" id="bdisp">8٬000 <span class="budget-unit">دج</span></div>
+      <div class="budget-hint" id="budget-hint">تبقى لك كامل الميزانية هذا الشهر ✓</div>
+      <div class="range-track"><input type="range" id="bg" min="2000" max="20000" step="500" value="8000" oninput="updateBudget(this.value)"></div>
+      <div class="range-labels"><span>2٬000 دج</span><span>20٬000 دج</span></div>
+    </div>
+    <div><div class="form-section-title">ما مناسبتك؟</div>
+      <div class="tag-group" id="occasion-tags">
+        <span class="tag on" data-v="يوم عادي">🎓 يوم عادي</span><span class="tag" data-v="مناسبة خاصة">👔 مناسبة</span><span class="tag" data-v="توفير المال">💸 أوفر ما أقدر</span>
+      </div>
+    </div>
+    <button class="cta-btn" id="go-btn" onclick="startGenerate()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      اكتشف تنسيقاتي
+    </button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="s-loading" class="screen-center">
+  <div class="loading-inner">
+    <div class="loading-ring-outer"><div class="loading-glyph">◈</div></div>
+    <div class="loading-title">يبني تنسيقاتك...</div>
+    <div class="loading-steps" id="lsteps">
+      <div class="loading-step" id="ls0"><span class="step-dot"></span>يقرأ مخزون المتجر</div>
+      <div class="loading-step" id="ls1"><span class="step-dot"></span>يحلل ذوقك وقياساتك</div>
+      <div class="loading-step" id="ls2"><span class="step-dot"></span>يبني التنسيقات</div>
+      <div class="loading-step" id="ls3"><span class="step-dot"></span>يرتب الأفضل لك</div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="s-results" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="navigateTo('s-profile','slide')">←</button>
+    <span class="top-title">تنسيقاتك</span>
+    <span class="top-badge">WARDRO AI</span>
+  </div>
+  <div class="results-body pb-safe" id="results-body"></div>
+</div>
+
+<!-- SELLER -->
+<div id="s-seller" class="screen pb-safe">
+  <div class="top-bar">
+    <button class="back-btn" onclick="navigateTo('s-splash','z-axis');hideNav()">←</button>
+    <span class="top-title">لوحة البائع</span>
+    <span class="top-badge">WARDRO</span>
+  </div>
+  <div class="seller-body" id="seller-body">
+    <div class="seller-welcome">مرحباً،<br><span>متجر النخبة</span></div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div>
+      <div class="section-header" style="margin-bottom:12px">
+        <span class="section-title">المخزون</span>
+        <button class="section-action" onclick="toggleAddForm()">+ إضافة قطعة</button>
+      </div>
+      <div class="inv-list" id="inv-list"></div>
+    </div>
+    <div class="add-form" id="add-form" style="display:none">
+      <div class="add-form-title">إضافة قطعة جديدة</div>
+      <div class="field-group"><span class="field-label">اسم القطعة</span><input class="field-input" id="nn" placeholder="مثال: سترة نيفي كلاسيك"></div>
+      <div class="two-col-fields">
+        <div class="field-group"><span class="field-label">النوع</span><select class="field-select" id="nt"><option>قميص</option><option>تيشيرت</option><option>سترة</option><option>بنطلون</option><option>جينز</option><option>جاكيت</option><option>حذاء</option><option>إكسسوار</option></select></div>
+        <div class="field-group"><span class="field-label">السعر (دج)</span><input class="field-input" id="np" type="number" placeholder="2500" inputmode="numeric"></div>
+      </div>
+      <div class="field-group"><span class="field-label">المقاسات</span><input class="field-input" id="ns" placeholder="S, M, L, XL"></div>
+      <div class="field-group"><span class="field-label">اللون</span>
+        <div class="color-picker-row" id="cp-row">
+          <div class="color-swatch on" data-c="#1C2C4A" style="background:#1C2C4A" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#2C2C2C" style="background:#2C2C2C" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#8B2020" style="background:#8B2020" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#A09070" style="background:#A09070" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#5C3010" style="background:#5C3010" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#E0E0D8" style="background:#E0E0D8" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#2A6A3A" style="background:#2A6A3A" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#6A4A8A" style="background:#6A4A8A" onclick="pickC(this)"></div>
+        </div>
+      </div>
+      <button class="add-submit" onclick="addItem()">✦ أضف للمخزون</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHT -->
+<div id="s-insight" class="screen pb-safe">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showSeller('inventory')">←</button>
+    <span class="top-title">ذكاء المتجر</span>
+    <span class="top-badge">AI</span>
+  </div>
+  <div class="insight-body" id="insight-body"></div>
+</div>
+
+<!-- PRODUCT SHEET -->
+<div class="product-sheet" id="product-sheet" onclick="closeSheet(event)">
+  <div class="product-sheet-inner" id="ps-inner">
+    <div class="ps-img-wrap" id="ps-img-wrap">
+      <img class="ps-img" id="ps-img" src="" alt="" style="display:none">
+      <div class="ps-img-fallback" id="ps-img-fallback" style="display:flex;background:var(--card2)">👕</div>
+      <div class="ps-img-overlay"></div>
+      <button class="ps-close" onclick="closeProductSheet()">×</button>
+    </div>
+    <div class="ps-body">
+      <div class="ps-type" id="ps-type"></div>
+      <div class="ps-name" id="ps-name"></div>
+      <div class="ps-price" id="ps-price"></div>
+      <div class="ps-sizes" id="ps-sizes"></div>
+      <div class="ps-divider"></div>
+      <div class="ps-action-title">بناءً على هذه القطعة — الذكاء يبني لك</div>
+      <button class="ps-build-btn" id="ps-build-btn" onclick="buildAroundItem()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        نسّق تنسيقين حول هذه القطعة
+      </button>
+      <div class="ps-result" id="ps-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<!-- Customer Nav (Browse) -->
+<div class="nav-bar" id="nav-bar-customer" style="display:none">
+  <button class="nav-item" id="nav-home" onclick="showCustomerTab('profile')"><span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span></button>
+  <button class="nav-item on" id="nav-browse" onclick="showCustomerTab('browse')"><span class="nav-icon">✦</span><span class="nav-label">اكتشف</span></button>
+  <button class="nav-item" id="nav-style" onclick="showCustomerTab('generate')"><span class="nav-icon">⚡</span><span class="nav-label">نسّق</span></button>
+</div>
+
+<!-- Seller Nav -->
+<div class="nav-bar" id="nav-bar">
+  <button class="nav-item on" id="nav-inv" onclick="showSeller('inventory')"><span class="nav-icon">📦</span><span class="nav-label">المخزون</span></button>
+  <button class="nav-item" id="nav-ai" onclick="showSeller('insight')"><span class="nav-icon">🧠</span><span class="nav-label">ذكاء AI</span></button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

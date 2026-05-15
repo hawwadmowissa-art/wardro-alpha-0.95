@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wardro AI v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,600;1,9..144,200;1,9..144,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0908;--surf:#131110;--card:#1A1815;--card2:#201D19;
+  --brd:rgba(200,170,100,.1);--brd2:rgba(200,170,100,.18);
+  --gold:#C8A864;--goldD:#7A6030;--goldL:#E8C888;
+  --cream:#EEE4D0;--rust:#AA4428;--rustL:#D05530;
+  --sage:#4E7A4C;--sageL:#70A86E;
+  --blue:#3A6E9A;--blueL:#5090C0;
+  --purple:#6A4A8A;
+  --muted:#5A5248;--dim:#3A3530;
+  --txt:#DDD4BC;--txtD:#8A8070;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Tajawal',sans-serif}
+body::after{content:'';position:fixed;inset:0;opacity:.025;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* ── HEADER ── */
+.hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;border-bottom:1px solid var(--brd);background:rgba(10,9,8,.92);backdrop-filter:blur(16px)}
+.brand{font-family:'Fraunces',serif;font-size:20px;color:var(--gold);letter-spacing:5px;font-weight:200}
+.brand i{font-style:italic}
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:9px;padding:3px}
+.tab{padding:5px 16px;border:none;border-radius:7px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;color:var(--muted);background:transparent;transition:all .2s;font-weight:500}
+.tab.on{background:var(--gold);color:#0A0908;font-weight:700}
+.hdr-r{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--sageL);animation:bk 2s infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ── BODY ── */
+.body{display:flex;flex:1;overflow:hidden}
+
+/* ════════════════ CUSTOMER VIEW ════════════════ */
+#cv{display:flex;flex:1;overflow:hidden;flex-direction:column}
+.c-top{flex-shrink:0}
+
+/* sub-tabs */
+.stabs{display:flex;padding:0 24px;border-bottom:1px solid var(--brd);background:var(--surf);gap:0}
+.stab{padding:10px 18px;border:none;background:transparent;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-weight:500}
+.stab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700}
+
+/* profile */
+.profile-bar{padding:12px 24px;border-bottom:1px solid var(--brd);background:var(--surf);display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.pg{display:flex;flex-direction:column;gap:3px}
+.pl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.pi,.ps{padding:7px 10px;border:1px solid var(--brd);border-radius:8px;background:var(--card);color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.pi{width:76px}.ps{width:124px}
+.pi:focus,.ps:focus{border-color:var(--gold)}
+option{background:#131110}
+.strow{display:flex;gap:4px;flex-wrap:wrap}
+.st{padding:5px 10px;border-radius:20px;border:1px solid var(--brd);font-size:12px;cursor:pointer;color:var(--muted);background:transparent;transition:all .15s}
+.st.on{background:var(--gold);color:#0A0908;border-color:var(--gold);font-weight:700}
+.bgp{flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px}
+.bgrow{display:flex;align-items:center;gap:8px}
+input[type=range]{flex:1;-webkit-appearance:none;height:2px;background:var(--dim);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer}
+.bv{font-size:14px;font-weight:700;color:var(--gold);min-width:86px}
+.gobtn{padding:8px 20px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--rust),var(--rustL));color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;align-self:flex-end;box-shadow:0 4px 16px rgba(170,68,40,.3);transition:all .2s}
+.gobtn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(170,68,40,.45)}
+.gobtn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* c-main */
+.c-main{display:flex;flex:1;overflow:hidden}
+
+/* feed */
+.feed{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.feed::-webkit-scrollbar{width:3px}
+.feed::-webkit-scrollbar-thumb{background:var(--dim)}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;text-align:center}
+.eg{font-family:'Fraunces',serif;font-size:60px;color:rgba(200,168,100,.06);line-height:1}
+.eh{font-family:'Fraunces',serif;font-size:18px;color:var(--muted);font-weight:200}
+.ep{font-size:12px;color:var(--txtD);max-width:260px;line-height:1.8}
+
+.ldr{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px}
+.ring{width:44px;height:44px;border:1.5px solid var(--brd);border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lt{font-family:'Fraunces',serif;font-size:17px;color:var(--muted);font-weight:200;animation:fl 1.6s ease-in-out infinite}
+@keyframes fl{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* analysis */
+.acard{background:linear-gradient(135deg,rgba(200,168,100,.06),rgba(200,168,100,.02));border:1px solid rgba(200,168,100,.18);border-radius:14px;padding:16px 20px}
+.abadge{font-size:9px;letter-spacing:2px;background:var(--gold);color:#0A0908;padding:3px 9px;border-radius:20px;font-weight:700}
+.atitle{font-family:'Fraunces',serif;font-size:16px;color:var(--cream);font-weight:200;margin-right:8px}
+.abody{font-size:13px;color:var(--txtD);line-height:1.9;margin-top:10px}
+.atip{margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(78,122,76,.1);border:1px solid rgba(78,122,76,.2);font-size:12px;color:var(--sageL)}
+
+/* outfit grid */
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px}
+.oc{background:var(--card);border:1px solid var(--brd);border-radius:13px;overflow:hidden;cursor:pointer;transition:all .22s}
+.oc:hover{border-color:var(--goldD);transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.5)}
+.oc.chosen{border-color:var(--rust);border-width:2px}
+.ovis{height:100px;display:flex;align-items:flex-end;justify-content:center;gap:4px;padding:10px 10px 0}
+.op{border-radius:5px 5px 0 0;flex:1}
+.obody{padding:11px}
+.otag{font-size:9px;letter-spacing:1.8px;color:var(--goldD);text-transform:uppercase;margin-bottom:2px;font-weight:700}
+.oname{font-family:'Fraunces',serif;font-size:14px;color:var(--cream);font-weight:200;margin-bottom:4px}
+.oitems{font-size:11px;color:var(--txtD);line-height:1.7;margin-bottom:6px}
+.oreason{font-size:10px;color:var(--muted);font-style:italic;margin-bottom:7px;line-height:1.5}
+.ofoot{display:flex;align-items:center;justify-content:space-between}
+.oprice{font-size:14px;font-weight:700;color:var(--gold)}
+.omatch{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(78,122,76,.15);color:var(--sageL);font-weight:700}
+
+/* chat */
+.chat-zone{border-top:1px solid var(--brd);background:var(--surf);flex-shrink:0}
+.cmsgs{max-height:130px;overflow-y:auto;padding:9px 22px;display:flex;flex-direction:column;gap:6px}
+.cmsgs::-webkit-scrollbar{width:2px}
+.cmsg{display:flex;gap:7px;align-items:flex-start;animation:mi .25s ease-out}
+@keyframes mi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.cbadge{font-size:9px;letter-spacing:1px;font-weight:700;padding:3px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.cmsg.usr .cbadge{background:rgba(200,168,100,.1);color:var(--goldD)}
+.cmsg.ai .cbadge{background:rgba(170,68,40,.15);color:var(--rust)}
+.ctxt{font-size:12px;color:var(--txtD);line-height:1.7}
+.cinprow{padding:7px 22px 10px;display:flex;gap:7px}
+.cinp{flex:1;padding:8px 12px;border:1px solid var(--brd);border-radius:8px;background:var(--card);color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;outline:none;transition:border-color .2s;direction:rtl}
+.cinp::placeholder{color:var(--muted)}
+.cinp:focus{border-color:var(--gold)}
+.sbtn{padding:8px 14px;border:none;border-radius:8px;background:var(--gold);color:#0A0908;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.sbtn:hover{background:var(--goldL)}
+.sbtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* sidebar */
+.sidebar{width:260px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.sbhdr{padding:12px 16px 10px;border-bottom:1px solid var(--brd)}
+.sbtitle{font-family:'Fraunces',serif;font-size:15px;color:var(--cream);font-weight:200}
+.sbsub{font-size:10px;color:var(--txtD);margin-top:2px}
+.sblist{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px}
+.sblist::-webkit-scrollbar{width:2px}
+.irow{padding:9px 11px;border-radius:9px;border:1px solid var(--brd);display:flex;gap:9px;align-items:center;background:var(--card);transition:border-color .2s}
+.irow:hover{border-color:var(--goldD)}
+.idot{width:32px;height:32px;border-radius:7px;flex-shrink:0}
+.iname{font-size:12px;font-weight:500;color:var(--txt)}
+.imeta{font-size:10px;color:var(--txtD);margin-top:1px}
+.iprice{font-size:11px;font-weight:700;color:var(--gold);margin-top:2px}
+
+/* ── WARDROBE TAB ── */
+#wb-view{display:flex;flex:1;overflow:hidden;flex-direction:column}
+.wb-main{flex:1;overflow-y:auto;padding:18px 24px}
+.wb-main::-webkit-scrollbar{width:3px}
+
+.wb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.wb-title{font-family:'Fraunces',serif;font-size:20px;color:var(--cream);font-weight:200}
+.wb-add-btn{padding:8px 16px;border:1px solid rgba(200,168,100,.25);border-radius:9px;background:rgba(200,168,100,.06);color:var(--gold);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.wb-add-btn:hover{background:rgba(200,168,100,.12)}
+
+.wb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.wb-item{background:var(--card);border:1px solid var(--brd);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.wb-item:hover{border-color:var(--goldD);transform:translateY(-2px)}
+.wb-item.sel{border-color:var(--gold);border-width:2px}
+.wb-vis{height:80px;display:flex;align-items:center;justify-content:center}
+.wb-circle{width:52px;height:52px;border-radius:50%}
+.wb-info{padding:9px 10px}
+.wb-n{font-size:12px;font-weight:500;color:var(--txt)}
+.wb-m{font-size:10px;color:var(--txtD);margin-top:1px}
+.wb-del{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:rgba(170,68,40,.7);color:#fff;border:none;cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center}
+.wb-item:hover .wb-del{display:flex}
+
+.wb-suggest-bar{background:linear-gradient(135deg,rgba(106,74,138,.1),rgba(106,74,138,.04));border:1px solid rgba(106,74,138,.2);border-radius:14px;padding:16px 20px;margin-bottom:16px}
+.wb-sb-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.wb-badge{font-size:9px;letter-spacing:2px;background:var(--purple);color:#fff;padding:3px 9px;border-radius:20px;font-weight:700}
+.wb-stitle{font-family:'Fraunces',serif;font-size:16px;color:var(--cream);font-weight:200}
+.wb-sub{font-size:12px;color:var(--txtD);line-height:1.8;margin-bottom:12px}
+.wb-btn{padding:9px 18px;border:1px solid rgba(106,74,138,.3);border-radius:9px;background:rgba(106,74,138,.1);color:#A07ACA;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.wb-btn:hover{background:rgba(106,74,138,.2)}
+.wb-btn:disabled{opacity:.4;cursor:not-allowed}
+.wb-result{margin-top:12px}
+
+.add-item-form{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.aif-title{font-size:13px;font-weight:700;color:var(--cream);margin-bottom:2px}
+.aif-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.aif-g{display:flex;flex-direction:column;gap:3px}
+.aif-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.aif-i,.aif-s{padding:8px 10px;border:1px solid var(--brd);border-radius:8px;background:var(--surf);color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.aif-i:focus,.aif-s:focus{border-color:var(--gold)}
+.clr-r{display:flex;gap:5px;flex-wrap:wrap}
+.cs{width:24px;height:24px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.cs.on{border-color:var(--gold)}
+.aif-btn{padding:9px;border:none;border-radius:8px;background:var(--purple);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.aif-btn:hover{background:#7A5A9A}
+
+/* ════════════════ SELLER VIEW ════════════════ */
+#sv{display:flex;flex:1;overflow:hidden;flex-direction:column}
+.sv-tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--brd);background:var(--surf);gap:0}
+.sv-main{flex:1;overflow-y:auto;padding:20px 26px}
+.sv-main::-webkit-scrollbar{width:3px}
+
+.stats-r{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:14px 16px}
+.slbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.snum{font-family:'Fraunces',serif;font-size:28px;color:var(--cream);font-weight:200}
+.snote{font-size:10px;color:var(--sageL);margin-top:2px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.sectitle{font-family:'Fraunces',serif;font-size:16px;color:var(--cream);font-weight:200;margin-bottom:10px}
+
+/* ai panel */
+.ai-panel{border-radius:14px;padding:16px 20px;margin-bottom:20px}
+.ai-panel.market{background:linear-gradient(135deg,rgba(58,110,154,.08),rgba(58,110,154,.02));border:1px solid rgba(58,110,154,.2)}
+.ai-panel.dead{background:linear-gradient(135deg,rgba(170,68,40,.08),rgba(170,68,40,.02));border:1px solid rgba(170,68,40,.2)}
+.ai-panel.trend{background:linear-gradient(135deg,rgba(78,122,76,.08),rgba(78,122,76,.02));border:1px solid rgba(78,122,76,.2)}
+.aph{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.apbadge{font-size:9px;letter-spacing:2px;padding:3px 9px;border-radius:20px;font-weight:700}
+.apbadge.b{background:var(--blue);color:#fff}
+.apbadge.r{background:var(--rust);color:#fff}
+.apbadge.g{background:var(--sage);color:#fff}
+.aptitle{font-family:'Fraunces',serif;font-size:15px;color:var(--cream);font-weight:200}
+.apbody{font-size:12px;color:var(--txtD);line-height:1.8}
+.apbtn{margin-top:12px;padding:8px 16px;border:1px solid;border-radius:9px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.apbtn.b{border-color:rgba(58,110,154,.3);background:rgba(58,110,154,.1);color:var(--blueL)}
+.apbtn.r{border-color:rgba(170,68,40,.3);background:rgba(170,68,40,.1);color:var(--rustL)}
+.apbtn.g{border-color:rgba(78,122,76,.3);background:rgba(78,122,76,.1);color:var(--sageL)}
+.apbtn:hover{opacity:.8}
+.apbtn:disabled{opacity:.35;cursor:not-allowed}
+
+.mini-sp{display:inline-block;width:13px;height:13px;border:1.5px solid rgba(255,255,255,.15);border-top-color:currentColor;border-radius:50%;animation:sp 1s linear infinite;vertical-align:middle;margin-left:5px}
+
+.finv{display:flex;flex-direction:column;gap:7px}
+.fr{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:10px;transition:border-color .2s;position:relative}
+.fr:hover{border-color:var(--goldD)}
+.fr.dead-flag{border-color:rgba(170,68,40,.3);background:rgba(170,68,40,.04)}
+.fdot{width:36px;height:36px;border-radius:7px;flex-shrink:0}
+.fin{flex:1}
+.fn{font-size:12px;font-weight:500;color:var(--txt)}
+.fm{font-size:10px;color:var(--txtD);margin-top:1px}
+.fr2{text-align:left;flex-shrink:0}
+.fp{font-size:12px;font-weight:700;color:var(--gold)}
+.bge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;margin-top:3px;display:inline-block}
+.ok{background:rgba(78,122,76,.15);color:var(--sageL)}
+.low{background:rgba(200,168,100,.1);color:var(--goldD)}
+.out{background:rgba(170,68,40,.15);color:var(--rustL)}
+.dead-badge{position:absolute;top:5px;left:5px;font-size:8px;background:rgba(170,68,40,.8);color:#fff;padding:2px 6px;border-radius:20px;font-weight:700}
+
+.addform{background:var(--card);border:1px solid var(--brd);border-radius:13px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.fi,.fs{padding:8px 11px;border:1px solid var(--brd);border-radius:8px;background:var(--surf);color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.fi:focus,.fs:focus{border-color:var(--gold)}
+.two-f{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.clrr{display:flex;gap:5px;flex-wrap:wrap}
+.csw{width:24px;height:24px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.csw.on{border-color:var(--gold)}
+.addbtn{padding:9px;border:none;border-radius:8px;background:var(--sage);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s}
+.addbtn:hover{background:#3E6A3C}
+
+/* pill tags */
+.ptag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;margin:3px 3px 0 0;font-weight:600}
+.ptag.r{background:rgba(170,68,40,.12);color:var(--rustL)}
+.ptag.g{background:rgba(78,122,76,.12);color:var(--sageL)}
+.ptag.b{background:rgba(58,110,154,.12);color:var(--blueL)}
+
+/* rescue card */
+.rescue-item{background:rgba(170,68,40,.06);border:1px solid rgba(170,68,40,.18);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.ri-name{font-size:13px;font-weight:700;color:var(--cream);margin-bottom:3px}
+.ri-stat{font-size:11px;color:var(--rustL);margin-bottom:6px}
+.ri-strategies{display:flex;flex-direction:column;gap:5px}
+.ri-s{font-size:11px;color:var(--txtD);padding:5px 9px;border-radius:7px;background:rgba(255,255,255,.03);border:1px solid var(--brd)}
+
+/* trend bars */
+.tbar-item{margin-bottom:10px}
+.tbar-name{font-size:12px;color:var(--txt);margin-bottom:4px;display:flex;justify-content:space-between}
+.tbar-track{height:6px;background:var(--dim);border-radius:3px;overflow:hidden;display:flex}
+.tbar-like{height:100%;background:var(--gold);border-radius:3px;transition:width 1s ease-out}
+.tbar-buy{height:100%;background:var(--sage);border-radius:3px;transition:width 1s ease-out}
+.tbar-legend{display:flex;gap:12px;margin-top:4px;font-size:10px;color:var(--muted)}
+.tleg{display:flex;align-items:center;gap:4px}
+.tleg-dot{width:8px;height:8px;border-radius:2px}
+
+.reveal{animation:rv .4s ease-out both}
+@keyframes rv{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--brd);color:var(--gold);padding:8px 18px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="brand">WARD<i>ro</i></div>
+  <div class="tabs">
+    <button class="tab on" onclick="gv('c')">الزبون</button>
+    <button class="tab" onclick="gv('s')">البائع</button>
+  </div>
+  <div class="hdr-r"><span class="dot"></span>النخبة ستور — الجزائر</div>
+</div>
+
+<div class="body">
+
+<!-- ════ CUSTOMER VIEW ════ -->
+<div id="cv">
+  <div class="c-top">
+    <div class="stabs">
+      <button class="stab on" onclick="ct('outfit')">🔍 اقتراح تنسيقات</button>
+      <button class="stab" onclick="ct('wardrobe')">👕 خزانتي</button>
+    </div>
+
+    <!-- OUTFIT sub -->
+    <div id="outfit-bar" class="profile-bar">
+      <div class="pg"><span class="pl">الطول سم</span><input class="pi" type="number" id="ht" value="178" min="150" max="210"></div>
+      <div class="pg"><span class="pl">العمر</span><input class="pi" type="number" id="ag" value="22" min="15" max="65"></div>
+      <div class="pg"><span class="pl">البنية</span>
+        <select class="ps" id="bd"><option>نحيف</option><option selected>متوسط</option><option>رياضي</option><option>ممتلئ</option></select>
+      </div>
+      <div class="pg"><span class="pl">الذوق</span>
+        <div class="strow">
+          <span class="st on" data-v="كاجوال مريح">كاجوال</span>
+          <span class="st" data-v="سمارت كاجوال">سمارت</span>
+          <span class="st" data-v="أنيق فورمال">فورمال</span>
+          <span class="st" data-v="ستريت وير">ستريت</span>
+        </div>
+      </div>
+      <div class="bgp">
+        <span class="pl">الميزانية</span>
+        <div class="bgrow">
+          <input type="range" id="bg" min="3000" max="20000" step="500" value="8000"
+            oninput="document.getElementById('bv').textContent=Number(this.value).toLocaleString('ar-DZ')+' دج'">
+          <span class="bv" id="bv">8٬000 دج</span>
+        </div>
+      </div>
+      <button class="gobtn" id="gobtn" onclick="genOutfits()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        اقترح
+      </button>
+    </div>
+  </div>
+
+  <!-- outfit main -->
+  <div class="c-main" id="outfit-main">
+    <div class="feed" id="feed">
+      <div class="empty" id="emp">
+        <div class="eg">◈</div>
+        <div class="eh">اكتشف ستايلك</div>
+        <div class="ep">أدخل بياناتك واضغط اقترح — سيبني الذكاء تنسيقات من مخزون المتجر</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="chat-zone">
+        <div class="cmsgs" id="msgs"></div>
+        <div class="cinprow">
+          <input class="cinp" id="cinp" placeholder="اسأل عن تنسيق، مناسبة، لون..." onkeydown="if(event.key==='Enter')chat()">
+          <button class="sbtn" id="sbtn" onclick="chat()">أرسل</button>
+        </div>
+      </div>
+      <div class="sidebar">
+        <div class="sbhdr"><div class="sbtitle">مخزون المتجر</div><div class="sbsub" id="icc">جاري التحميل...</div></div>
+        <div class="sblist" id="sblist"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- wardrobe main -->
+  <div id="wardrobe-main" style="display:none;flex:1;overflow:hidden">
+    <div class="wb-main">
+      <div class="wb-header">
+        <div class="wb-title">خزانتي — ملابسي الحالية</div>
+        <button class="wb-add-btn" onclick="toggleAddForm()">+ أضف قطعة</button>
+      </div>
+
+      <!-- add form (hidden by default) -->
+      <div class="add-item-form" id="wbadf" style="display:none;margin-bottom:16px">
+        <div class="aif-title">أضف قطعة من خزانتك</div>
+        <div class="aif-row">
+          <div class="aif-g"><span class="aif-l">اسم القطعة</span><input class="aif-i" id="wbn" placeholder="جاكيت جلد أسود"></div>
+          <div class="aif-g"><span class="aif-l">النوع</span>
+            <select class="aif-s" id="wbt">
+              <option>قميص</option><option>تيشيرت</option><option>سترة/جاكيت</option>
+              <option>بنطلون</option><option>جينز</option><option>حذاء</option><option>إكسسوار</option>
+            </select>
+          </div>
+        </div>
+        <div class="aif-g"><span class="aif-l">اللون</span>
+          <div class="clr-r" id="wbclrr">
+            <div class="cs on" data-c="#1C2C4A" style="background:#1C2C4A" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#2C2C2C" style="background:#2C2C2C" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#8B2020" style="background:#8B2020" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#A09070" style="background:#A09070" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#5C3010" style="background:#5C3010" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#DDDDDD" style="background:#DDDDDD" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#2A6A3A" style="background:#2A6A3A" onclick="wbpick(this)"></div>
+            <div class="cs" data-c="#6A4A8A" style="background:#6A4A8A" onclick="wbpick(this)"></div>
+          </div>
+        </div>
+        <button class="aif-btn" onclick="addWbItem()">أضف للخزانة</button>
+      </div>
+
+      <!-- wardrobe grid -->
+      <div class="wb-grid" id="wbgrid">
+        <!-- rendered by JS -->
+      </div>
+
+      <!-- smart suggest -->
+      <div class="wb-suggest-bar">
+        <div class="wb-sb-hdr">
+          <span class="wb-badge">CLOSET AI</span>
+          <span class="wb-stitle">اكمل تنسيقاتك بأقل تكلفة</span>
+        </div>
+        <div class="wb-sub">الذكاء سيحلل ما لديك في الخزانة ويقترح قطعاً من المتجر تكمل تنسيقاتك — بأقل إنفاق ممكن.</div>
+        <button class="wb-btn" id="wbbtn" onclick="genWardrobeSuggest()">⟡ اقترح ما ينقصني من المتجر</button>
+        <div class="wb-result" id="wbresult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SELLER VIEW ════ -->
+<div id="sv" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+  <div class="sv-tabs stabs">
+    <button class="stab on" onclick="st2('inventory')">📦 المخزون</button>
+    <button class="stab" onclick="st2('deadstock')">⚠ القطع المكدسة</button>
+    <button class="stab" onclick="st2('market')">📊 ذكاء السوق</button>
+    <button class="stab" onclick="st2('trend')">📈 Trend Radar</button>
+  </div>
+
+  <!-- inventory panel -->
+  <div id="sp-inventory" class="sv-main">
+    <div class="stats-r">
+      <div class="stat"><div class="slbl">القطع المسجلة</div><div class="snum" id="st0">—</div><div class="snote">كامل المخزون</div></div>
+      <div class="stat"><div class="slbl">متوسط السعر</div><div class="snum" id="st1">—</div><div class="snote">دج</div></div>
+      <div class="stat"><div class="slbl">تحتاج إعادة طلب</div><div class="snum" id="st2s" style="color:var(--rustL)">—</div><div class="snote">قطعة</div></div>
+      <div class="stat"><div class="slbl">أعلى سعر</div><div class="snum" id="st3">—</div><div class="snote">دج</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="sectitle">جميع القطع</div>
+        <div class="finv" id="finv"></div>
+      </div>
+      <div>
+        <div class="sectitle">إضافة قطعة جديدة</div>
+        <div class="addform">
+          <div class="fg"><span class="fl">اسم القطعة</span><input class="fi" id="nn" placeholder="جاكيت جلد أسود"></div>
+          <div class="two-f">
+            <div class="fg"><span class="fl">النوع</span>
+              <select class="fs" id="nt"><option>قميص</option><option>تيشيرت</option><option>سترة</option><option>بنطلون</option><option>جينز</option><option>جاكيت</option><option>حذاء</option><option>إكسسوار</option></select>
+            </div>
+            <div class="fg"><span class="fl">السعر دج</span><input class="fi" id="np" type="number" placeholder="2500"></div>
+          </div>
+          <div class="two-f">
+            <div class="fg"><span class="fl">المقاسات</span><input class="fi" id="ns" placeholder="S,M,L,XL"></div>
+            <div class="fg"><span class="fl">المخزون</span>
+              <select class="fs" id="nst"><option value="ok">متوفر</option><option value="low">آخر القطع</option><option value="out">نفد</option></select>
+            </div>
+          </div>
+          <div class="fg"><span class="fl">اللون</span>
+            <div class="clrr" id="clrr">
+              <div class="csw on" data-c="#1C2C4A" style="background:#1C2C4A" onclick="pc(this)"></div>
+              <div class="csw" data-c="#B54A2A" style="background:#B54A2A" onclick="pc(this)"></div>
+              <div class="csw" data-c="#A09070" style="background:#A09070" onclick="pc(this)"></div>
+              <div class="csw" data-c="#2A4A7A" style="background:#2A4A7A" onclick="pc(this)"></div>
+              <div class="csw" data-c="#3A6A3A" style="background:#3A6A3A" onclick="pc(this)"></div>
+              <div class="csw" data-c="#E0E0D8" style="background:#E0E0D8" onclick="pc(this)"></div>
+              <div class="csw" data-c="#5C3010" style="background:#5C3010" onclick="pc(this)"></div>
+              <div class="csw" data-c="#2C2C2C" style="background:#2C2C2C" onclick="pc(this)"></div>
+            </div>
+          </div>
+          <button class="addbtn" onclick="addItem()">✦ أضف للمخزون</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- dead stock panel -->
+  <div id="sp-deadstock" class="sv-main" style="display:none">
+    <div class="ai-panel dead">
+      <div class="aph"><span class="apbadge r">DEAD STOCK AI</span><span class="aptitle">القطع المكدسة — استراتيجية الإنقاذ</span></div>
+      <div class="apbody">الذكاء يحلل تاريخ الاقتراحات مقابل المبيعات — يحدد القطع التي لم تُشترَ رغم الاقتراح، ثم يبني لك استراتيجية إنقاذ مخصصة لكل قطعة.</div>
+      <button class="apbtn r" id="deadbtn" onclick="runDeadstock()">⚠ حلل القطع المكدسة وأعطني استراتيجية</button>
+    </div>
+    <div id="deadresult"></div>
+  </div>
+
+  <!-- market panel -->
+  <div id="sp-market" class="sv-main" style="display:none">
+    <div class="ai-panel market">
+      <div class="aph"><span class="apbadge b">MARKET AI</span><span class="aptitle">ذكاء السوق — ماذا تشتري القادم</span></div>
+      <div class="apbody">يحلل مخزونك ويقارنه ببيانات السوق الجزائري — يحدد الفجوات ويوصي بما تشتريه لتحقيق أعلى ربح.</div>
+      <button class="apbtn b" id="mktbtn" onclick="runMarket()">⟡ حلل وأعطني توصيات الشراء</button>
+    </div>
+    <div id="mktresult"></div>
+  </div>
+
+  <!-- trend panel -->
+  <div id="sp-trend" class="sv-main" style="display:none">
+    <div class="ai-panel trend">
+      <div class="aph"><span class="apbadge g">TREND RADAR</span><span class="aptitle">الفرق بين الإعجاب والشراء</span></div>
+      <div class="apbody">يقيس كل قطعة بمعيارين: نسبة الاقتراح (كم مرة اقترحها الذكاء) ونسبة الشراء الفعلي — الفجوة بينهما تكشف مشكلة السعر أو الحجم أو التوقيت.</div>
+      <button class="apbtn g" id="trendbtn" onclick="runTrend()">📊 اعرض Trend Radar</button>
+    </div>
+    <div id="trendresult"></div>
+  </div>
+</div>
+
+</div><!-- end body -->
+</div><!-- end app -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ DATA ══
+let inv=[
+  {id:1,name:"سترة كلاسيكية نيفي",type:"سترة",color:"#1C2C4A",cname:"كحلي",price:3200,sizes:"M·L·XL",stock:"ok",views:42,sold:18},
+  {id:2,name:"قميص كاروه أحمر",type:"قميص",color:"#8B2020",cname:"أحمر",price:1800,sizes:"S·M·L",stock:"ok",views:28,sold:14},
+  {id:3,name:"بنطلون بيج كاجوال",type:"بنطلون",color:"#A09070",cname:"بيج",price:2200,sizes:"32·34·36",stock:"low",views:35,sold:5},
+  {id:4,name:"جينز أزرق سليم",type:"جينز",color:"#2A4A7A",cname:"أزرق",price:2800,sizes:"30·32·34·36",stock:"ok",views:50,sold:22},
+  {id:5,name:"جاكيت جلد بني",type:"جاكيت",color:"#5C3010",cname:"بني",price:5500,sizes:"M·L",stock:"ok",views:15,sold:3},
+  {id:6,name:"تيشيرت أبيض بسيط",type:"تيشيرت",color:"#D8D4CC",cname:"أبيض",price:900,sizes:"S·M·L·XL",stock:"ok",views:60,sold:40},
+  {id:7,name:"حذاء جلد بني كلاسيك",type:"حذاء",color:"#7A4010",cname:"بني",price:4200,sizes:"40·41·42·43",stock:"ok",views:22,sold:8},
+  {id:8,name:"سترة رمادية كاجوال",type:"سترة",color:"#6A6A6A",cname:"رمادي",price:2600,sizes:"M·L·XL",stock:"low",views:18,sold:2},
+  {id:9,name:"قميص أوكسفورد أبيض",type:"قميص",color:"#E8E4DA",cname:"أبيض",price:2100,sizes:"S·M·L",stock:"ok",views:30,sold:12},
+  {id:10,name:"بنطلون أسود فورمال",type:"بنطلون",color:"#1A1A1A",cname:"أسود",price:3100,sizes:"30·32·34",stock:"ok",views:38,sold:16},
+  {id:11,name:"هودي رمادي فاتح",type:"سترة",color:"#BCBCBC",cname:"رمادي فاتح",price:2400,sizes:"M·L·XL",stock:"ok",views:20,sold:4},
+  {id:12,name:"سنيكرز أبيض كلاسيك",type:"حذاء",color:"#E0E0D8",cname:"أبيض",price:3800,sizes:"40·41·42·43",stock:"ok",views:44,sold:20},
+];
+
+let wardrobe=[
+  {id:1,name:"جينز داكن قديم",type:"جينز",color:"#1A2A4A"},
+  {id:2,name:"تيشيرت أسود بسيط",type:"تيشيرت",color:"#222222"},
+];
+
+let selClr="#1C2C4A", wbSelClr="#1C2C4A", chatH=[], lastData=null;
+let currentView='c', currentCTab='outfit', currentSTab='inventory';
+
+// ══ VIEW SWITCH ══
+function gv(v){
+  currentView=v;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',(i===0&&v==='c')||(i===1&&v==='s')));
+  document.getElementById('cv').style.display=v==='c'?'flex':'none';
+  document.getElementById('sv').style.display=v==='s'?'flex':'none';
+  if(v==='s'){renderFullInv();updateStats();}
+}
+
+function ct(tab){
+  currentCTab=tab;
+  document.querySelectorAll('.stab').forEach((t,i)=>t.classList.toggle('on',(i===0&&tab==='outfit')||(i===1&&tab==='wardrobe')));
+  document.getElementById('outfit-bar').style.display=tab==='outfit'?'flex':'none';
+  document.getElementById('outfit-main').style.display=tab==='outfit'?'flex':'none';
+  document.getElementById('wardrobe-main').style.display=tab==='wardrobe'?'flex':'none';
+  if(tab==='wardrobe')renderWardrobe();
+}
+
+function st2(tab){
+  currentSTab=tab;
+  const panels=['inventory','deadstock','market','trend'];
+  document.querySelectorAll('.sv-tabs .stab').forEach((t,i)=>t.classList.toggle('on',i===panels.indexOf(tab)));
+  panels.forEach(p=>document.getElementById('sp-'+p).style.display=p===tab?'block':'none');
+}
+
+// ══ STYLE TAGS ══
+document.querySelectorAll('.st').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.st').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+});
+
+// ══ COLOR PICKERS ══
+function pc(el){document.querySelectorAll('.csw').forEach(x=>x.classList.remove('on'));el.classList.add('on');selClr=el.dataset.c;}
+function wbpick(el){document.querySelectorAll('#wbclrr .cs').forEach(x=>x.classList.remove('on'));el.classList.add('on');wbSelClr=el.dataset.c;}
+
+// ══ RENDER SIDEBAR ══
+function renderSidebar(){
+  document.getElementById('sblist').innerHTML=inv.map(i=>`
+    <div class="irow">
+      <div class="idot" style="background:${i.color}"></div>
+      <div style="flex:1"><div class="iname">${i.name}</div><div class="imeta">${i.type}·${i.sizes}</div><div class="iprice">${i.price.toLocaleString('ar-DZ')} دج</div></div>
+    </div>`).join('');
+  document.getElementById('icc').textContent=`${inv.length} قطعة`;
+}
+
+function renderFullInv(){
+  const sl={ok:'متوفر',low:'آخر القطع',out:'نفد'};
+  const deadIds=getDeadIds();
+  document.getElementById('finv').innerHTML=inv.map(i=>{
+    const isDead=deadIds.includes(i.id);
+    return `<div class="fr${isDead?' dead-flag':''}">
+      ${isDead?`<span class="dead-badge">مكدسة</span>`:''}
+      <div class="fdot" style="background:${i.color}"></div>
+      <div class="fin"><div class="fn">${i.name}</div><div class="fm">${i.type}·${i.sizes}</div></div>
+      <div class="fr2"><div class="fp">${i.price.toLocaleString('ar-DZ')} دج</div><span class="bge ${i.stock}">${sl[i.stock]}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function getDeadIds(){return inv.filter(i=>i.views>10&&(i.sold/i.views)<0.15).map(i=>i.id);}
+
+function updateStats(){
+  const prices=inv.map(x=>x.price);
+  const low=inv.filter(x=>x.stock!=='ok').length;
+  document.getElementById('st0').textContent=inv.length;
+  document.getElementById('st1').textContent=Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString('ar-DZ');
+  document.getElementById('st2s').textContent=low;
+  document.getElementById('st3').textContent=Math.max(...prices).toLocaleString('ar-DZ');
+}
+
+// ══ WARDROBE ══
+function renderWardrobe(){
+  document.getElementById('wbgrid').innerHTML=wardrobe.map(i=>`
+    <div class="wb-item" id="wbi-${i.id}">
+      <button class="wb-del" onclick="delWb(${i.id})">×</button>
+      <div class="wb-vis"><div class="wb-circle" style="background:${i.color}"></div></div>
+      <div class="wb-info"><div class="wb-n">${i.name}</div><div class="wb-m">${i.type}</div></div>
+    </div>`).join('');
+}
+
+function toggleAddForm(){
+  const f=document.getElementById('wbadf');
+  f.style.display=f.style.display==='none'?'flex':'none';
+  f.style.flexDirection='column';
+}
+
+function addWbItem(){
+  const name=document.getElementById('wbn').value.trim();
+  const type=document.getElementById('wbt').value;
+  if(!name){toast('أدخل اسم القطعة');return;}
+  wardrobe.push({id:Date.now(),name,type,color:wbSelClr});
+  renderWardrobe();document.getElementById('wbn').value='';
+  toast('✦ أضيفت لخزانتك');
+}
+
+function delWb(id){wardrobe=wardrobe.filter(x=>x.id!==id);renderWardrobe();}
+
+async function genWardrobeSuggest(){
+  const btn=document.getElementById('wbbtn');btn.disabled=true;
+  document.getElementById('wbresult').innerHTML=`<div style="padding:12px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px"><div class="mini-sp" style="color:#A07ACA"></div>يحلل خزانتك ومخزون المتجر...</div>`;
+
+  const wbTxt=wardrobe.map(i=>`${i.name}(${i.type})`).join('،');
+  const invTxt=inv.map(i=>`${i.name}(${i.type}،${i.cname}،${i.price}دج)`).join(' | ');
+
+  const p=`أنت خبير تنسيق ملابس. خزانة الزبون الحالية: ${wbTxt}.
+مخزون المتجر: ${invTxt}.
+
+مهمتك: اقترح 3 قطع فقط من المتجر تكمل ما لدى الزبون وتعطيه أكبر عدد تنسيقات ممكنة بأقل إنفاق.
+
+أجب JSON فقط:
+{
+  "intro": "جملة واحدة تشرح استراتيجية الاختيار",
+  "picks": [
+    {
+      "item": "اسم القطعة من المتجر",
+      "price": 0,
+      "completes": ["تنسيق1 يصبح ممكناً", "تنسيق2"],
+      "why": "لماذا هي الأذكى"
+    }
+  ]
+}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:p}]})});
+    const d=await r.json();
+    const raw=d.content[0].text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    const html=parsed.picks.map((pk,i)=>`
+      <div style="background:rgba(106,74,138,.06);border:1px solid rgba(106,74,138,.18);border-radius:10px;padding:12px 14px;margin-bottom:8px;animation:rv .4s ${i*.1}s both">
+        <div style="font-size:13px;font-weight:700;color:var(--cream)">${pk.item}</div>
+        <div style="font-size:12px;color:var(--gold);font-weight:700;margin:3px 0">${Number(pk.price).toLocaleString('ar-DZ')} دج</div>
+        <div style="font-size:11px;color:var(--txtD);margin-bottom:6px">${pk.why}</div>
+        <div style="font-size:10px;color:#A07ACA">${pk.completes.map(c=>'✓ '+c).join(' · ')}</div>
+      </div>`).join('');
+    document.getElementById('wbresult').innerHTML=`<div style="font-size:12px;color:var(--txtD);margin-bottom:10px">${parsed.intro}</div>${html}`;
+  }catch(e){document.getElementById('wbresult').innerHTML=`<div style="color:var(--rustL);font-size:12px">خطأ: ${e.message}</div>`;}
+  btn.disabled=false;
+}
+
+// ══ ADD ITEM (SELLER) ══
+function addItem(){
+  const name=document.getElementById('nn').value.trim();
+  const price=parseInt(document.getElementById('np').value);
+  if(!name||!price){toast('⚠ أدخل الاسم والسعر');return;}
+  inv.push({id:Date.now(),name,type:document.getElementById('nt').value,color:selClr,cname:'مخصص',
+    price,sizes:document.getElementById('ns').value||'M·L',stock:document.getElementById('nst').value,views:0,sold:0});
+  renderSidebar();renderFullInv();updateStats();
+  document.getElementById('nn').value='';document.getElementById('np').value='';
+  toast('✦ أضيفت للمخزون');
+}
+
+// ══ GENERATE OUTFITS ══
+async function genOutfits(){
+  const btn=document.getElementById('gobtn');btn.disabled=true;
+  const feed=document.getElementById('feed');
+  feed.innerHTML=`<div class="ldr"><div class="ring"></div><div class="lt">يبني تنسيقاتك...</div></div>`;
+
+  const ht=document.getElementById('ht').value,ag=document.getElementById('ag').value;
+  const bd=document.getElementById('bd').value,st=document.querySelector('.st.on').dataset.v;
+  const bg=document.getElementById('bg').value;
+  const invTxt=inv.map(i=>`- ${i.name}(${i.type}،${i.cname}،${i.price}دج،${i.sizes})`).join('\n');
+
+  const p=`أنت مستشار موضة ذكي. الزبون: طول ${ht}سم، عمر ${ag}، بنية ${bd}، ذوق ${st}، ميزانية ${bg}دج.
+المخزون:
+${invTxt}
+اقترح 4 تنسيقات متنوعة من المخزون فقط، المجموع تحت الميزانية.
+JSON فقط:
+{"persona":"وصف الزبون","analysis":"تحليل ستايله","tip":"نصيحة مخصصة",
+"outfits":[{"tag":"English","name":"عربي","items":["قطعة"],"colors":["#hex"],"bg":"#hex","reason":"لماذا يناسبه","total":0,"match":90}]}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:p}]})});
+    const d=await r.json();
+    const raw=d.content[0].text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    lastData=parsed;
+    chatH=[{role:"user",content:"سياق: مخزون: "+invTxt+" | زبون: "+ht+"سم "+bd+" "+st+" "+bg+"دج"},{role:"assistant",content:raw}];
+    renderFeed(parsed);
+    // update views
+    parsed.outfits.forEach(o=>o.items.forEach(name=>{const f=inv.find(i=>i.name===name||name.includes(i.name.split(' ')[0]));if(f)f.views++;}));
+  }catch(e){
+    feed.innerHTML=`<div class="empty"><div class="eh" style="color:var(--rustL)">خطأ في الاتصال</div><div class="ep">${e.message}</div></div>`;
+  }
+  btn.disabled=false;
+}
+
+function renderFeed(p){
+  const cards=p.outfits.map((o,i)=>{
+    const cols=o.colors&&o.colors.length?o.colors:['#1C2C4A','#A09070','#7A4010'];
+    const pieces=cols.slice(0,3).map((c,j)=>`<div class="op" style="background:${c};height:${48+j*16}px"></div>`).join('');
+    const items=o.items.map(x=>`• ${x}`).join('<br>');
+    return `<div class="oc reveal" style="animation-delay:${i*.08}s" onclick="pickO(this,'${o.name}')">
+      <div class="ovis" style="background:${o.bg||'#181510'}">${pieces}</div>
+      <div class="obody">
+        <div class="otag">${o.tag}</div>
+        <div class="oname">${o.name}</div>
+        <div class="oitems">${items}</div>
+        <div class="oreason">${o.reason}</div>
+        <div class="ofoot"><div class="oprice">${Number(o.total).toLocaleString('ar-DZ')} دج</div><span class="omatch">${o.match}%</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('feed').innerHTML=`
+    <div class="acard reveal">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span class="abadge">WARDRO AI</span><span class="atitle">${p.persona||'ملفك'}</span>
+      </div>
+      <div class="abody">${p.analysis}</div>
+      <div class="atip">💡 ${p.tip}</div>
+    </div>
+    <div style="font-family:'Fraunces',serif;font-size:14px;color:var(--muted);font-weight:200;letter-spacing:1px" class="reveal">التنسيقات المقترحة</div>
+    <div class="og">${cards}</div>`;
+}
+
+function pickO(el,name){
+  document.querySelectorAll('.oc').forEach(c=>c.classList.remove('chosen'));
+  el.classList.add('chosen');
+  // update sold
+  const o=lastData&&lastData.outfits.find(x=>x.name===name);
+  if(o)o.items.forEach(nm=>{const f=inv.find(i=>i.name===nm);if(f)f.sold++;});
+  toast('✦ تم اختيار: '+name);
+}
+
+// ══ CHAT ══
+async function chat(){
+  const inp=document.getElementById('cinp'),txt=inp.value.trim();
+  if(!txt)return;inp.value='';
+  document.getElementById('sbtn').disabled=true;
+  addMsg('usr',txt);
+  const invTxt=inv.map(i=>`${i.name}(${i.price}دج)`).join('،');
+  chatH.push({role:"user",content:txt});
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:250,
+        system:`مستشار ستايل لتطبيق Wardro. المخزون: ${invTxt}. أجب باختصار بالعربية.`,
+        messages:chatH.slice(-6)})});
+    const d=await r.json();
+    const rep=d.content[0].text;
+    chatH.push({role:"assistant",content:rep});addMsg('ai',rep);
+  }catch(e){addMsg('ai','خطأ في الاتصال.');}
+  document.getElementById('sbtn').disabled=false;
+}
+
+function addMsg(role,txt){
+  const el=document.getElementById('msgs');
+  const d=document.createElement('div');d.className='cmsg '+role;
+  d.innerHTML=`<span class="cbadge">${role==='usr'?'أنت':'AI'}</span><span class="ctxt">${txt}</span>`;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+
+// ══ DEAD STOCK AI ══
+async function runDeadstock(){
+  const btn=document.getElementById('deadbtn');btn.disabled=true;
+  document.getElementById('deadresult').innerHTML=`<div style="padding:16px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px"><div class="mini-sp" style="color:var(--rustL)"></div>يحلل القطع المكدسة...</div>`;
+
+  const deadItems=inv.filter(i=>i.views>10&&(i.sold/i.views)<0.15);
+  if(!deadItems.length){
+    document.getElementById('deadresult').innerHTML=`<div style="padding:16px;color:var(--sageL);font-size:13px">✓ لا توجد قطع مكدسة حالياً — جميع القطع تُباع بشكل معقول.</div>`;
+    btn.disabled=false;return;
+  }
+
+  const deadTxt=deadItems.map(i=>`${i.name}(${i.type}،${i.price}دج،${i.views}مرة مقترحة،${i.sold}مبيعة)`).join(' | ');
+  const invTxt=inv.map(i=>`${i.name}(${i.type}،${i.price}دج)`).join(' | ');
+
+  const p=`أنت مستشار تجاري لمتجر ملابس. القطع المكدسة (مقترحة كثيراً لكن لا تُشترى): ${deadTxt}.
+باقي المخزون: ${invTxt}.
+لكل قطعة مكدسة قدم 3 استراتيجيات إنقاذ محددة وعملية.
+JSON فقط:
+{"summary":"جملة تشخيص","rescues":[{"item":"اسم القطعة","problem":"سبب عدم البيع","strategies":["استراتيجية1","استراتيجية2","استراتيجية3"]}]}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:p}]})});
+    const d=await r.json();
+    const raw=d.content[0].text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    const cards=parsed.rescues.map((rc,i)=>`
+      <div class="rescue-item reveal" style="animation-delay:${i*.1}s">
+        <div class="ri-name">${rc.item}</div>
+        <div class="ri-stat">⚠ ${rc.problem}</div>
+        <div class="ri-strategies">${rc.strategies.map((s,j)=>`<div class="ri-s">${j+1}. ${s}</div>`).join('')}</div>
+      </div>`).join('');
+    document.getElementById('deadresult').innerHTML=`<div style="font-size:12px;color:var(--txtD);margin-bottom:12px">${parsed.summary}</div>${cards}`;
+  }catch(e){document.getElementById('deadresult').innerHTML=`<div style="color:var(--rustL);font-size:12px">خطأ: ${e.message}</div>`;}
+  btn.disabled=false;
+}
+
+// ══ MARKET AI ══
+async function runMarket(){
+  const btn=document.getElementById('mktbtn');btn.disabled=true;
+  document.getElementById('mktresult').innerHTML=`<div style="padding:16px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px"><div class="mini-sp" style="color:var(--blueL)"></div>يحلل السوق...</div>`;
+
+  const invTxt=inv.map(i=>`${i.name}(${i.type}،${i.price}دج،مخزون:${i.stock})`).join(' | ');
+  const p=`أنت محلل سوق ملابس رجالية جزائري. المخزون: ${invTxt}.
+حلل وأعطني توصيات شراء. JSON فقط:
+{"summary":"ملخص","gaps":["فجوة1","فجوة2","فجوة3"],"best_range":"النطاق الأنسب","picks":[{"item":"اسم","why":"سبب","price":"سعر متوقع"}],"target":"الفئة الأكثر ربحاً"}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:p}]})});
+    const d=await r.json();
+    const raw=d.content[0].text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    const gaps=parsed.gaps.map(g=>`<span class="ptag r">${g}</span>`).join('');
+    const picks=parsed.picks.map((pk,i)=>`
+      <div style="background:rgba(58,110,154,.06);border:1px solid rgba(58,110,154,.15);border-radius:9px;padding:10px 13px;margin-bottom:7px;animation:rv .4s ${i*.1}s both">
+        <div style="font-size:13px;font-weight:700;color:var(--cream)">${pk.item}</div>
+        <div style="font-size:12px;color:var(--blueL);font-weight:700">${pk.price}</div>
+        <div style="font-size:11px;color:var(--txtD);margin-top:3px">${pk.why}</div>
+      </div>`).join('');
+    document.getElementById('mktresult').innerHTML=`
+      <div style="font-size:12px;color:var(--txtD);margin-bottom:10px">${parsed.summary}</div>
+      <div style="margin-bottom:10px"><div style="font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px">فجوات المخزون</div>${gaps}</div>
+      <div style="font-size:10px;color:var(--blueL);margin-bottom:8px;letter-spacing:.5px">اشترِ هذه القادم ↓</div>
+      ${picks}
+      <div style="background:rgba(78,122,76,.06);border:1px solid rgba(78,122,76,.15);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--sageL)">${parsed.target}</div>`;
+  }catch(e){document.getElementById('mktresult').innerHTML=`<div style="color:var(--rustL);font-size:12px">خطأ: ${e.message}</div>`;}
+  btn.disabled=false;
+}
+
+// ══ TREND RADAR ══
+async function runTrend(){
+  const btn=document.getElementById('trendbtn');btn.disabled=true;
+  document.getElementById('trendresult').innerHTML=`<div style="padding:16px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px"><div class="mini-sp" style="color:var(--sageL)"></div>يحسب نسب التحويل...</div>`;
+
+  const sorted=[...inv].sort((a,b)=>b.views-a.views).slice(0,8);
+  const bars=sorted.map(i=>{
+    const viewPct=Math.min(100,Math.round((i.views/60)*100));
+    const buyPct=i.views>0?Math.min(100,Math.round((i.sold/i.views)*100)):0;
+    const gap=viewPct-buyPct;
+    const flag=gap>40?'⚠ فجوة كبيرة — راجع السعر':gap>20?'↓ تحويل منخفض':'✓ أداء جيد';
+    return `<div class="tbar-item reveal" style="animation-delay:${sorted.indexOf(i)*.07}s">
+      <div class="tbar-name"><span>${i.name}</span><span style="font-size:10px;color:${gap>40?'var(--rustL)':gap>20?'var(--gold)':'var(--sageL)'}">${flag}</span></div>
+      <div style="position:relative;height:14px;background:var(--dim);border-radius:3px;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;height:7px;background:var(--goldD);width:${viewPct}%;border-radius:3px;transition:width 1s"></div>
+        <div style="position:absolute;bottom:0;right:0;height:7px;background:var(--sage);width:${buyPct}%;border-radius:3px;transition:width 1s .1s"></div>
+      </div>
+      <div class="tbar-legend">
+        <span class="tleg"><span class="tleg-dot" style="background:var(--goldD)"></span>${viewPct}% اقتراح</span>
+        <span class="tleg"><span class="tleg-dot" style="background:var(--sage)"></span>${buyPct}% شراء</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ask AI for insight
+  const dataTxt=sorted.map(i=>`${i.name}: ${i.views}اقتراح/${i.sold}مبيع`).join('،');
+  const p=`بيانات مبيعات متجر ملابس: ${dataTxt}. اعطني ملاحظة واحدة مهمة جداً في جملتين عن هذه البيانات لمساعدة البائع.`;
+  let insight='';
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:120,messages:[{role:"user",content:p}]})});
+    const d=await r.json();insight=d.content[0].text;
+  }catch(e){}
+
+  document.getElementById('trendresult').innerHTML=`
+    ${insight?`<div style="background:rgba(78,122,76,.06);border:1px solid rgba(78,122,76,.18);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--sageL);margin-bottom:14px">💡 ${insight}</div>`:''}
+    <div style="margin-bottom:12px">${bars}</div>`;
+  btn.disabled=false;
+}
+
+// ══ TOAST ══
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ══ INIT ══
+renderSidebar();renderWardrobe();
+</script>
+</body>
+</html>

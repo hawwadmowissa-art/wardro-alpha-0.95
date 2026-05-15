@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wardro</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+
+:root {
+  --bg:       #0B0A08;
+  --surf:     #141210;
+  --card:     #1C1915;
+  --card2:    #232019;
+  --brd:      rgba(210,175,105,.1);
+  --brd2:     rgba(210,175,105,.2);
+  --gold:     #D2AF69;
+  --goldD:    #8A7040;
+  --goldL:    #EDD080;
+  --cream:    #EDE3CC;
+  --rust:     #A83D22;
+  --rustL:    #C94E2A;
+  --sage:     #4A7848;
+  --sageL:    #68A866;
+  --muted:    #5A5045;
+  --dim:      #2A2520;
+  --txt:      #D8CFBA;
+  --txtD:     #7A7060;
+}
+
+html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--txt); font-family:'Tajawal',sans-serif }
+
+/* ── NOISE ── */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ══════════════════════════════
+   SCREENS SYSTEM
+══════════════════════════════ */
+.screen { display:none; position:fixed; inset:0; overflow-y:auto; background:var(--bg) }
+.screen.active { display:flex; flex-direction:column }
+.screen-center { display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:var(--bg) }
+.screen-center.active { display:flex }
+
+/* ══════════════════════════════
+   SCREEN 1 — SPLASH / ROLE
+══════════════════════════════ */
+#s-splash {
+  align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at 50% 60%, rgba(210,175,105,.06) 0%, transparent 70%), var(--bg);
+}
+
+.splash-inner { text-align:center; padding:40px 24px }
+
+.logo-mark {
+  font-family:'Fraunces',serif;
+  font-size:64px; font-weight:200; letter-spacing:12px;
+  color:var(--gold); line-height:1;
+  margin-bottom:6px;
+}
+.logo-mark em { font-style:italic; font-weight:200 }
+
+.logo-sub {
+  font-size:11px; letter-spacing:4px; color:var(--muted);
+  text-transform:uppercase; margin-bottom:56px;
+}
+
+.role-prompt {
+  font-family:'Fraunces',serif;
+  font-size:18px; font-weight:200; color:var(--txtD);
+  margin-bottom:28px; letter-spacing:.5px;
+}
+
+.role-cards { display:flex; gap:14px; justify-content:center; flex-wrap:wrap }
+
+.role-card {
+  width:160px; padding:28px 20px;
+  background:var(--card); border:1px solid var(--brd);
+  border-radius:20px; cursor:pointer;
+  transition:all .25s; text-align:center;
+}
+.role-card:hover { border-color:var(--gold); transform:translateY(-4px); background:var(--card2) }
+.role-card:active { transform:scale(.97) }
+
+.role-icon { font-size:32px; margin-bottom:12px; display:block }
+.role-name { font-family:'Fraunces',serif; font-size:17px; color:var(--cream); font-weight:200; display:block; margin-bottom:5px }
+.role-desc { font-size:11px; color:var(--txtD); line-height:1.6 }
+
+.splash-footer {
+  margin-top:48px; font-size:11px; color:var(--muted); letter-spacing:.3px;
+  display:flex; align-items:center; gap:6px; justify-content:center;
+}
+.live-dot { width:5px; height:5px; border-radius:50%; background:var(--sageL); animation:bk 2s infinite }
+@keyframes bk { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+/* ══════════════════════════════
+   SCREEN 2 — CUSTOMER PROFILE
+══════════════════════════════ */
+#s-profile { background:var(--bg) }
+
+.top-bar {
+  display:flex; align-items:center; gap:12px;
+  padding:16px 24px; border-bottom:1px solid var(--brd);
+  background:rgba(11,10,8,.9); backdrop-filter:blur(16px);
+  position:sticky; top:0; z-index:10; flex-shrink:0;
+}
+.back-btn {
+  width:34px; height:34px; border-radius:50%;
+  border:1px solid var(--brd); background:transparent;
+  color:var(--txtD); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:16px; transition:all .2s; flex-shrink:0;
+}
+.back-btn:hover { border-color:var(--gold); color:var(--gold) }
+
+.top-title { font-family:'Fraunces',serif; font-size:17px; color:var(--cream); font-weight:200; flex:1 }
+.top-badge {
+  font-size:9px; letter-spacing:2px; font-weight:700;
+  padding:4px 10px; border-radius:20px;
+  background:var(--gold); color:#0B0A08;
+}
+
+.form-body { padding:28px 24px; display:flex; flex-direction:column; gap:28px }
+
+.form-section-title {
+  font-family:'Fraunces',serif; font-size:14px; color:var(--goldD);
+  font-weight:400; letter-spacing:2px; text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+.field-group { display:flex; flex-direction:column; gap:6px }
+.field-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.7px }
+.field-input, .field-select {
+  padding:12px 14px; border:1px solid var(--brd); border-radius:11px;
+  background:var(--card); color:var(--txt);
+  font-family:'Tajawal',sans-serif; font-size:14px; outline:none;
+  transition:border-color .2s; width:100%;
+}
+.field-input:focus, .field-select:focus { border-color:var(--gold) }
+option { background:var(--surf) }
+
+.two-col-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px }
+
+.tag-group { display:flex; gap:8px; flex-wrap:wrap }
+.tag {
+  padding:8px 16px; border-radius:24px; border:1px solid var(--brd);
+  font-size:13px; cursor:pointer; color:var(--txtD); background:transparent;
+  transition:all .18s; font-weight:500;
+}
+.tag.on { background:var(--gold); color:#0B0A08; border-color:var(--gold); font-weight:700 }
+
+.budget-display {
+  font-family:'Fraunces',serif; font-size:36px; font-weight:200;
+  color:var(--gold); text-align:center; margin:8px 0;
+}
+.budget-unit { font-size:16px; color:var(--goldD) }
+
+.range-track { position:relative; padding:8px 0 }
+input[type=range] {
+  width:100%; -webkit-appearance:none; height:2px;
+  background:var(--dim); border-radius:2px; outline:none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+  background:var(--gold); cursor:pointer;
+  box-shadow:0 0 0 4px rgba(210,175,105,.15);
+  transition:box-shadow .2s;
+}
+input[type=range]::-webkit-slider-thumb:hover { box-shadow:0 0 0 8px rgba(210,175,105,.15) }
+
+.range-labels { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:4px }
+
+.cta-btn {
+  padding:16px; border:none; border-radius:14px;
+  background:linear-gradient(135deg, var(--rust), var(--rustL));
+  color:#fff; font-family:'Tajawal',sans-serif; font-size:16px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
+  box-shadow:0 6px 24px rgba(168,61,34,.3); transition:all .22s;
+  margin-top:8px;
+}
+.cta-btn:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(168,61,34,.4) }
+.cta-btn:active { transform:scale(.98) }
+.cta-btn:disabled { opacity:.4; cursor:not-allowed; transform:none }
+
+/* ══════════════════════════════
+   SCREEN 3 — LOADING
+══════════════════════════════ */
+#s-loading {
+  background: radial-gradient(ellipse at 50% 50%, rgba(210,175,105,.04) 0%, transparent 70%), var(--bg);
+}
+
+.loading-inner { text-align:center; padding:40px 24px }
+
+.loading-ring-outer {
+  width:80px; height:80px; border-radius:50%;
+  border:1px solid rgba(210,175,105,.12);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 32px; position:relative;
+}
+.loading-ring-outer::before {
+  content:''; position:absolute; inset:-1px; border-radius:50%;
+  border:1.5px solid transparent;
+  border-top-color:var(--gold);
+  animation:spin 1.2s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg) } }
+
+.loading-glyph {
+  font-family:'Fraunces',serif; font-size:28px; color:var(--goldD); font-weight:200;
+}
+
+.loading-title {
+  font-family:'Fraunces',serif; font-size:22px; color:var(--cream);
+  font-weight:200; margin-bottom:10px;
+}
+.loading-steps { display:flex; flex-direction:column; gap:8px; margin-top:24px }
+.loading-step {
+  font-size:12px; color:var(--muted); opacity:.3;
+  transition:opacity .4s; display:flex; align-items:center; gap:8px;
+  justify-content:center;
+}
+.loading-step.active { opacity:1; color:var(--txt) }
+.loading-step.done { opacity:.5; color:var(--sageL) }
+.step-dot { width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0 }
+
+/* ══════════════════════════════
+   SCREEN 4 — RESULTS
+══════════════════════════════ */
+#s-results { background:var(--bg) }
+
+.results-body { padding:20px 20px 32px; display:flex; flex-direction:column; gap:16px }
+
+/* persona card */
+.persona-card {
+  background:linear-gradient(135deg, rgba(210,175,105,.07), rgba(210,175,105,.02));
+  border:1px solid rgba(210,175,105,.2); border-radius:18px; padding:20px 22px;
+}
+.pc-eyebrow { font-size:9px; letter-spacing:2.5px; color:var(--goldD); text-transform:uppercase; margin-bottom:8px; font-weight:700 }
+.pc-title { font-family:'Fraunces',serif; font-size:20px; color:var(--cream); font-weight:200; margin-bottom:10px }
+.pc-body { font-size:13px; color:var(--txtD); line-height:1.9 }
+.pc-tip {
+  margin-top:12px; padding:10px 14px; border-radius:10px;
+  background:rgba(74,120,72,.1); border:1px solid rgba(74,120,72,.2);
+  font-size:12px; color:var(--sageL); line-height:1.7;
+}
+
+/* outfits */
+.outfits-label {
+  font-family:'Fraunces',serif; font-size:13px; color:var(--muted);
+  font-weight:200; letter-spacing:2px; text-transform:uppercase;
+}
+
+.outfit-card {
+  background:var(--card); border:1px solid var(--brd); border-radius:18px;
+  overflow:hidden; cursor:pointer; transition:all .25s;
+}
+.outfit-card:hover { border-color:var(--goldD); transform:translateY(-2px); box-shadow:0 12px 32px rgba(0,0,0,.5) }
+.outfit-card.chosen { border-color:var(--rust); border-width:2px; box-shadow:0 8px 24px rgba(168,61,34,.2) }
+
+.outfit-visual {
+  height:130px; display:flex; align-items:flex-end;
+  justify-content:center; gap:6px; padding:16px 16px 0;
+  position:relative; overflow:hidden;
+}
+.outfit-piece { border-radius:7px 7px 0 0; flex:1; opacity:.92 }
+
+/* gradient overlay on visual */
+.outfit-visual::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:40px;
+  background:linear-gradient(transparent, var(--card));
+  pointer-events:none;
+}
+
+.outfit-body { padding:16px 18px 18px }
+.outfit-eyebrow { font-size:9px; letter-spacing:2px; color:var(--goldD); text-transform:uppercase; margin-bottom:4px; font-weight:700 }
+.outfit-name { font-family:'Fraunces',serif; font-size:18px; color:var(--cream); font-weight:200; margin-bottom:8px }
+
+.outfit-items { display:flex; flex-direction:column; gap:5px; margin-bottom:10px }
+.outfit-item-row {
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--txtD);
+}
+.item-color-chip { width:10px; height:10px; border-radius:3px; flex-shrink:0 }
+
+.outfit-reason {
+  font-size:11px; color:var(--muted); font-style:italic;
+  line-height:1.6; margin-bottom:14px;
+  padding-bottom:14px; border-bottom:1px solid var(--brd);
+}
+
+.outfit-footer { display:flex; align-items:center; justify-content:space-between }
+.outfit-price { font-family:'Fraunces',serif; font-size:22px; color:var(--gold); font-weight:200 }
+.outfit-price-unit { font-size:12px; color:var(--goldD) }
+.match-pill {
+  font-size:11px; padding:4px 12px; border-radius:20px;
+  background:rgba(74,120,72,.15); color:var(--sageL); font-weight:700;
+}
+
+/* chat */
+.chat-section {
+  background:var(--card); border:1px solid var(--brd); border-radius:18px;
+  overflow:hidden; margin-top:4px;
+}
+.chat-header {
+  padding:14px 18px; border-bottom:1px solid var(--brd);
+  font-size:12px; color:var(--muted); display:flex; align-items:center; gap:8px;
+}
+.chat-dot { width:6px; height:6px; border-radius:50%; background:var(--sageL); animation:bk 2s infinite }
+.chat-messages { padding:14px 18px; display:flex; flex-direction:column; gap:10px; min-height:60px; max-height:200px; overflow-y:auto }
+.chat-messages::-webkit-scrollbar { width:2px }
+.chat-messages::-webkit-scrollbar-thumb { background:var(--dim) }
+
+.chat-msg { display:flex; gap:8px; align-items:flex-start; animation:mi .25s ease-out }
+@keyframes mi { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.chat-role { font-size:9px; letter-spacing:1.5px; font-weight:700; padding:3px 8px; border-radius:4px; white-space:nowrap; flex-shrink:0; margin-top:2px }
+.chat-msg.usr .chat-role { background:rgba(210,175,105,.1); color:var(--goldD) }
+.chat-msg.ai .chat-role { background:rgba(168,61,34,.15); color:var(--rustL) }
+.chat-text { font-size:13px; color:var(--txtD); line-height:1.75 }
+
+.chat-input-row { padding:12px 14px; display:flex; gap:8px; border-top:1px solid var(--brd) }
+.chat-inp {
+  flex:1; padding:10px 14px; border:1px solid var(--brd); border-radius:10px;
+  background:var(--surf); color:var(--txt); font-family:'Tajawal',sans-serif; font-size:13px;
+  outline:none; transition:border-color .2s; direction:rtl;
+}
+.chat-inp::placeholder { color:var(--muted) }
+.chat-inp:focus { border-color:var(--gold) }
+.chat-send {
+  padding:10px 16px; border:none; border-radius:10px;
+  background:var(--gold); color:#0B0A08; font-family:'Tajawal',sans-serif;
+  font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; flex-shrink:0;
+}
+.chat-send:hover { background:var(--goldL) }
+.chat-send:disabled { opacity:.4; cursor:not-allowed }
+
+.redo-btn {
+  padding:14px; border:1px solid var(--brd); border-radius:14px;
+  background:transparent; color:var(--muted); font-family:'Tajawal',sans-serif;
+  font-size:14px; cursor:pointer; transition:all .2s; width:100%; margin-top:4px;
+}
+.redo-btn:hover { border-color:var(--gold); color:var(--gold) }
+
+/* ══════════════════════════════
+   SCREEN 5 — SELLER HOME
+══════════════════════════════ */
+#s-seller { background:var(--bg) }
+
+.seller-body { padding:24px 20px; display:flex; flex-direction:column; gap:20px }
+
+.seller-welcome {
+  font-family:'Fraunces',serif; font-size:24px; color:var(--cream); font-weight:200;
+}
+.seller-welcome span { color:var(--gold); font-style:italic }
+
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.stat-tile {
+  background:var(--card); border:1px solid var(--brd); border-radius:14px;
+  padding:16px 18px;
+}
+.stat-tile-l { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px }
+.stat-tile-n { font-family:'Fraunces',serif; font-size:30px; color:var(--cream); font-weight:200 }
+.stat-tile-s { font-size:11px; margin-top:3px }
+.stat-tile-s.g { color:var(--sageL) }
+.stat-tile-s.r { color:var(--rustL) }
+
+.section-header { display:flex; align-items:center; justify-content:space-between }
+.section-title { font-family:'Fraunces',serif; font-size:18px; color:var(--cream); font-weight:200 }
+.section-action {
+  padding:7px 14px; border:1px solid rgba(210,175,105,.2); border-radius:9px;
+  background:rgba(210,175,105,.06); color:var(--gold); font-family:'Tajawal',sans-serif;
+  font-size:12px; font-weight:700; cursor:pointer; transition:all .2s;
+}
+.section-action:hover { background:rgba(210,175,105,.12) }
+
+.inv-list { display:flex; flex-direction:column; gap:8px }
+.inv-tile {
+  background:var(--card); border:1px solid var(--brd); border-radius:12px;
+  padding:13px 15px; display:flex; align-items:center; gap:12px;
+  transition:border-color .2s;
+}
+.inv-tile:hover { border-color:var(--goldD) }
+.inv-tile.dead { border-color:rgba(168,61,34,.3); background:rgba(168,61,34,.03) }
+.inv-swatch { width:40px; height:40px; border-radius:9px; flex-shrink:0 }
+.inv-info { flex:1 }
+.inv-name { font-size:13px; font-weight:500; color:var(--txt) }
+.inv-meta { font-size:11px; color:var(--txtD); margin-top:2px }
+.inv-right { text-align:left; flex-shrink:0 }
+.inv-price { font-size:13px; font-weight:700; color:var(--gold) }
+.inv-badge { font-size:9px; padding:2px 8px; border-radius:20px; font-weight:700; margin-top:4px; display:inline-block }
+.ok { background:rgba(74,120,72,.15); color:var(--sageL) }
+.low { background:rgba(210,175,105,.1); color:var(--goldD) }
+.dead-badge-s { background:rgba(168,61,34,.2); color:var(--rustL) }
+
+/* add form */
+.add-form {
+  background:var(--card); border:1px solid var(--brd); border-radius:16px;
+  padding:20px; display:flex; flex-direction:column; gap:14px;
+}
+.add-form-title { font-family:'Fraunces',serif; font-size:16px; color:var(--cream); font-weight:200 }
+
+.color-picker-row { display:flex; gap:8px; flex-wrap:wrap }
+.color-swatch {
+  width:28px; height:28px; border-radius:7px; cursor:pointer;
+  border:2px solid transparent; transition:border-color .15s;
+}
+.color-swatch.on { border-color:var(--gold) }
+
+.add-submit {
+  padding:12px; border:none; border-radius:11px;
+  background:var(--sage); color:#fff; font-family:'Tajawal',sans-serif;
+  font-size:14px; font-weight:700; cursor:pointer; transition:background .2s;
+}
+.add-submit:hover { background:#3A6438 }
+
+/* ══════════════════════════════
+   SCREEN 6 — SELLER AI INSIGHT
+══════════════════════════════ */
+#s-insight { background:var(--bg) }
+.insight-body { padding:20px; display:flex; flex-direction:column; gap:14px }
+
+.insight-section {
+  background:var(--card); border:1px solid var(--brd); border-radius:16px;
+  padding:18px 20px;
+}
+.is-eyebrow { font-size:9px; letter-spacing:2px; color:var(--goldD); text-transform:uppercase; font-weight:700; margin-bottom:6px }
+.is-title { font-family:'Fraunces',serif; font-size:17px; color:var(--cream); font-weight:200; margin-bottom:12px }
+.is-body { font-size:13px; color:var(--txtD); line-height:1.85 }
+
+.insight-btn {
+  padding:14px; border:none; border-radius:13px;
+  color:#fff; font-family:'Tajawal',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .22s; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.insight-btn.blue { background:linear-gradient(135deg,#2A5A8A,#3A70A8); box-shadow:0 4px 18px rgba(42,90,138,.3) }
+.insight-btn.red { background:linear-gradient(135deg,var(--rust),var(--rustL)); box-shadow:0 4px 18px rgba(168,61,34,.3) }
+.insight-btn:disabled { opacity:.45; cursor:not-allowed }
+.insight-btn:hover:not(:disabled) { transform:translateY(-1px) }
+
+.mini-spin { display:inline-block; width:14px; height:14px; border:1.5px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite }
+
+.rescue-item {
+  background:rgba(168,61,34,.05); border:1px solid rgba(168,61,34,.15);
+  border-radius:11px; padding:13px 15px; margin-bottom:8px;
+}
+.ri-name { font-size:13px; font-weight:700; color:var(--cream); margin-bottom:4px }
+.ri-why { font-size:11px; color:var(--rustL); margin-bottom:8px }
+.ri-strats { display:flex; flex-direction:column; gap:5px }
+.ri-s { font-size:12px; color:var(--txtD); padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid var(--brd) }
+
+.market-pick {
+  background:rgba(42,90,138,.06); border:1px solid rgba(42,90,138,.15);
+  border-radius:11px; padding:12px 15px; margin-bottom:8px;
+}
+.mp-name { font-size:13px; font-weight:700; color:var(--cream); margin-bottom:3px }
+.mp-price { font-size:12px; color:#5090C0; font-weight:700; margin-bottom:4px }
+.mp-why { font-size:11px; color:var(--txtD) }
+
+.gap-tag { display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; margin:3px 3px 0 0; background:rgba(168,61,34,.12); color:var(--rustL) }
+
+/* ══════════════════════════════
+   NAVIGATION BAR (Seller)
+══════════════════════════════ */
+.nav-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  background:rgba(20,18,16,.95); backdrop-filter:blur(20px);
+  border-top:1px solid var(--brd); padding:10px 0 14px;
+  display:none; z-index:100;
+}
+.nav-bar.visible { display:flex; justify-content:center; gap:0 }
+.nav-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:4px 8px; cursor:pointer; transition:all .2s; border:none; background:transparent;
+  max-width:90px;
+}
+.nav-icon { font-size:20px; transition:transform .2s }
+.nav-label { font-size:10px; color:var(--muted); font-family:'Tajawal',sans-serif; transition:color .2s }
+.nav-item.on .nav-label { color:var(--gold) }
+.nav-item.on .nav-icon { transform:translateY(-2px) }
+
+/* ══════════════════════════════
+   UTILS
+══════════════════════════════ */
+.reveal { animation:rv .4s ease-out both }
+@keyframes rv { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:var(--card); border:1px solid var(--brd); color:var(--gold);
+  padding:9px 20px; border-radius:10px; font-size:13px; font-weight:500;
+  opacity:0; transition:opacity .3s; pointer-events:none; z-index:9999;
+  white-space:nowrap;
+}
+.toast.show { opacity:1 }
+
+.pb-safe { padding-bottom:80px }
+</style>
+</head>
+<body>
+
+<!-- ══ S1: SPLASH ══ -->
+<div id="s-splash" class="screen-center active">
+  <div class="splash-inner">
+    <div class="logo-mark">WARD<em>ro</em></div>
+    <div class="logo-sub">Fashion Intelligence</div>
+    <div class="role-prompt">من أنت؟</div>
+    <div class="role-cards">
+      <div class="role-card" onclick="goCustomer()">
+        <span class="role-icon">🛍</span>
+        <span class="role-name">زبون</span>
+        <span class="role-desc">اكتشف تنسيقات مناسبة لك</span>
+      </div>
+      <div class="role-card" onclick="goSeller()">
+        <span class="role-icon">🏪</span>
+        <span class="role-name">بائع</span>
+        <span class="role-desc">أدر مخزونك بذكاء</span>
+      </div>
+    </div>
+    <div class="splash-footer">
+      <span class="live-dot"></span>
+      النخبة ستور — الجزائر
+    </div>
+  </div>
+</div>
+
+<!-- ══ S2: CUSTOMER PROFILE ══ -->
+<div id="s-profile" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="show('s-splash')">←</button>
+    <span class="top-title">ملفك الشخصي</span>
+    <span class="top-badge">WARDRO AI</span>
+  </div>
+
+  <div class="form-body">
+    <!-- measurements -->
+    <div>
+      <div class="form-section-title">قياساتك</div>
+      <div class="two-col-fields">
+        <div class="field-group">
+          <span class="field-label">الطول (سم)</span>
+          <input class="field-input" type="number" id="ht" value="178" min="150" max="210" inputmode="numeric">
+        </div>
+        <div class="field-group">
+          <span class="field-label">العمر</span>
+          <input class="field-input" type="number" id="ag" value="22" min="15" max="65" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <!-- build -->
+    <div>
+      <div class="form-section-title">البنية الجسدية</div>
+      <div class="tag-group" id="build-tags">
+        <span class="tag" data-v="نحيف">نحيف</span>
+        <span class="tag on" data-v="متوسط">متوسط</span>
+        <span class="tag" data-v="رياضي">رياضي</span>
+        <span class="tag" data-v="ممتلئ">ممتلئ</span>
+      </div>
+    </div>
+
+    <!-- style -->
+    <div>
+      <div class="form-section-title">ذوقك في الموضة</div>
+      <div class="tag-group" id="style-tags">
+        <span class="tag on" data-v="كاجوال مريح">كاجوال</span>
+        <span class="tag" data-v="سمارت كاجوال">سمارت</span>
+        <span class="tag" data-v="أنيق فورمال">فورمال</span>
+        <span class="tag" data-v="ستريت وير">ستريت</span>
+      </div>
+    </div>
+
+    <!-- budget -->
+    <div>
+      <div class="form-section-title">ميزانيتك</div>
+      <div class="budget-display" id="bdisp">8٬000 <span class="budget-unit">دج</span></div>
+      <div class="range-track">
+        <input type="range" id="bg" min="2000" max="20000" step="500" value="8000"
+          oninput="updateBudget(this.value)">
+      </div>
+      <div class="range-labels"><span>2٬000 دج</span><span>20٬000 دج</span></div>
+    </div>
+
+    <button class="cta-btn" id="go-btn" onclick="startGenerate()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      اكتشف تنسيقاتي
+    </button>
+  </div>
+</div>
+
+<!-- ══ S3: LOADING ══ -->
+<div id="s-loading" class="screen-center">
+  <div class="loading-inner">
+    <div class="loading-ring-outer">
+      <div class="loading-glyph">◈</div>
+    </div>
+    <div class="loading-title">يبني تنسيقاتك...</div>
+    <div class="loading-steps" id="lsteps">
+      <div class="loading-step" id="ls0"><span class="step-dot"></span>يقرأ مخزون المتجر</div>
+      <div class="loading-step" id="ls1"><span class="step-dot"></span>يحلل ذوقك وقياساتك</div>
+      <div class="loading-step" id="ls2"><span class="step-dot"></span>يبني التنسيقات</div>
+      <div class="loading-step" id="ls3"><span class="step-dot"></span>يرتب الأفضل لك</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S4: RESULTS ══ -->
+<div id="s-results" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="show('s-profile')">←</button>
+    <span class="top-title">تنسيقاتك</span>
+    <span class="top-badge">WARDRO AI</span>
+  </div>
+  <div class="results-body pb-safe" id="results-body">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- ══ S5: SELLER ══ -->
+<div id="s-seller" class="screen pb-safe">
+  <div class="top-bar">
+    <button class="back-btn" onclick="show('s-splash');hideNav()">←</button>
+    <span class="top-title">لوحة البائع</span>
+    <span class="top-badge">WARDRO</span>
+  </div>
+  <div class="seller-body" id="seller-body">
+
+    <div class="seller-welcome">مرحباً،<br><span>متجر النخبة</span></div>
+
+    <div class="stats-grid" id="stats-grid">
+      <!-- filled by JS -->
+    </div>
+
+    <div>
+      <div class="section-header" style="margin-bottom:12px">
+        <span class="section-title">المخزون</span>
+        <button class="section-action" onclick="toggleAddForm()">+ إضافة قطعة</button>
+      </div>
+      <div class="inv-list" id="inv-list"></div>
+    </div>
+
+    <!-- add form -->
+    <div class="add-form" id="add-form" style="display:none">
+      <div class="add-form-title">إضافة قطعة جديدة</div>
+      <div class="field-group">
+        <span class="field-label">اسم القطعة</span>
+        <input class="field-input" id="nn" placeholder="مثال: سترة نيفي كلاسيك">
+      </div>
+      <div class="two-col-fields">
+        <div class="field-group">
+          <span class="field-label">النوع</span>
+          <select class="field-select" id="nt">
+            <option>قميص</option><option>تيشيرت</option><option>سترة</option>
+            <option>بنطلون</option><option>جينز</option><option>جاكيت</option>
+            <option>حذاء</option><option>إكسسوار</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <span class="field-label">السعر (دج)</span>
+          <input class="field-input" id="np" type="number" placeholder="2500" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">المقاسات</span>
+        <input class="field-input" id="ns" placeholder="S, M, L, XL">
+      </div>
+      <div class="field-group">
+        <span class="field-label">اللون</span>
+        <div class="color-picker-row" id="cp-row">
+          <div class="color-swatch on" data-c="#1C2C4A" style="background:#1C2C4A" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#2C2C2C" style="background:#2C2C2C" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#8B2020" style="background:#8B2020" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#A09070" style="background:#A09070" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#5C3010" style="background:#5C3010" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#E0E0D8" style="background:#E0E0D8" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#2A6A3A" style="background:#2A6A3A" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#6A4A8A" style="background:#6A4A8A" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#2A4A7A" style="background:#2A4A7A" onclick="pickC(this)"></div>
+          <div class="color-swatch" data-c="#B8A060" style="background:#B8A060" onclick="pickC(this)"></div>
+        </div>
+      </div>
+      <button class="add-submit" onclick="addItem()">✦ أضف للمخزون</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ S6: SELLER INSIGHT ══ -->
+<div id="s-insight" class="screen pb-safe">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showSeller('inventory')">←</button>
+    <span class="top-title">ذكاء المتجر</span>
+    <span class="top-badge">AI</span>
+  </div>
+  <div class="insight-body" id="insight-body">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<div class="nav-bar" id="nav-bar">
+  <button class="nav-item on" id="nav-inv" onclick="showSeller('inventory')">
+    <span class="nav-icon">📦</span>
+    <span class="nav-label">المخزون</span>
+  </button>
+  <button class="nav-item" id="nav-ai" onclick="showSeller('insight')">
+    <span class="nav-icon">🧠</span>
+    <span class="nav-label">ذكاء AI</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// INVENTORY
+// ══════════════════════════════════════
+let inv = [
+  {id:1,name:"سترة كلاسيكية نيفي",type:"سترة",color:"#1C2C4A",cname:"كحلي",price:3200,sizes:"M·L·XL",stock:"ok",views:42,sold:18},
+  {id:2,name:"قميص كاروه أحمر",type:"قميص",color:"#8B2020",cname:"أحمر",price:1800,sizes:"S·M·L",stock:"ok",views:28,sold:14},
+  {id:3,name:"بنطلون بيج كاجوال",type:"بنطلون",color:"#A09070",cname:"بيج",price:2200,sizes:"32·34·36",stock:"low",views:35,sold:5},
+  {id:4,name:"جينز أزرق سليم",type:"جينز",color:"#2A4A7A",cname:"أزرق",price:2800,sizes:"30·32·34·36",stock:"ok",views:50,sold:22},
+  {id:5,name:"جاكيت جلد بني",type:"جاكيت",color:"#5C3010",cname:"بني",price:5500,sizes:"M·L",stock:"ok",views:15,sold:3},
+  {id:6,name:"تيشيرت أبيض بسيط",type:"تيشيرت",color:"#D8D4CC",cname:"أبيض",price:900,sizes:"S·M·L·XL",stock:"ok",views:60,sold:40},
+  {id:7,name:"حذاء جلد بني كلاسيك",type:"حذاء",color:"#7A4010",cname:"بني",price:4200,sizes:"40·41·42·43",stock:"ok",views:22,sold:8},
+  {id:8,name:"سترة رمادية كاجوال",type:"سترة",color:"#6A6A6A",cname:"رمادي",price:2600,sizes:"M·L·XL",stock:"low",views:18,sold:2},
+  {id:9,name:"قميص أوكسفورد أبيض",type:"قميص",color:"#E8E4DA",cname:"أبيض",price:2100,sizes:"S·M·L",stock:"ok",views:30,sold:12},
+  {id:10,name:"بنطلون أسود فورمال",type:"بنطلون",color:"#1A1A1A",cname:"أسود",price:3100,sizes:"30·32·34",stock:"ok",views:38,sold:16},
+  {id:11,name:"هودي رمادي فاتح",type:"سترة",color:"#BCBCBC",cname:"رمادي",price:2400,sizes:"M·L·XL",stock:"ok",views:20,sold:4},
+  {id:12,name:"سنيكرز أبيض كلاسيك",type:"حذاء",color:"#E0E0D8",cname:"أبيض",price:3800,sizes:"40·41·42·43",stock:"ok",views:44,sold:20},
+];
+
+let selClr = "#1C2C4A";
+let chatHistory = [];
+let lastData = null;
+let currentRole = '';
+
+// ══════════════════════════════════════
+// SCREEN NAVIGATION
+// ══════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen, .screen-center').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function hideNav() { document.getElementById('nav-bar').classList.remove('visible') }
+
+function goCustomer() { currentRole = 'customer'; show('s-profile') }
+
+function goSeller() {
+  currentRole = 'seller';
+  show('s-seller');
+  document.getElementById('nav-bar').classList.add('visible');
+  renderSellerInventory();
+  renderStats();
+}
+
+function showSeller(tab) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('on'));
+  if (tab === 'inventory') {
+    show('s-seller'); document.getElementById('nav-inv').classList.add('on');
+    renderSellerInventory(); renderStats();
+  } else {
+    show('s-insight'); document.getElementById('nav-ai').classList.add('on');
+    renderInsightPanel();
+  }
+}
+
+// ══════════════════════════════════════
+// TAG SELECTORS
+// ══════════════════════════════════════
+document.querySelectorAll('#build-tags .tag').forEach(t => t.onclick = () => {
+  document.querySelectorAll('#build-tags .tag').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+});
+document.querySelectorAll('#style-tags .tag').forEach(t => t.onclick = () => {
+  document.querySelectorAll('#style-tags .tag').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+});
+
+// ══════════════════════════════════════
+// BUDGET
+// ══════════════════════════════════════
+function updateBudget(v) {
+  document.getElementById('bdisp').innerHTML =
+    Number(v).toLocaleString('ar-DZ') + ' <span class="budget-unit">دج</span>';
+}
+
+// ══════════════════════════════════════
+// GENERATE OUTFITS
+// ══════════════════════════════════════
+async function startGenerate() {
+  show('s-loading');
+  animateSteps();
+
+  const ht    = document.getElementById('ht').value;
+  const ag    = document.getElementById('ag').value;
+  const build = document.querySelector('#build-tags .tag.on').dataset.v;
+  const style = document.querySelector('#style-tags .tag.on').dataset.v;
+  const bg    = document.getElementById('bg').value;
+  const invTxt = inv.map(i => `- ${i.name} (${i.type}، ${i.cname}، ${i.price} دج، ${i.sizes})`).join('\n');
+
+  const prompt = `أنت مستشار موضة ذكي لتطبيق Wardro في الجزائر.
+الزبون: طول ${ht}سم، عمر ${ag} سنة، بنية ${build}، ذوق ${style}، ميزانية قصوى ${bg} دج.
+مخزون المتجر:
+${invTxt}
+اقترح 4 تنسيقات متنوعة (من كلاسيكي لجريء) من المخزون فقط. كل تنسيق 2-3 قطع. المجموع تحت الميزانية.
+أجب بـJSON فقط لا نص آخر:
+{"persona":"وصف الزبون بجملة مميزة","analysis":"تحليل ستايله","tip":"نصيحة مخصصة لبنيته وطوله","outfits":[{"tag":"English label","name":"اسم عربي","items":[{"name":"اسم القطعة","color":"#hex"}],"bg":"#hex داكن","reason":"لماذا يناسبه","total":0,"match":90}]}`;
+
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({model:"claude-sonnet-4-20250514", max_tokens:1100,
+        messages:[{role:"user",content:prompt}]})
+    });
+    const d = await r.json();
+    const raw = d.content[0].text.replace(/```json|```/g,'').trim();
+    const p = JSON.parse(raw);
+    lastData = p;
+    chatHistory = [
+      {role:"user", content:`سياق: مخزون: ${invTxt} | زبون: ${ht}سم ${build} ${style} ${bg}دج`},
+      {role:"assistant", content:raw}
+    ];
+    p.outfits.forEach(o => o.items.forEach(it => {
+      const f = inv.find(i => i.name === it.name || it.name.includes(i.name.split(' ')[0]));
+      if (f) f.views++;
+    }));
+    renderResults(p);
+    show('s-results');
+  } catch(e) {
+    show('s-profile');
+    toast('خطأ في الاتصال — حاول مجدداً');
+  }
+}
+
+function animateSteps() {
+  const steps = ['ls0','ls1','ls2','ls3'];
+  steps.forEach(s => {
+    const el = document.getElementById(s);
+    if (el) { el.classList.remove('active','done') }
+  });
+  let i = 0;
+  const run = () => {
+    if (i > 0) { const prev = document.getElementById(steps[i-1]); if(prev){prev.classList.remove('active');prev.classList.add('done')} }
+    const cur = document.getElementById(steps[i]);
+    if (cur) cur.classList.add('active');
+    i++;
+    if (i < steps.length) setTimeout(run, 600);
+  };
+  run();
+}
+
+// ══════════════════════════════════════
+// RENDER RESULTS
+// ══════════════════════════════════════
+function renderResults(p) {
+  const visColors = ['#1A1612','#121820','#1A1218','#181A12'];
+  const cards = p.outfits.map((o, i) => {
+    const pieces = o.items.map((it, j) =>
+      `<div class="outfit-piece" style="background:${it.color};height:${50+j*20}px"></div>`
+    ).join('');
+    const itemRows = o.items.map(it =>
+      `<div class="outfit-item-row"><div class="item-color-chip" style="background:${it.color}"></div>${it.name}</div>`
+    ).join('');
+    return `
+    <div class="outfit-card reveal" style="animation-delay:${i*.1}s" onclick="pickOutfit(this,'${o.name}',${i})">
+      <div class="outfit-visual" style="background:${o.bg||visColors[i%4]}">${pieces}</div>
+      <div class="outfit-body">
+        <div class="outfit-eyebrow">${o.tag}</div>
+        <div class="outfit-name">${o.name}</div>
+        <div class="outfit-items">${itemRows}</div>
+        <div class="outfit-reason">${o.reason}</div>
+        <div class="outfit-footer">
+          <div class="outfit-price">${Number(o.total).toLocaleString('ar-DZ')} <span class="outfit-price-unit">دج</span></div>
+          <span class="match-pill">${o.match}% توافق</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('results-body').innerHTML = `
+    <div class="persona-card reveal">
+      <div class="pc-eyebrow">WARDRO AI — تحليلك الشخصي</div>
+      <div class="pc-title">${p.persona}</div>
+      <div class="pc-body">${p.analysis}</div>
+      <div class="pc-tip">💡 ${p.tip}</div>
+    </div>
+    <div class="outfits-label reveal" style="animation-delay:.05s">التنسيقات المقترحة</div>
+    ${cards}
+    <div class="chat-section reveal" style="animation-delay:.45s">
+      <div class="chat-header"><span class="chat-dot"></span>اسأل مستشار الستايل</div>
+      <div class="chat-messages" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input class="chat-inp" id="cinp" placeholder="اسأل عن تنسيق، مناسبة، لون..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" id="csbtn" onclick="sendChat()">أرسل</button>
+      </div>
+    </div>
+    <button class="redo-btn" onclick="show('s-profile')">↩ تعديل بياناتي</button>
+  `;
+}
+
+function pickOutfit(el, name, idx) {
+  document.querySelectorAll('.outfit-card').forEach(c => c.classList.remove('chosen'));
+  el.classList.add('chosen');
+  if (lastData && lastData.outfits[idx]) {
+    lastData.outfits[idx].items.forEach(it => {
+      const f = inv.find(i => i.name === it.name);
+      if (f) f.sold++;
+    });
+  }
+  toast('✦ تم اختيار: ' + name);
+}
+
+// ══════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════
+async function sendChat() {
+  const inp = document.getElementById('cinp');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  document.getElementById('csbtn').disabled = true;
+  addChatMsg('usr', txt);
+  chatHistory.push({role:"user", content:txt});
+
+  const invTxt = inv.map(i=>`${i.name}(${i.price}دج)`).join('،');
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514", max_tokens:250,
+        system:`مستشار ستايل لتطبيق Wardro في الجزائر. المخزون: ${invTxt}. أجب باختصار وودية بالعربية.`,
+        messages:chatHistory.slice(-6)})
+    });
+    const d = await r.json();
+    const rep = d.content[0].text;
+    chatHistory.push({role:"assistant",content:rep});
+    addChatMsg('ai', rep);
+  } catch(e) { addChatMsg('ai','خطأ في الاتصال.') }
+  document.getElementById('csbtn').disabled = false;
+}
+
+function addChatMsg(role, txt) {
+  const el = document.getElementById('chat-msgs');
+  if (!el) return;
+  const d = document.createElement('div');
+  d.className = 'chat-msg ' + role;
+  d.innerHTML = `<span class="chat-role">${role==='usr'?'أنت':'AI'}</span><span class="chat-text">${txt}</span>`;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ══════════════════════════════════════
+// SELLER — INVENTORY
+// ══════════════════════════════════════
+function renderStats() {
+  const prices = inv.map(x=>x.price);
+  const low = inv.filter(x=>x.stock!=='ok').length;
+  const dead = getDeadIds().length;
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-tile">
+      <div class="stat-tile-l">القطع المسجلة</div>
+      <div class="stat-tile-n">${inv.length}</div>
+      <div class="stat-tile-s g">كامل المخزون</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-l">تحتاج انتباهاً</div>
+      <div class="stat-tile-n" style="color:var(--rustL)">${low + dead}</div>
+      <div class="stat-tile-s r">${low} نفدت · ${dead} مكدسة</div>
+    </div>`;
+}
+
+function getDeadIds() {
+  return inv.filter(i => i.views > 10 && (i.sold/i.views) < 0.15).map(i=>i.id);
+}
+
+function renderSellerInventory() {
+  const sl = {ok:'متوفر',low:'آخر القطع'};
+  const dead = getDeadIds();
+  document.getElementById('inv-list').innerHTML = inv.map(i => {
+    const isDead = dead.includes(i.id);
+    return `
+    <div class="inv-tile ${isDead?'dead':''}">
+      <div class="inv-swatch" style="background:${i.color}"></div>
+      <div class="inv-info">
+        <div class="inv-name">${i.name} ${isDead?'<span style="font-size:10px;color:var(--rustL)">(مكدسة)</span>':''}</div>
+        <div class="inv-meta">${i.type} · ${i.sizes}</div>
+      </div>
+      <div class="inv-right">
+        <div class="inv-price">${i.price.toLocaleString('ar-DZ')} دج</div>
+        <span class="inv-badge ${i.stock==='ok'?'ok':'dead-badge-s'}">${sl[i.stock]||'نفد'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAddForm() {
+  const f = document.getElementById('add-form');
+  f.style.display = f.style.display === 'none' ? 'flex' : 'none';
+  f.style.flexDirection = 'column';
+}
+
+function pickC(el) {
+  document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on'); selClr = el.dataset.c;
+}
+
+function addItem() {
+  const name = document.getElementById('nn').value.trim();
+  const price = parseInt(document.getElementById('np').value);
+  if (!name || !price) { toast('أدخل الاسم والسعر'); return }
+  inv.push({id:Date.now(),name,type:document.getElementById('nt').value,
+    color:selClr,cname:'مخصص',price,
+    sizes:document.getElementById('ns').value||'M·L',stock:'ok',views:0,sold:0});
+  renderSellerInventory(); renderStats();
+  document.getElementById('nn').value='';
+  document.getElementById('np').value='';
+  toast('✦ أضيفت للمخزون');
+}
+
+// ══════════════════════════════════════
+// SELLER AI INSIGHT
+// ══════════════════════════════════════
+function renderInsightPanel() {
+  document.getElementById('insight-body').innerHTML = `
+    <div class="insight-section">
+      <div class="is-eyebrow">DEAD STOCK AI</div>
+      <div class="is-title">القطع المكدسة — استراتيجية الإنقاذ</div>
+      <div class="is-body">الذكاء يحدد القطع التي تُعرض كثيراً لكن لا تُشترى، ويعطيك خطة إنقاذ لكل قطعة.</div>
+      <button class="insight-btn red" id="dead-btn" onclick="runDead()" style="margin-top:14px">
+        ⚠ حلل القطع المكدسة
+      </button>
+      <div id="dead-result"></div>
+    </div>
+    <div class="insight-section">
+      <div class="is-eyebrow">MARKET AI</div>
+      <div class="is-title">ماذا تشتري القادم؟</div>
+      <div class="is-body">يحلل مخزونك ويكشف الفجوات — يخبرك بالقطع التي تحقق أعلى ربح إذا أضفتها.</div>
+      <button class="insight-btn blue" id="mkt-btn" onclick="runMarket()" style="margin-top:14px">
+        ⟡ توصيات الشراء القادم
+      </button>
+      <div id="mkt-result"></div>
+    </div>
+  `;
+}
+
+async function runDead() {
+  const btn = document.getElementById('dead-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="mini-spin"></span> يحلل...';
+  const deadItems = inv.filter(i => i.views > 10 && (i.sold/i.views) < 0.15);
+  if (!deadItems.length) {
+    document.getElementById('dead-result').innerHTML =
+      '<div style="margin-top:12px;font-size:13px;color:var(--sageL)">✓ لا توجد قطع مكدسة الآن.</div>';
+    btn.disabled=false; btn.innerHTML='⚠ حلل القطع المكدسة'; return;
+  }
+  const txt = deadItems.map(i=>`${i.name}(${i.type}،${i.price}دج،${i.views}اقتراح،${i.sold}مبيع)`).join(' | ');
+  const invTxt = inv.map(i=>`${i.name}(${i.type}،${i.price}دج)`).join(' | ');
+  const p = `متجر ملابس جزائري. القطع المكدسة: ${txt}. باقي المخزون: ${invTxt}. لكل قطعة مكدسة 3 استراتيجيات إنقاذ محددة. JSON فقط:{"summary":"جملة","rescues":[{"item":"اسم","problem":"سبب","strategies":["س1","س2","س3"]}]}`;
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:p}]})});
+    const d = await r.json();
+    const parsed = JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+    const html = parsed.rescues.map(rc=>`
+      <div class="rescue-item">
+        <div class="ri-name">${rc.item}</div>
+        <div class="ri-why">⚠ ${rc.problem}</div>
+        <div class="ri-strats">${rc.strategies.map((s,j)=>`<div class="ri-s">${j+1}. ${s}</div>`).join('')}</div>
+      </div>`).join('');
+    document.getElementById('dead-result').innerHTML=`<div style="margin-top:14px"><div style="font-size:12px;color:var(--txtD);margin-bottom:10px">${parsed.summary}</div>${html}</div>`;
+  } catch(e) { document.getElementById('dead-result').innerHTML=`<div style="color:var(--rustL);margin-top:10px;font-size:12px">خطأ: ${e.message}</div>`; }
+  btn.disabled=false; btn.innerHTML='⚠ حلل القطع المكدسة';
+}
+
+async function runMarket() {
+  const btn = document.getElementById('mkt-btn');
+  btn.disabled=true; btn.innerHTML='<span class="mini-spin"></span> يحلل...';
+  const invTxt = inv.map(i=>`${i.name}(${i.type}،${i.price}دج،${i.stock})`).join(' | ');
+  const p = `محلل سوق ملابس رجالية جزائري. المخزون: ${invTxt}. JSON فقط:{"summary":"ملخص","gaps":["فجوة1","فجوة2","فجوة3"],"picks":[{"item":"اسم","price":"سعر","why":"سبب"}],"target":"الفئة الأربح"}`;
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:400,messages:[{role:"user",content:p}]})});
+    const d = await r.json();
+    const parsed = JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+    const gaps = parsed.gaps.map(g=>`<span class="gap-tag">${g}</span>`).join('');
+    const picks = parsed.picks.map(pk=>`
+      <div class="market-pick">
+        <div class="mp-name">${pk.item}</div>
+        <div class="mp-price">${pk.price}</div>
+        <div class="mp-why">${pk.why}</div>
+      </div>`).join('');
+    document.getElementById('mkt-result').innerHTML=`
+      <div style="margin-top:14px">
+        <div style="font-size:12px;color:var(--txtD);margin-bottom:10px">${parsed.summary}</div>
+        <div style="margin-bottom:12px">${gaps}</div>
+        <div style="font-size:10px;letter-spacing:1px;color:#5090C0;margin-bottom:8px">اشترِ هذا القادم ↓</div>
+        ${picks}
+        <div style="background:rgba(74,120,72,.08);border:1px solid rgba(74,120,72,.15);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--sageL)">${parsed.target}</div>
+      </div>`;
+  } catch(e) { document.getElementById('mkt-result').innerHTML=`<div style="color:var(--rustL);margin-top:10px;font-size:12px">خطأ: ${e.message}</div>`; }
+  btn.disabled=false; btn.innerHTML='⟡ توصيات الشراء القادم';
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
