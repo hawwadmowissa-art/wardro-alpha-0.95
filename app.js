@@ -155,6 +155,7 @@ function celebratePick(el){
 
 // ══ GENERATE ══
 async function startGenerate(){
+  const key=getApiKey();if(!key)return;
   navigateTo('s-loading','mask');
   animateSteps();
   const ht=document.getElementById('ht').value,ag=document.getElementById('ag').value,
@@ -165,7 +166,12 @@ async function startGenerate(){
     invTxt=inv.map(i=>`- ${i.name} (${i.type}، ${i.cname}، ${i.price} دج، ${i.sizes})`).join('\n');
   const prompt=`أنت مستشار موضة ذكي لتطبيق Wardro في الجزائر.الزبون: طول ${ht}سم، عمر ${ag} سنة، بنية ${build}، ذوق ${style}، مناسبة: ${occasion}، ميزانية قصوى ${bg} دج.مخزون المتجر:\n${invTxt}\nاقترح 4 تنسيقات متنوعة من المخزون فقط. كل تنسيق 2-3 قطع. المجموع تحت الميزانية.أجب بـJSON فقط:{"persona":"وصف","analysis":"تحليل","tip":"نصيحة","outfits":[{"tag":"label","name":"اسم عربي","items":[{"name":"اسم","color":"#hex"}],"bg":"#hex","reason":"سبب","total":0,"match":90}]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1100,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+      "Content-Type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1100,messages:[{role:"user",content:prompt}]})});
     const d=await r.json(),raw=d.content[0].text.replace(/```json|```/g,'').trim(),p=JSON.parse(raw);
     lastData=p;
     chatHistory=[{role:"user",content:`سياق: ${invTxt} | ${ht}سم ${build} ${style} ${bg}دج`},{role:"assistant",content:raw}];
@@ -239,11 +245,17 @@ function pickOutfit(el,name,idx){
 
 // ══ CHAT ══
 async function sendChat(){
+  const key=getApiKey();if(!key)return;
   const inp=document.getElementById('cinp'),txt=inp.value.trim();if(!txt)return;inp.value='';
   document.getElementById('csbtn').disabled=true;addChatMsg('usr',txt);chatHistory.push({role:"user",content:txt});
   const invTxt=inv.map(i=>`${i.name}(${i.price}دج)`).join('،');
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:250,system:`مستشار ستايل Wardro. المخزون: ${invTxt}. أجب باختصار بالعربية.`,messages:chatHistory.slice(-6)})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+      "Content-Type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:250,system:`مستشار ستايل Wardro. المخزون: ${invTxt}. أجب باختصار بالعربية.`,messages:chatHistory.slice(-6)})});
     const d=await r.json(),rep=d.content[0].text;chatHistory.push({role:"assistant",content:rep});addChatMsg('ai',rep);
   }catch(e){addChatMsg('ai','خطأ في الاتصال.')}
   document.getElementById('csbtn').disabled=false;
@@ -313,13 +325,19 @@ function renderInsightPanel(){
     <div class="insight-section"><div class="is-eyebrow">MARKET AI</div><div class="is-title">ماذا تشتري القادم؟</div><div class="is-body">يحلل مخزونك ويكشف الفجوات — يخبرك بالقطع الأكثر ربحية.</div><button class="insight-btn blue" id="mkt-btn" onclick="runMarket()" style="margin-top:14px">⟡ توصيات الشراء القادم</button><div id="mkt-result"></div></div>`;
 }
 async function runDead(){
+  const key=getApiKey();if(!key)return;
   const btn=document.getElementById('dead-btn');btn.disabled=true;btn.innerHTML='<span class="mini-spin"></span> يحلل...';
   const di=inv.filter(i=>i.views>10&&(i.sold/i.views)<.15);
   if(!di.length){document.getElementById('dead-result').innerHTML='<div style="margin-top:12px;font-size:13px;color:var(--sageL)">✓ لا توجد قطع مكدسة.</div>';btn.disabled=false;btn.innerHTML='⚠ حلل القطع المكدسة';return}
   const txt=di.map(i=>`${i.name}(${i.views}اقتراح،${i.sold}مبيع)`).join(' | '),itx=inv.map(i=>`${i.name}(${i.price}دج)`).join(' | ');
   const p=`متجر ملابس جزائري. المكدسة: ${txt}. الباقي: ${itx}. لكل قطعة 3 استراتيجيات. JSON فقط:{"summary":"جملة","rescues":[{"item":"اسم","problem":"سبب","strategies":["س1","س2","س3"]}]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:p}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+      "Content-Type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:p}]})});
     const d=await r.json(),ps=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
     document.getElementById('dead-result').innerHTML=`<div style="margin-top:14px"><div style="font-size:12px;color:var(--txtD);margin-bottom:10px">${ps.summary}</div>${ps.rescues.map(rc=>`<div class="rescue-item"><div class="ri-name">${rc.item}</div><div class="ri-why">⚠ ${rc.problem}</div><div class="ri-strats">${rc.strategies.map((s,j)=>`<div class="ri-s">${j+1}. ${s}</div>`).join('')}</div></div>`).join('')}</div>`;
     setTimeout(()=>document.querySelectorAll('.rescue-item').forEach((it,i)=>setTimeout(()=>it.classList.add('visible'),i*120)),50);
@@ -327,16 +345,55 @@ async function runDead(){
   btn.disabled=false;btn.innerHTML='⚠ حلل القطع المكدسة';
 }
 async function runMarket(){
+  const key=getApiKey();if(!key)return;
   const btn=document.getElementById('mkt-btn');btn.disabled=true;btn.innerHTML='<span class="mini-spin"></span> يحلل...';
   const itx=inv.map(i=>`${i.name}(${i.type}،${i.price}دج،${i.stock})`).join(' | ');
   const p=`محلل سوق ملابس رجالية جزائري. المخزون: ${itx}. JSON فقط:{"summary":"ملخص","gaps":["فجوة1","فجوة2","فجوة3"],"picks":[{"item":"اسم","price":"سعر","why":"سبب"}],"target":"الفئة الأربح"}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:400,messages:[{role:"user",content:p}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+      "Content-Type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:400,messages:[{role:"user",content:p}]})});
     const d=await r.json(),ps=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
     document.getElementById('mkt-result').innerHTML=`<div style="margin-top:14px"><div style="font-size:12px;color:var(--txtD);margin-bottom:10px">${ps.summary}</div><div style="margin-bottom:12px">${ps.gaps.map(g=>`<span class="gap-tag">${g}</span>`).join('')}</div><div style="font-size:10px;color:#5090C0;margin-bottom:8px">اشترِ هذا القادم ↓</div>${ps.picks.map(pk=>`<div class="market-pick"><div class="mp-name">${pk.item}</div><div class="mp-price">${pk.price}</div><div class="mp-why">${pk.why}</div></div>`).join('')}<div style="background:rgba(74,120,72,.08);border:1px solid rgba(74,120,72,.15);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--sageL)">${ps.target}</div></div>`;
     setTimeout(()=>document.querySelectorAll('.market-pick').forEach((it,i)=>setTimeout(()=>it.classList.add('visible'),i*100)),50);
   }catch(e){document.getElementById('mkt-result').innerHTML='<div style="color:var(--rustL);font-size:12px;margin-top:10px">خطأ في الاتصال</div>'}
   btn.disabled=false;btn.innerHTML='⟡ توصيات الشراء القادم';
+}
+
+// ══ API KEY GUARD ══
+function getApiKey(){
+  const k=localStorage.getItem('wardro_claude_key');
+  if(k&&k.trim())return k.trim();
+  showApiKeyModal();
+  return null;
+}
+function showApiKeyModal(){
+  let m=document.getElementById('api-key-modal');
+  if(m){m.style.display='flex';return}
+  m=document.createElement('div');
+  m.id='api-key-modal';
+  m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(11,10,8,.92);display:flex;align-items:center;justify-content:center;padding:24px';
+  m.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd2);border-radius:18px;padding:28px 24px;width:100%;max-width:360px;text-align:center">
+    <div style="font-size:28px;margin-bottom:12px">🔑</div>
+    <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--cream);margin-bottom:8px">مفتاح Claude API</div>
+    <div style="font-size:13px;color:var(--txtD);margin-bottom:20px;line-height:1.6">أدخل مفتاح Anthropic API الخاص بك.<br>يُحفظ محلياً على جهازك فقط.</div>
+    <input id="api-key-inp" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg);border:1px solid var(--brd2);border-radius:10px;padding:12px 14px;color:var(--cream);font-size:14px;outline:none;margin-bottom:14px;text-align:left;direction:ltr">
+    <button onclick="saveApiKey()" style="width:100%;background:var(--rust);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-family:'Tajawal',sans-serif;cursor:pointer">حفظ والمتابعة</button>
+  </div>`;
+  document.body.appendChild(m);
+  setTimeout(()=>document.getElementById('api-key-inp')?.focus(),100);
+}
+function saveApiKey(){
+  const inp=document.getElementById('api-key-inp');
+  const k=(inp?.value||'').trim();
+  if(!k.startsWith('sk-')){toast('المفتاح غير صحيح — يجب أن يبدأ بـ sk-');return}
+  localStorage.setItem('wardro_claude_key',k);
+  const m=document.getElementById('api-key-modal');
+  if(m)m.style.display='none';
+  toast('✓ تم حفظ المفتاح');
 }
 
 // ══ TOAST ══
@@ -397,12 +454,18 @@ function closeSheet(e){if(e.target===document.getElementById('product-sheet'))cl
 function closeProductSheet(){document.getElementById('product-sheet').classList.remove('open');document.body.style.overflow='';curItem=null}
 
 async function buildAroundItem(){
+  const key=getApiKey();if(!key)return;
   if(!curItem)return;
   const btn=document.getElementById('ps-build-btn');btn.disabled=true;btn.innerHTML='<span class="mini-spin" style="border-top-color:#fff"></span> يبني التنسيقات...';
   const itx=inv.filter(i=>i.id!==curItem.id).map(i=>`${i.name}(${i.type}،${i.cname}،${i.price}دج)`).join(' | ');
   const prompt=`مستشار موضة Wardro. القطعة: ${curItem.name} (${curItem.type}، ${curItem.cname}، ${curItem.price} دج). الباقي: ${itx}. تنسيقين: كاجوال وأنيق. JSON فقط:{"outfits":[{"label":"كاجوال","name":"اسم","items":[{"name":"اسم","color":"#hex"}],"total":0,"reason":"سبب"},{"label":"أنيق","name":"اسم","items":[{"name":"اسم","color":"#hex"}],"total":0,"reason":"سبب"}]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:prompt}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{
+      "Content-Type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:prompt}]})});
     const d=await r.json(),ps=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
     const lc={'كاجوال':'var(--sage)','أنيق':'var(--gold)'};
     document.getElementById('ps-result').innerHTML=ps.outfits.map((o,i)=>{
