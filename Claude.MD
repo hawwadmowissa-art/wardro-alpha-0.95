@@ -48,11 +48,12 @@ wardro/
 | Phase 3 — Hero Slider | `heroSlides[]` + `initHeroSlider()` في app.js، شاشة #s-browse في index.html، styles في style.css | يونيو 2026 |
 | V2 Phase 1 — Seller Flow | Splash ✅، Onboarding 3 slides ✅، Role Selection ✅، Seller Reg ✅، Sign In ✅، Welcome ✅، Editor Mode ✅، Add Product ✅، Show Mode ✅ | يونيو 2026 |
 | V2 Phase 2 — Editor Mode rebuilt | Store Profile section (upload + Supabase save) ✅، Add Product modal (bottom-sheet، multi-select sizes، image upload) ✅، Quick Add row ✅، DB migration (description + profile_image + product-images bucket) ✅، field names fixed (sizes/type/image) ✅ | يونيو 2026 |
+| V2 Phase 3 — Show Mode | Store header (avatar + name + Follow btn) ✅، Tab nav (Home/Products/About) ✅، Hero Slider (real product images، auto-advance 3.8s، dot indicators) ✅، Featured Products grid ✅، All Products tab ✅، About tab (stats) ✅، Trust strip ✅ | يونيو 2026 |
 
 ---
 
 ## المرحلة الحالية
-**V2 — Editor Mode مكتمل — التالي: Show Mode polish + Customer Registration + Browse**
+**V2 — Show Mode مكتمل — التالي: Customer Registration + Browse**
 - Hero Slider تلقائي (أقوى القطع / عروض البائع)
 - Horizontal Sections (عروض / تخفيضات / رياضي / جديد)
 - Product Cards (صورة + نجوم + وفرة + سعر)

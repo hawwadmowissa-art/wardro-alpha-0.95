@@ -35,6 +35,7 @@ function triggerStagger(id){
   if(id==='s-welcome')el.querySelectorAll('.wel-card').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(20px)';setTimeout(()=>{c.style.transition='all .5s var(--spring)';c.style.opacity='1';c.style.transform='translateY(0)'},200+i*150)});
   if(id==='s-seller-reg'||id==='s-seller-signin')el.querySelectorAll('.form-group,.cta-btn,.form-link,.form-security,.reg-features').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(14px)';setTimeout(()=>{c.style.transition='all .5s var(--expo)';c.style.opacity='1';c.style.transform='translateY(0)'},80+i*60)});
   if(id==='s-editor'){const nm=document.getElementById('ed-store-name');if(nm)nm.textContent=localStorage.getItem('wardro_store_name')||'—';loadEditorProducts();}
+  if(id==='s-show'){loadShowMode();}
 }
 
 // ══ LOGO ══
@@ -303,16 +304,29 @@ function renderEditorProducts(prods){
 }
 
 function renderShowProducts(prods){
-  const grid=document.getElementById('show-prod-grid');
-  const empty=document.getElementById('show-empty');
-  if(!grid||!empty)return;
-  if(!prods.length){grid.style.display='none';empty.style.display='block';return}
-  empty.style.display='none';grid.style.display='grid';
-  grid.innerHTML=prods.map(p=>`
+  buildHeroSlider(prods);
+  const cardHtml=p=>`
     <div class="show-prod-card">
       ${p.image?`<img class="show-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
       <div class="show-prod-info"><div class="show-prod-name">${p.name}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="show-prod-cat">${p.type||''}</div></div>
-    </div>`).join('');
+    </div>`;
+  // Featured grid (Home tab — first 4)
+  const grid=document.getElementById('show-prod-grid');
+  const empty=document.getElementById('show-empty');
+  if(grid&&empty){
+    if(!prods.length){grid.style.display='none';empty.style.display='block';}
+    else{empty.style.display='none';grid.style.display='grid';grid.innerHTML=prods.slice(0,4).map(cardHtml).join('');}
+  }
+  // All-products grid (Products tab)
+  const allGrid=document.getElementById('show-all-prod-grid');
+  const allEmpty=document.getElementById('show-empty-all');
+  if(allGrid&&allEmpty){
+    if(!prods.length){allGrid.style.display='none';allEmpty.style.display='block';}
+    else{allEmpty.style.display='none';allGrid.style.display='grid';allGrid.innerHTML=prods.map(cardHtml).join('');}
+  }
+  // About tab stats
+  const cnt=document.getElementById('show-prod-count');
+  if(cnt)cnt.textContent=prods.length;
 }
 
 function openAddProduct(){
@@ -351,6 +365,68 @@ function previewStoreProfile(input){
     }
   };
   r.readAsDataURL(file);
+}
+
+// ══ SHOW MODE ══
+let _heroIdx=0,_heroTimer=null,_heroLen=1;
+
+function loadShowMode(){
+  const img=localStorage.getItem('wardro_profile_image');
+  const name=localStorage.getItem('wardro_store_name')||'—';
+  // Avatar in header
+  const av=document.getElementById('show-avatar');
+  if(av&&img){av.style.backgroundImage=`url(${img})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
+  // Avatar in About tab
+  const avAbout=document.getElementById('show-about-avatar');
+  if(avAbout&&img){avAbout.style.backgroundImage=`url(${img})`;avAbout.style.backgroundSize='cover';avAbout.style.backgroundPosition='center';avAbout.innerHTML='';}
+  // Store name in About tab
+  const aboutName=document.getElementById('show-about-name');
+  if(aboutName)aboutName.textContent=name;
+  // Reset to Home tab
+  switchShowTab('home',document.querySelector('.show-tab[data-tab="home"]'));
+  // Load fresh data
+  loadEditorProducts();
+}
+
+function buildHeroSlider(prods){
+  const track=document.getElementById('show-hero-track');
+  const dotsEl=document.getElementById('show-hero-dots');
+  if(!track||!dotsEl)return;
+  clearInterval(_heroTimer);_heroIdx=0;
+  const heroProds=prods.filter(p=>p.image).slice(0,3);
+  let slides;
+  if(!heroProds.length){
+    slides=[{bg:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
+  }else{
+    slides=heroProds.map(p=>({bg:p.image,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`}));
+  }
+  _heroLen=slides.length;
+  track.innerHTML=slides.map((s,i)=>`
+    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}">
+      <div class="show-hero-overlay"></div>
+      <div class="show-hero-content">
+        <div class="show-hero-label">${s.label}</div>
+        <div class="show-hero-title">${s.title}</div>
+        <div class="show-hero-sub">${s.sub}</div>
+        <div class="show-hero-cta">${s.cta} →</div>
+      </div>
+    </div>`).join('');
+  dotsEl.innerHTML=slides.map((_,i)=>`<button class="show-hero-dot${i===0?' active':''}" onclick="goHeroSlide(${i})"></button>`).join('');
+  if(slides.length>1){_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);}
+}
+
+function goHeroSlide(idx){
+  _heroIdx=idx;
+  document.querySelectorAll('.show-hero-slide').forEach((s,i)=>s.classList.toggle('active',i===idx));
+  document.querySelectorAll('.show-hero-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+function switchShowTab(tab,btn){
+  document.querySelectorAll('.show-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.show-tab-panel').forEach(p=>p.style.display='none');
+  if(btn)btn.classList.add('active');
+  const panel=document.getElementById('show-tab-'+tab);
+  if(panel)panel.style.display='block';
 }
 
 // ══ ONBOARDING ══
