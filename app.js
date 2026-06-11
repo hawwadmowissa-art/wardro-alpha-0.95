@@ -112,35 +112,69 @@ function toast(m){clearTimeout(toastT);const t=document.getElementById('toast');
 
 // ══ SUPABASE HELPER ══
 function getSb(){
-  if(window._sb)return window._sb;
+  if(window.db)return window.db;
   toast('قاعدة البيانات غير متصلة');
   return null;
 }
 
 // ══ SELLER AUTH ══
+function setRegErr(id,msg){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=msg;el.classList.add('show');
+  const inp=el.previousElementSibling;
+  if(inp&&(inp.tagName==='INPUT'||inp.tagName==='TEXTAREA')){
+    inp.classList.add('input-err');
+    inp.addEventListener('input',()=>{inp.classList.remove('input-err');el.classList.remove('show')},{once:true});
+  }
+}
+function clearRegErrors(){
+  document.querySelectorAll('#s-seller-reg .field-err').forEach(el=>{el.classList.remove('show');el.textContent=''});
+  document.querySelectorAll('#s-seller-reg .input-err').forEach(el=>el.classList.remove('input-err'));
+}
+
 async function doSellerReg(){
+  clearRegErrors();
   const btn=document.getElementById('reg-submit');
   const storeName=document.getElementById('reg-store').value.trim();
   const email=document.getElementById('reg-email').value.trim();
   const pass=document.getElementById('reg-pass').value;
   const pass2=document.getElementById('reg-pass2').value;
-  if(!storeName)return toast('أدخل اسم المتجر');
-  if(!email||!email.includes('@'))return toast('البريد الإلكتروني غير صحيح');
-  if(pass.length<8)return toast('كلمة المرور: 8 أحرف على الأقل');
-  if(pass!==pass2)return toast('كلمتا المرور غير متطابقتين');
+
+  let ok=true;
+  if(!storeName){setRegErr('err-store','أدخل اسم المتجر');ok=false}
+  if(!email||!email.includes('@')){setRegErr('err-email','أدخل بريداً إلكترونياً صحيحاً');ok=false}
+  if(pass.length<8){setRegErr('err-pass','كلمة المرور: 8 أحرف على الأقل');ok=false}
+  else if(pass!==pass2){setRegErr('err-pass2','كلمتا المرور غير متطابقتين');ok=false}
+  if(!ok)return;
+
   const sb=getSb();if(!sb)return;
-  btn.textContent='جاري الإنشاء...';btn.disabled=true;
+  btn.disabled=true;
+  btn.innerHTML='<span class="btn-spinner"></span> جاري الإنشاء...';
+
   try{
     const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{store_name:storeName,role:'seller'}}});
     if(error)throw error;
-    await sb.from('sellers').upsert({user_id:data.user.id,store_name:storeName,email},{onConflict:'user_id'});
+    await sb.from('sellers').upsert({id:data.user.id,store_name:storeName},{onConflict:'id'});
     localStorage.setItem('wardro_store_name',storeName);
     localStorage.setItem('wardro_role','seller');
     document.getElementById('wel-name').textContent=storeName;
     document.getElementById('show-store-name').textContent=storeName;
-    navigateTo('s-welcome','mask');
-    toast('✓ تم إنشاء متجرك!');
-  }catch(e){toast(e.message||'حدث خطأ — حاول مجدداً');btn.textContent='Create Store →';btn.disabled=false}
+    btn.innerHTML='✓ تم إنشاء المتجر';
+    btn.style.background='var(--goldD)';
+    setTimeout(()=>{btn.style.background='';navigateTo('s-welcome','mask')},700);
+  }catch(e){
+    btn.disabled=false;btn.innerHTML='Create Store →';
+    const msg=(e.message||'').toLowerCase();
+    if(msg.includes('already registered')||msg.includes('already been registered')){
+      setRegErr('err-email','هذا البريد الإلكتروني مستخدم بالفعل');
+    }else if(msg.includes('password')&&(msg.includes('weak')||msg.includes('strong'))){
+      setRegErr('err-pass','كلمة المرور ضعيفة — اختر كلمة أقوى');
+    }else if(msg.includes('email')&&(msg.includes('invalid')||msg.includes('format'))){
+      setRegErr('err-email','صيغة البريد الإلكتروني غير صحيحة');
+    }else{
+      setRegErr('err-general',e.message||'حدث خطأ — حاول مجدداً');
+    }
+  }
 }
 
 async function doSellerSignIn(){
