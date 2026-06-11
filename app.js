@@ -24,24 +24,35 @@ function navigateTo(targetId,type='z-axis'){
   },dur);
 }
 
-function goCustomer(){toast('Customer — coming soon')}
+function goCustomer(){toast('Customer — قريباً')}
 
-function goSeller(){toast('Seller — coming soon')}
+function goSeller(){navigateTo('s-seller-reg','slide')}
 
 // ══ STAGGER ══
 function triggerStagger(id){
   const el=document.getElementById(id);if(!el)return;
-  if(id==='s-splash')el.querySelectorAll('.role-card').forEach((c,i)=>{c.classList.remove('visible');setTimeout(()=>c.classList.add('visible'),200+i*150)});
+  if(id==='s-splash')el.querySelectorAll('.rs-card').forEach((c,i)=>{c.classList.remove('visible');setTimeout(()=>c.classList.add('visible'),200+i*150)});
+  if(id==='s-welcome')el.querySelectorAll('.wel-card').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(20px)';setTimeout(()=>{c.style.transition='all .5s var(--spring)';c.style.opacity='1';c.style.transform='translateY(0)'},200+i*150)});
+  if(id==='s-seller-reg'||id==='s-seller-signin')el.querySelectorAll('.form-group,.cta-btn,.form-link,.form-security,.reg-features').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(14px)';setTimeout(()=>{c.style.transition='all .5s var(--expo)';c.style.opacity='1';c.style.transform='translateY(0)'},80+i*60)});
 }
 
 // ══ LOGO ══
 window.addEventListener('DOMContentLoaded',()=>{
+  const onboarded=localStorage.getItem('wardro_onboarded')==='true';
+  if(onboarded){const ob=document.getElementById('s-onboard');if(ob)ob.classList.add('gone')}
+
+  const storeName=localStorage.getItem('wardro_store_name');
+  if(storeName){const wn=document.getElementById('wel-name');if(wn)wn.textContent=storeName}
+  const showName=localStorage.getItem('wardro_store_name')||'—';
+  const sn=document.getElementById('show-store-name');if(sn)sn.textContent=showName;
+
   setTimeout(()=>{
-    document.getElementById('s-logo').classList.add('fade-out');
-    setTimeout(()=>document.getElementById('s-logo').style.display='none',1100);
-  },3800);  // longer display for assembly animation
-  setTimeout(()=>animateCounter(60,2600),700);
-  setTimeout(()=>{const sc=document.getElementById('s-splash');if(sc)sc.querySelectorAll('.role-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),3200+i*150))},0);
+    const logo=document.getElementById('s-logo');
+    logo.classList.add('fade-out');
+    setTimeout(()=>{logo.style.display='none'},1000);
+    if(!onboarded)animateCounter(60,1500);
+    document.querySelectorAll('.rs-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),200+i*150));
+  },3800);
 });
 
 // ══ PARTICLES ══
@@ -99,13 +110,171 @@ function saveApiKey(){
 let toastT;
 function toast(m){clearTimeout(toastT);const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');toastT=setTimeout(()=>t.classList.remove('show'),2200)}
 
+// ══ SUPABASE HELPER ══
+function getSb(){
+  if(window._sb)return window._sb;
+  toast('قاعدة البيانات غير متصلة');
+  return null;
+}
+
+// ══ SELLER AUTH ══
+async function doSellerReg(){
+  const btn=document.getElementById('reg-submit');
+  const storeName=document.getElementById('reg-store').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const pass2=document.getElementById('reg-pass2').value;
+  if(!storeName)return toast('أدخل اسم المتجر');
+  if(!email||!email.includes('@'))return toast('البريد الإلكتروني غير صحيح');
+  if(pass.length<8)return toast('كلمة المرور: 8 أحرف على الأقل');
+  if(pass!==pass2)return toast('كلمتا المرور غير متطابقتين');
+  const sb=getSb();if(!sb)return;
+  btn.textContent='جاري الإنشاء...';btn.disabled=true;
+  try{
+    const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{store_name:storeName,role:'seller'}}});
+    if(error)throw error;
+    await sb.from('sellers').upsert({user_id:data.user.id,store_name:storeName,email},{onConflict:'user_id'});
+    localStorage.setItem('wardro_store_name',storeName);
+    localStorage.setItem('wardro_role','seller');
+    document.getElementById('wel-name').textContent=storeName;
+    document.getElementById('show-store-name').textContent=storeName;
+    navigateTo('s-welcome','mask');
+    toast('✓ تم إنشاء متجرك!');
+  }catch(e){toast(e.message||'حدث خطأ — حاول مجدداً');btn.textContent='Create Store →';btn.disabled=false}
+}
+
+async function doSellerSignIn(){
+  const btn=document.getElementById('si-submit');
+  const email=document.getElementById('si-email').value.trim();
+  const pass=document.getElementById('si-pass').value;
+  if(!email||!pass)return toast('يرجى ملء جميع الحقول');
+  const sb=getSb();if(!sb)return;
+  btn.textContent='جاري التحقق...';btn.disabled=true;
+  try{
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error)throw error;
+    const{data:seller}=await sb.from('sellers').select('store_name').eq('user_id',data.user.id).single();
+    const name=seller?.store_name||email.split('@')[0];
+    localStorage.setItem('wardro_store_name',name);
+    localStorage.setItem('wardro_role','seller');
+    document.getElementById('wel-name').textContent=name;
+    document.getElementById('show-store-name').textContent=name;
+    navigateTo('s-welcome','mask');
+    await loadEditorProducts();
+    toast('✓ أهلاً بعودتك!');
+  }catch(e){toast(e.message||'بيانات غير صحيحة');btn.textContent='Sign In →';btn.disabled=false}
+}
+
+// ══ PRODUCTS ══
+let _apSize=null,_apCat=null,_apImgFile=null;
+
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('size-btns')?.addEventListener('click',e=>{
+    const b=e.target.closest('.sel-btn');if(!b)return;
+    document.querySelectorAll('#size-btns .sel-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');_apSize=b.dataset.val;
+  });
+  document.getElementById('cat-btns')?.addEventListener('click',e=>{
+    const b=e.target.closest('.sel-btn');if(!b)return;
+    document.querySelectorAll('#cat-btns .sel-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');_apCat=b.dataset.val;
+  });
+});
+
+function previewProductImg(input){
+  if(!input.files[0])return;
+  _apImgFile=input.files[0];
+  const r=new FileReader();
+  r.onload=e=>{
+    const p=document.getElementById('ap-img-preview');
+    p.style.backgroundImage=`url(${e.target.result})`;
+    p.style.backgroundSize='cover';p.style.backgroundPosition='center';
+    p.innerHTML='';
+  };
+  r.readAsDataURL(_apImgFile);
+}
+
+async function saveProduct(){
+  const btn=document.getElementById('ap-submit');
+  const name=document.getElementById('ap-name').value.trim();
+  const price=document.getElementById('ap-price').value;
+  const color=document.getElementById('ap-color').value.trim();
+  const desc=document.getElementById('ap-desc').value.trim();
+  if(!name)return toast('أدخل اسم القطعة');
+  if(!price||isNaN(price))return toast('أدخل سعراً صحيحاً');
+  if(!_apSize)return toast('اختر الحجم');
+  if(!_apCat)return toast('اختر الفئة');
+  const sb=getSb();if(!sb)return;
+  btn.textContent='جاري الحفظ...';btn.disabled=true;
+  try{
+    let img_url=null;
+    if(_apImgFile){
+      const ext=_apImgFile.name.split('.').pop();
+      const path=`products/${Date.now()}.${ext}`;
+      const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
+      if(!upErr){const{data:u}=sb.storage.from('product-images').getPublicUrl(path);img_url=u.publicUrl}
+    }
+    const{data:{user}}=await sb.auth.getUser();
+    await sb.from('products').insert({seller_id:user.id,name,price:parseFloat(price),size:_apSize,category:_apCat,color,description:desc,image_url:img_url});
+    toast('✓ تمت إضافة القطعة');
+    document.getElementById('ap-name').value='';
+    document.getElementById('ap-price').value='';
+    document.getElementById('ap-color').value='';
+    document.getElementById('ap-desc').value='';
+    document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
+    const p=document.getElementById('ap-img-preview');
+    p.style.backgroundImage='';
+    p.innerHTML='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>اضغط لرفع صورة</span>';
+    _apSize=null;_apCat=null;_apImgFile=null;
+    navigateTo('s-editor','slide');
+    await loadEditorProducts();
+  }catch(e){toast(e.message||'حدث خطأ');btn.textContent='Done ✓';btn.disabled=false}
+}
+
+async function loadEditorProducts(){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();
+    if(!user)return;
+    const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
+    renderEditorProducts(prods||[]);
+    renderShowProducts(prods||[]);
+  }catch(e){}
+}
+
+function renderEditorProducts(prods){
+  const grid=document.getElementById('prod-grid');
+  const empty=document.getElementById('prod-empty');
+  if(!grid||!empty)return;
+  if(!prods.length){grid.style.display='none';empty.style.display='flex';return}
+  empty.style.display='none';grid.style.display='grid';
+  grid.innerHTML=prods.map(p=>`
+    <div class="ed-prod-card">
+      ${p.image_url?`<img class="ed-prod-img" src="${p.image_url}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
+      <div class="ed-prod-info"><div class="ed-prod-name">${p.name}</div><div class="ed-prod-price">${Number(p.price).toLocaleString()} DA</div></div>
+    </div>`).join('');
+}
+
+function renderShowProducts(prods){
+  const grid=document.getElementById('show-prod-grid');
+  const empty=document.getElementById('show-empty');
+  if(!grid||!empty)return;
+  if(!prods.length){grid.style.display='none';empty.style.display='block';return}
+  empty.style.display='none';grid.style.display='grid';
+  grid.innerHTML=prods.map(p=>`
+    <div class="show-prod-card">
+      ${p.image_url?`<img class="show-prod-img" src="${p.image_url}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
+      <div class="show-prod-info"><div class="show-prod-name">${p.name}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DA</div><div class="show-prod-cat">${p.category||''}</div></div>
+    </div>`).join('');
+}
+
 // ══ ONBOARDING ══
 let obSlide=0;
 function animateCounter(target,dur){
-  const el=document.getElementById('ob-counter'),ring=document.getElementById('ob-ring-fill'),c=515;
-  let st=null;if(ring)ring.style.transition='none';
+  const el=document.getElementById('ob-counter');if(!el)return;
+  let st=null;
   function step(ts){if(!st)st=ts;const p=Math.min((ts-st)/dur,1),e=1-Math.pow(1-p,3);
-    el.textContent=Math.round(e*target);if(ring)ring.style.strokeDashoffset=c-(e*(target/100))*c;
+    el.textContent=Math.round(e*target);
     if(p<1)requestAnimationFrame(step)}
   requestAnimationFrame(step);
 }
@@ -116,36 +285,20 @@ function nextSlide(){
   if(obSlide>=3){skipOnboard();return}
   setTimeout(()=>document.getElementById('ob'+obSlide).classList.add('active'),80);
   document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('on',i===obSlide));
-  if(obSlide===2)document.getElementById('ob-next').innerHTML='ابدأ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+  const btn=document.getElementById('ob-next');
+  if(btn){
+    if(obSlide===1)btn.textContent='Continue →';
+    if(obSlide===2)btn.textContent='START EXPERIENCE →';
+  }
 }
 function skipOnboard(){
+  localStorage.setItem('wardro_onboarded','true');
   const ob=document.getElementById('s-onboard');
   ob.style.opacity='0';
-  setTimeout(()=>ob.classList.add('gone'),500);
+  setTimeout(()=>{
+    ob.classList.add('gone');
+    document.querySelectorAll('.rs-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),100+i*150));
+  },500);
 }
 
-// ══ LOGO re-animate on revisit ══
-document.getElementById('s-logo').addEventListener('animationend', () => {}, {once:true});
-
-// ══ SLOW-MO PARALLAX ON ONBOARDING SLIDE 1 ══
-(function(){
-  let tY = 0, rafId;
-  function driftBg() {
-    tY += 0.18;
-    document.querySelectorAll('.ob-bg-img').forEach((el, i) => {
-      const speed = [0.6, 0.9, 0.4][i] || 0.6;
-      const offset = Math.sin(tY * 0.008 + i * 1.2) * 18 * speed;
-      el.style.transform = `translateY(${offset}px)`;
-    });
-    rafId = requestAnimationFrame(driftBg);
-  }
-  const ob = document.getElementById('s-onboard');
-  if (ob && !ob.classList.contains('gone')) driftBg();
-  document.getElementById('ob-next') && document.getElementById('ob-next').addEventListener('click', () => {
-    if (obSlide >= 1) cancelAnimationFrame(rafId);
-  });
-  document.querySelector('.ob-skip') && document.querySelector('.ob-skip').addEventListener('click', () => {
-    cancelAnimationFrame(rafId);
-  });
-})();
 
