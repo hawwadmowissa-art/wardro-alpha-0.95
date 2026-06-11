@@ -3,7 +3,7 @@
   --bg:#0B0A08;--surf:#141210;--card:#1C1915;--card2:#232019;
   --brd:rgba(210,175,105,.1);--brd2:rgba(210,175,105,.2);
   --gold:#D2AF69;--goldD:#8A7040;--goldL:#EDD080;
-  --cream:#EDE3CC;--rust:#A83D22;--rustL:#C94E2A;
+  --cream:#EDE3CC;--ivory:#EDE3CC;--rust:#A83D22;--rustL:#C94E2A;
   --sage:#4A7848;--sageL:#68A866;--muted:#5A5045;--dim:#2A2520;
   --txt:#D8CFBA;--txtD:#7A7060;
   --spring:cubic-bezier(.34,1.56,.64,1);
@@ -67,7 +67,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;o
 .rs-arr{color:var(--gold);font-size:17px;flex-shrink:0;transition:transform .3s var(--spring)}
 .rs-card:hover .rs-arr{transform:translateX(-4px)}
 .rs-footer{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;letter-spacing:.3px}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--sageL);animation:bk 2s infinite}
+.live-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);animation:bk 2s infinite}
 @keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
 
 /* ══ TOP BAR ══ */
@@ -192,11 +192,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;o
 .form-group{display:flex;flex-direction:column;gap:7px}
 .form-group label{font-size:11px;color:var(--gold);letter-spacing:.5px;font-weight:700;text-transform:uppercase}
 .form-group input,.form-group textarea{
-  background:var(--card);border:1px solid var(--brd2);border-radius:12px;
-  padding:13px 14px;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:14px;
+  background:var(--ivory);border:1px solid rgba(210,175,105,.25);border-radius:12px;
+  padding:13px 14px;color:#3A352E;font-family:'Tajawal',sans-serif;font-size:14px;
   outline:none;transition:border-color .3s,box-shadow .3s;resize:none}
-.form-group input:focus,.form-group textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(210,175,105,.07)}
-.form-group input::placeholder,.form-group textarea::placeholder{color:var(--muted)}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(210,175,105,.18)}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !important;-webkit-text-fill-color:#0B0A08 !important;caret-color:#0B0A08 !important}
+.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(58,53,46,.45)}
 .cta-btn{width:100%;background:var(--gold);color:#0B0A08;border:none;border-radius:14px;
   padding:15px;font-family:'Fraunces',serif;font-size:15px;font-weight:700;cursor:pointer;
   transition:all .4s var(--spring);margin-top:4px}
