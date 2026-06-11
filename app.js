@@ -34,6 +34,7 @@ function triggerStagger(id){
   if(id==='s-splash')el.querySelectorAll('.rs-card').forEach((c,i)=>{c.classList.remove('visible');setTimeout(()=>c.classList.add('visible'),200+i*150)});
   if(id==='s-welcome')el.querySelectorAll('.wel-card').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(20px)';setTimeout(()=>{c.style.transition='all .5s var(--spring)';c.style.opacity='1';c.style.transform='translateY(0)'},200+i*150)});
   if(id==='s-seller-reg'||id==='s-seller-signin')el.querySelectorAll('.form-group,.cta-btn,.form-link,.form-security,.reg-features').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(14px)';setTimeout(()=>{c.style.transition='all .5s var(--expo)';c.style.opacity='1';c.style.transform='translateY(0)'},80+i*60)});
+  if(id==='s-editor'){const nm=document.getElementById('ed-store-name');if(nm)nm.textContent=localStorage.getItem('wardro_store_name')||'—';loadEditorProducts();}
 }
 
 // ══ LOGO ══
@@ -187,7 +188,7 @@ async function doSellerSignIn(){
   try{
     const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error)throw error;
-    const{data:seller}=await sb.from('sellers').select('store_name').eq('user_id',data.user.id).single();
+    const{data:seller}=await sb.from('sellers').select('store_name').eq('id',data.user.id).single();
     const name=seller?.store_name||email.split('@')[0];
     localStorage.setItem('wardro_store_name',name);
     localStorage.setItem('wardro_role','seller');
@@ -200,13 +201,15 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSize=null,_apCat=null,_apImgFile=null;
+let _apSizes=[],_apCat=null,_apImgFile=null;
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
     const b=e.target.closest('.sel-btn');if(!b)return;
-    document.querySelectorAll('#size-btns .sel-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');_apSize=b.dataset.val;
+    b.classList.toggle('active');
+    const v=b.dataset.val;
+    if(b.classList.contains('active'))_apSizes.push(v);
+    else _apSizes=_apSizes.filter(s=>s!==v);
   });
   document.getElementById('cat-btns')?.addEventListener('click',e=>{
     const b=e.target.closest('.sel-btn');if(!b)return;
@@ -219,11 +222,13 @@ function previewProductImg(input){
   if(!input.files[0])return;
   _apImgFile=input.files[0];
   const r=new FileReader();
-  r.onload=e=>{
-    const p=document.getElementById('ap-img-preview');
-    p.style.backgroundImage=`url(${e.target.result})`;
-    p.style.backgroundSize='cover';p.style.backgroundPosition='center';
-    p.innerHTML='';
+  r.onload=ev=>{
+    const zone=document.getElementById('ap-img-zone');
+    const ph=document.getElementById('ap-img-preview');
+    zone.style.backgroundImage=`url(${ev.target.result})`;
+    zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';
+    zone.style.borderStyle='solid';
+    if(ph)ph.style.display='none';
   };
   r.readAsDataURL(_apImgFile);
 }
@@ -236,31 +241,33 @@ async function saveProduct(){
   const desc=document.getElementById('ap-desc').value.trim();
   if(!name)return toast('أدخل اسم القطعة');
   if(!price||isNaN(price))return toast('أدخل سعراً صحيحاً');
-  if(!_apSize)return toast('اختر الحجم');
+  if(!_apSizes.length)return toast('اختر حجماً على الأقل');
   if(!_apCat)return toast('اختر الفئة');
   const sb=getSb();if(!sb)return;
   btn.textContent='جاري الحفظ...';btn.disabled=true;
   try{
     let img_url=null;
     if(_apImgFile){
+      const{data:{user:u0}}=await sb.auth.getUser();
       const ext=_apImgFile.name.split('.').pop();
-      const path=`products/${Date.now()}.${ext}`;
+      const path=`products/${u0.id}/${Date.now()}.${ext}`;
       const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
-      if(!upErr){const{data:u}=sb.storage.from('product-images').getPublicUrl(path);img_url=u.publicUrl}
+      if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
     const{data:{user}}=await sb.auth.getUser();
-    await sb.from('products').insert({seller_id:user.id,name,price:parseFloat(price),size:_apSize,category:_apCat,color,description:desc,image_url:img_url});
+    const{error:insErr}=await sb.from('products').insert({seller_id:user.id,name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url});
+    if(insErr)throw insErr;
     toast('✓ تمت إضافة القطعة');
     document.getElementById('ap-name').value='';
     document.getElementById('ap-price').value='';
     document.getElementById('ap-color').value='';
     document.getElementById('ap-desc').value='';
     document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
-    const p=document.getElementById('ap-img-preview');
-    p.style.backgroundImage='';
-    p.innerHTML='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>اضغط لرفع صورة</span>';
-    _apSize=null;_apCat=null;_apImgFile=null;
-    navigateTo('s-editor','slide');
+    const zone=document.getElementById('ap-img-zone');
+    if(zone){zone.style.backgroundImage='';zone.style.backgroundSize='';zone.style.backgroundPosition='';zone.style.borderStyle='';}
+    const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display='';
+    _apSizes=[];_apCat=null;_apImgFile=null;
+    closeAddProduct();
     await loadEditorProducts();
   }catch(e){toast(e.message||'حدث خطأ');btn.textContent='Done ✓';btn.disabled=false}
 }
@@ -270,6 +277,12 @@ async function loadEditorProducts(){
   try{
     const{data:{user}}=await sb.auth.getUser();
     if(!user)return;
+    const{data:seller}=await sb.from('sellers').select('profile_image').eq('id',user.id).single();
+    if(seller?.profile_image){
+      const circle=document.getElementById('sp-img-circle');
+      if(circle){circle.style.backgroundImage=`url(${seller.profile_image})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';circle.innerHTML='';}
+      localStorage.setItem('wardro_profile_image',seller.profile_image);
+    }
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
     renderEditorProducts(prods||[]);
     renderShowProducts(prods||[]);
@@ -284,8 +297,8 @@ function renderEditorProducts(prods){
   empty.style.display='none';grid.style.display='grid';
   grid.innerHTML=prods.map(p=>`
     <div class="ed-prod-card">
-      ${p.image_url?`<img class="ed-prod-img" src="${p.image_url}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
-      <div class="ed-prod-info"><div class="ed-prod-name">${p.name}</div><div class="ed-prod-price">${Number(p.price).toLocaleString()} DA</div></div>
+      ${p.image?`<img class="ed-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
+      <div class="ed-prod-info"><div class="ed-prod-name">${p.name}</div><div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>
     </div>`).join('');
 }
 
@@ -297,9 +310,47 @@ function renderShowProducts(prods){
   empty.style.display='none';grid.style.display='grid';
   grid.innerHTML=prods.map(p=>`
     <div class="show-prod-card">
-      ${p.image_url?`<img class="show-prod-img" src="${p.image_url}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
-      <div class="show-prod-info"><div class="show-prod-name">${p.name}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DA</div><div class="show-prod-cat">${p.category||''}</div></div>
+      ${p.image?`<img class="show-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
+      <div class="show-prod-info"><div class="show-prod-name">${p.name}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="show-prod-cat">${p.type||''}</div></div>
     </div>`).join('');
+}
+
+function openAddProduct(){
+  const m=document.getElementById('ap-modal');if(!m)return;
+  m.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('ap-modal--open')));
+}
+
+function closeAddProduct(){
+  const m=document.getElementById('ap-modal');if(!m)return;
+  m.classList.remove('ap-modal--open');
+  setTimeout(()=>{m.style.display='none'},380);
+}
+
+function apModalBackdropClose(e){
+  if(e.target===e.currentTarget)closeAddProduct();
+}
+
+function previewStoreProfile(input){
+  if(!input.files[0])return;
+  const file=input.files[0];
+  const r=new FileReader();
+  r.onload=async ev=>{
+    const circle=document.getElementById('sp-img-circle');
+    if(circle){circle.style.backgroundImage=`url(${ev.target.result})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';circle.innerHTML='';}
+    const sb=getSb();if(!sb)return;
+    const{data:{user}}=await sb.auth.getUser();if(!user)return;
+    const ext=file.name.split('.').pop();
+    const path=`store-profiles/${user.id}.${ext}`;
+    const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
+    if(!upErr){
+      const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);
+      await sb.from('sellers').update({profile_image:pu.publicUrl}).eq('id',user.id);
+      localStorage.setItem('wardro_profile_image',pu.publicUrl);
+      toast('✓ تم تحديث صورة المتجر');
+    }
+  };
+  r.readAsDataURL(file);
 }
 
 // ══ ONBOARDING ══

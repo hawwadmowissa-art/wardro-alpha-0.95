@@ -203,20 +203,25 @@
       <div class="form-group">
         <label>اسم المتجر</label>
         <input type="text" id="reg-store" placeholder="مثال: ستايل مانشستر" autocomplete="off">
+        <span class="field-err" id="err-store"></span>
       </div>
       <div class="form-group">
         <label>البريد الإلكتروني</label>
         <input type="email" id="reg-email" placeholder="example@email.com" dir="ltr" autocomplete="email">
+        <span class="field-err" id="err-email"></span>
       </div>
       <div class="form-group">
         <label>كلمة المرور</label>
         <input type="password" id="reg-pass" placeholder="••••••••" dir="ltr" autocomplete="new-password">
+        <span class="field-err" id="err-pass"></span>
       </div>
       <div class="form-group">
         <label>تأكيد كلمة المرور</label>
         <input type="password" id="reg-pass2" placeholder="••••••••" dir="ltr" autocomplete="new-password">
+        <span class="field-err" id="err-pass2"></span>
       </div>
       <button class="cta-btn" id="reg-submit" onclick="doSellerReg()">Create Store →</button>
+      <span class="field-err field-err--center" id="err-general"></span>
       <div class="form-link">لديك حساب؟ <span onclick="navigateTo('s-seller-signin','slide')">سجّل الدخول</span></div>
       <div class="form-security">🔒 بياناتك محمية ومشفرة بالكامل</div>
     </div>
@@ -288,7 +293,46 @@
     <button class="ghost-btn" onclick="navigateTo('s-show','slide')">Preview →</button>
   </div>
   <div class="editor-body">
-    <div class="editor-eyebrow">Make your store stand out</div>
+
+    <!-- Store Profile -->
+    <div class="ed-section">
+      <div class="ed-sec-head">
+        <span class="ed-sec-title">Store Profile</span>
+      </div>
+      <div class="ed-profile-body">
+        <div class="ed-profile-img-wrap" onclick="document.getElementById('sp-img-input').click()">
+          <input type="file" id="sp-img-input" accept="image/*" onchange="previewStoreProfile(this)" hidden>
+          <div id="sp-img-circle" class="ed-profile-circle">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".45"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="ed-profile-badge">+</div>
+        </div>
+        <div class="ed-profile-info">
+          <div class="ed-profile-name" id="ed-store-name">—</div>
+          <div class="ed-profile-hint">اضغط لتغيير صورة المتجر</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Products -->
+    <div class="ed-section">
+      <div class="ed-sec-head">
+        <span class="ed-sec-title">Featured Products</span>
+        <button class="ed-add-btn" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+      <div class="ed-sec-empty" id="prod-empty">
+        <div class="ede-icon">👔</div>
+        <div class="ede-text">أضف قطعك الأفضل هنا</div>
+      </div>
+      <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
+      <div class="ed-quick-row">
+        <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+        <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+        <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+      </div>
+    </div>
+
+    <!-- Hero Slider -->
     <div class="ed-section">
       <div class="ed-sec-head">
         <span class="ed-sec-title">Main Hero Slider</span>
@@ -299,75 +343,65 @@
         <div class="ede-text">لا توجد صور بعد — أضف صورة غلاف لمتجرك</div>
       </div>
     </div>
-    <div class="ed-section">
-      <div class="ed-sec-head">
-        <span class="ed-sec-title">Featured Products</span>
-        <button class="ed-add-btn" onclick="navigateTo('s-add-product','slide')">+ Add Product</button>
-      </div>
-      <div class="ed-sec-empty" id="prod-empty">
-        <div class="ede-icon">👔</div>
-        <div class="ede-text">أضف قطعك الأفضل هنا</div>
-      </div>
-      <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
-    </div>
-  </div>
-</div>
 
-<!-- ADD PRODUCT -->
-<div id="s-add-product" class="screen">
-  <div class="top-bar">
-    <button class="back-btn" onclick="navigateTo('s-editor','slide')">←</button>
-    <div class="top-title">Add Product</div>
   </div>
-  <div class="addprod-body">
-    <div class="ap-form">
-      <div class="form-group">
-        <label>اسم القطعة</label>
-        <input type="text" id="ap-name" placeholder="مثال: قميص أزرق كلاسيكي">
+
+  <!-- Add Product Modal -->
+  <div id="ap-modal" class="ap-modal" style="display:none" onclick="apModalBackdropClose(event)">
+    <div class="ap-modal-sheet">
+      <div class="ap-modal-handle"></div>
+      <div class="ap-modal-hd">
+        <span class="ap-modal-title">Add Product</span>
+        <button class="ap-modal-close" onclick="closeAddProduct()">✕</button>
       </div>
-      <div class="form-group">
-        <label>السعر (DA)</label>
-        <input type="number" id="ap-price" placeholder="مثال: 3500" dir="ltr" min="0">
-      </div>
-      <div class="form-group">
-        <label>الحجم</label>
-        <div class="sel-btns" id="size-btns">
-          <button class="sel-btn" data-val="S">S</button>
-          <button class="sel-btn" data-val="M">M</button>
-          <button class="sel-btn" data-val="L">L</button>
-          <button class="sel-btn" data-val="XL">XL</button>
-          <button class="sel-btn" data-val="XXL">XXL</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>الفئة</label>
-        <div class="sel-btns" id="cat-btns">
-          <button class="sel-btn" data-val="formal">Formal</button>
-          <button class="sel-btn" data-val="casual">Casual</button>
-          <button class="sel-btn" data-val="sport">Sport</button>
-          <button class="sel-btn" data-val="traditional">Traditional</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>اللون</label>
-        <input type="text" id="ap-color" placeholder="مثال: أزرق كحلي">
-      </div>
-      <div class="form-group">
-        <label>وصف قصير <span style="color:var(--muted);font-weight:400">(اختياري)</span></label>
-        <textarea id="ap-desc" rows="3" placeholder="مثال: قميص فاخر للمناسبات الرسمية"></textarea>
-      </div>
-      <div class="form-group">
-        <label>صورة القطعة</label>
-        <div class="img-upload" onclick="document.getElementById('ap-img-input').click()">
+      <div class="ap-modal-body">
+        <div class="ap-img-zone" id="ap-img-zone" onclick="document.getElementById('ap-img-input').click()">
           <input type="file" id="ap-img-input" accept="image/*" onchange="previewProductImg(this)" hidden>
-          <div id="ap-img-preview" class="img-placeholder">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            <span>اضغط لرفع صورة</span>
+          <div id="ap-img-preview" class="ap-img-ph">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>اضغط لرفع صورة القطعة</span>
+          </div>
+        </div>
+        <div class="ap-fields">
+          <div class="form-group">
+            <label>اسم القطعة</label>
+            <input type="text" id="ap-name" placeholder="مثال: قميص أزرق كلاسيكي">
+          </div>
+          <div class="form-group">
+            <label>السعر (DZD)</label>
+            <input type="number" id="ap-price" placeholder="3500" dir="ltr" min="0">
+          </div>
+          <div class="form-group">
+            <label>الحجم <span style="color:var(--muted);font-weight:400;font-size:10px">(اختر كل الأحجام المتوفرة)</span></label>
+            <div class="sel-btns" id="size-btns">
+              <button class="sel-btn" data-val="S">S</button>
+              <button class="sel-btn" data-val="M">M</button>
+              <button class="sel-btn" data-val="L">L</button>
+              <button class="sel-btn" data-val="XL">XL</button>
+              <button class="sel-btn" data-val="XXL">XXL</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>الفئة</label>
+            <div class="sel-btns" id="cat-btns">
+              <button class="sel-btn" data-val="formal">Formal</button>
+              <button class="sel-btn" data-val="casual">Casual</button>
+              <button class="sel-btn" data-val="sport">Sport</button>
+              <button class="sel-btn" data-val="traditional">Traditional</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>اللون</label>
+            <input type="text" id="ap-color" placeholder="مثال: أزرق كحلي">
+          </div>
+          <div class="form-group">
+            <label>وصف قصير <span style="color:var(--muted);font-weight:400">(اختياري)</span></label>
+            <textarea id="ap-desc" rows="3" placeholder="مثال: قميص فاخر للمناسبات الرسمية"></textarea>
           </div>
         </div>
       </div>
-      <div class="ap-actions">
-        <button class="ap-cancel" onclick="navigateTo('s-editor','slide')">إلغاء</button>
+      <div class="ap-modal-footer">
+        <button class="ap-cancel" onclick="closeAddProduct()">إلغاء</button>
         <button class="ap-done" id="ap-submit" onclick="saveProduct()">Done ✓</button>
       </div>
     </div>
