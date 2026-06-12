@@ -24,7 +24,7 @@ function navigateTo(targetId,type='z-axis'){
   },dur);
 }
 
-function goCustomer(){toast('Customer — قريباً')}
+function goCustomer(){navigateTo('s-browse','slide')}
 
 function goSeller(){navigateTo('s-seller-reg','slide')}
 
@@ -36,6 +36,7 @@ function triggerStagger(id){
   if(id==='s-seller-reg'||id==='s-seller-signin')el.querySelectorAll('.form-group,.cta-btn,.form-link,.form-security,.reg-features').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(14px)';setTimeout(()=>{c.style.transition='all .5s var(--expo)';c.style.opacity='1';c.style.transform='translateY(0)'},80+i*60)});
   if(id==='s-editor'){const nm=document.getElementById('ed-store-name');if(nm)nm.textContent=localStorage.getItem('wardro_store_name')||'—';loadEditorProducts();}
   if(id==='s-show'){loadShowMode();}
+  if(id==='s-browse'){buildBrowseHero();loadBrowse();}
 }
 
 // ══ LOGO ══
@@ -53,11 +54,17 @@ window.addEventListener('DOMContentLoaded',async()=>{
     logo.classList.add('fade-out');
     setTimeout(()=>{logo.style.display='none'},1000);
     if(!onboarded)animateCounter(60,1500);
-    // Session persistence: if seller is already signed in, skip role selection
+    // Session persistence
     if(window.db&&localStorage.getItem('wardro_role')==='seller'){
       try{
         const{data:{session}}=await window.db.auth.getSession();
         if(session){navigateTo('s-show','z-axis');return;}
+      }catch(_){}
+    }
+    if(window.db&&localStorage.getItem('wardro_role')==='customer'){
+      try{
+        const{data:{session}}=await window.db.auth.getSession();
+        if(session){navigateTo('s-browse','z-axis');return;}
       }catch(_){}
     }
     document.querySelectorAll('.rs-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),200+i*150));
@@ -450,6 +457,7 @@ async function logOut(){
     localStorage.removeItem('wardro_role');
     localStorage.removeItem('wardro_profile_image');
     clearInterval(_heroTimer);
+    clearInterval(_brHeroTimer);
     navigateTo('s-splash','z-axis');
     toast('✓ تم تسجيل الخروج');
   }catch(e){toast(e.message||'خطأ في تسجيل الخروج')}
@@ -572,6 +580,184 @@ function skipOnboard(){
     ob.classList.add('gone');
     document.querySelectorAll('.rs-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),100+i*150));
   },500);
+}
+
+// ══ CUSTOMER BROWSE ══
+let _brHeroIdx=0,_brHeroTimer=null;
+let _brProds=[];
+let _pdCurrentId=null;
+
+const BR_SLIDES=[
+  {label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Explore featured stores',cta:'Explore'},
+  {label:'SPORT ESSENTIALS',title:'ACTIVE WEAR',sub:'Premium sportswear, built for you',cta:'Shop Now'},
+  {label:'JUST FOR YOU',title:'TOP PICKS',sub:'Curated from the best stores',cta:'Discover'},
+];
+
+async function loadBrowse(){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:prods}=await sb.from('products').select('*, seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
+    _brProds=prods||[];
+    renderBrGrid('br-rec-grid',_brProds.slice(0,9));
+    const sport=_brProds.filter(p=>p.type==='sport');
+    renderBrGrid('br-sport-grid',sport.length?sport:makeDemoProds(6));
+    const casual=_brProds.filter(p=>p.type==='casual');
+    renderBrGrid('br-casual-grid',casual.length?casual:makeDemoProds(6));
+    const stores=[],seen=new Set();
+    for(const p of _brProds){
+      if(p.seller&&!seen.has(p.seller_id)){
+        seen.add(p.seller_id);
+        stores.push({id:p.seller_id,name:p.seller.store_name,img:p.seller.profile_image});
+      }
+    }
+    renderTopStores(stores);
+  }catch(e){console.error('browse load:',e)}
+}
+
+function makeDemoProds(n){
+  return Array.from({length:n},(_,i)=>({id:'demo-'+i,_demo:true,name:'',price:null,image:null,sizes:[],color:'',description:''}));
+}
+
+function renderBrGrid(id,prods){
+  const el=document.getElementById(id);if(!el)return;
+  if(!prods.length){el.innerHTML='<div class="br-empty">لا توجد قطع</div>';return}
+  el.innerHTML=prods.map(p=>`
+    <div class="br-prod-card${p._demo?' br-prod-card--demo':''}"${p._demo?'':` onclick="openProdDetail('${p.id}')"`}>
+      ${p.image?`<img class="br-prod-img" src="${p.image}" alt="${p.name||''}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+      ${!p._demo?`<div class="br-prod-info"><div class="br-prod-name">${p.name}</div><div class="br-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>`:''}
+    </div>`).join('');
+}
+
+function renderTopStores(stores){
+  const el=document.getElementById('br-stores-row');if(!el)return;
+  const list=stores.length?stores:Array.from({length:4},(_,i)=>({id:'ds-'+i,_demo:true,name:'',img:null}));
+  el.innerHTML=list.map(s=>`
+    <div class="br-store-item"${s._demo?'':` onclick="toast('${s.name} — قريباً')"`}>
+      <div class="br-store-circle"${s.img?` style="background-image:url('${s.img}')"`:''}>${!s.img?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".35"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/></svg>`:''}</div>
+      <div class="br-store-name${s._demo?' br-store-name--ph':''}">${s._demo?'':s.name}</div>
+    </div>`).join('');
+}
+
+function buildBrowseHero(){
+  const track=document.getElementById('br-hero-track');
+  const dots=document.getElementById('br-hero-dots');
+  if(!track||!dots)return;
+  clearInterval(_brHeroTimer);_brHeroIdx=0;
+  track.innerHTML=BR_SLIDES.map((s,i)=>`
+    <div class="br-hero-slide br-hero-slide--${i}${i===0?' active':''}">
+      <div class="br-hero-overlay"></div>
+      <div class="br-hero-content">
+        <div class="br-hero-label">${s.label}</div>
+        <div class="br-hero-title">${s.title}</div>
+        <div class="br-hero-sub">${s.sub}</div>
+        <button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${s.cta} →</button>
+      </div>
+    </div>`).join('');
+  dots.innerHTML=BR_SLIDES.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
+  if(BR_SLIDES.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%BR_SLIDES.length;goBrHeroSlide(_brHeroIdx);},3800);}
+}
+
+function goBrHeroSlide(idx){
+  _brHeroIdx=idx;
+  document.querySelectorAll('.br-hero-slide').forEach((s,i)=>s.classList.toggle('active',i===idx));
+  document.querySelectorAll('.br-hero-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+function brNavSwitch(tab,btn){
+  document.querySelectorAll('.br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
+  btn.classList.add('br-nav-btn--active');
+  if(tab!=='home')toast(tab+' — قريباً');
+}
+
+// ── Product Detail ──
+function openProdDetail(id){
+  const p=_brProds.find(x=>x.id===id);if(!p)return;
+  _pdCurrentId=id;
+  const img=document.getElementById('pd-img');
+  const ph=document.getElementById('pd-img-ph');
+  if(p.image){img.src=p.image;img.style.display='block';if(ph)ph.style.display='none';}
+  else{img.style.display='none';if(ph)ph.style.display='flex';}
+  document.getElementById('pd-name').textContent=p.name;
+  document.getElementById('pd-price').textContent=Number(p.price).toLocaleString()+' DZD';
+  document.getElementById('pd-desc').textContent=p.description||'';
+  document.getElementById('pd-stock-lbl').textContent=(p.stock>0?'متوفر — '+p.stock+' قطعة':'Quantity Available');
+  const cWrap=document.getElementById('pd-colors-wrap');
+  cWrap.innerHTML=p.color?`<span class="pd-color-chip pd-color-chip--active">${p.color_name||p.color}</span>`:'';
+  const sPills=document.getElementById('pd-size-pills');
+  sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${s}</button>`).join('');
+  const btn=document.getElementById('pd-save-btn');
+  btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
+  const ov=document.getElementById('pd-overlay');
+  ov.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
+}
+
+function closeProdDetail(){
+  const ov=document.getElementById('pd-overlay');
+  ov.classList.remove('pd-overlay--open');
+  setTimeout(()=>{ov.style.display='none';},380);
+}
+
+function pdSelectSize(btn){
+  document.querySelectorAll('.pd-size-pill').forEach(b=>b.classList.remove('pd-size-pill--active'));
+  btn.classList.add('pd-size-pill--active');
+}
+
+async function saveItem(){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){openCustAuth();return;}
+    const btn=document.getElementById('pd-save-btn');
+    btn.textContent='Saving...';btn.disabled=true;
+    const{error}=await sb.from('saved_items').insert({customer_id:session.user.id,product_id:_pdCurrentId});
+    if(error&&error.code==='23505'){
+      btn.textContent='Already Saved ✓';btn.classList.add('pd-save-btn--saved');
+    }else if(error){throw error;}
+    else{btn.textContent='Added to Saved ✓';btn.classList.add('pd-save-btn--saved');}
+  }catch(e){toast(e.message||'خطأ في الحفظ');const btn=document.getElementById('pd-save-btn');if(btn){btn.textContent='Save';btn.disabled=false;}}
+}
+
+// ── Customer Auth ──
+function openCustAuth(){
+  const m=document.getElementById('cust-auth-modal');
+  m.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('cust-auth--open')));
+}
+function closeCustAuth(){
+  const m=document.getElementById('cust-auth-modal');
+  m.classList.remove('cust-auth--open');
+  setTimeout(()=>{m.style.display='none';},380);
+}
+function custAuthBackdrop(e){if(e.target===e.currentTarget)closeCustAuth();}
+
+async function doCustAuth(){
+  const sb=getSb();if(!sb)return;
+  const email=document.getElementById('ca-email').value.trim();
+  const pass=document.getElementById('ca-pass').value;
+  if(!email||!pass)return toast('أدخل البريد وكلمة المرور');
+  const btn=document.getElementById('ca-submit');
+  btn.textContent='...';btn.disabled=true;
+  try{
+    let{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error){
+      const em=(error.message||'').toLowerCase();
+      if(em.includes('invalid')||em.includes('credentials')||em.includes('not found')){
+        const{data:d2,error:e2}=await sb.auth.signUp({email,password:pass});
+        if(e2)throw e2;
+        data=d2;
+      }else throw error;
+    }
+    if(data?.session){
+      localStorage.setItem('wardro_role','customer');
+      toast('✓ تم تسجيل الدخول');
+      closeCustAuth();
+      setTimeout(()=>saveItem(),420);
+    }else{
+      toast('تحقق من بريدك الإلكتروني لتأكيد الحساب');
+      btn.textContent='Continue →';btn.disabled=false;
+    }
+  }catch(e){toast(e.message||'خطأ');btn.textContent='Continue →';btn.disabled=false;}
 }
 
 
