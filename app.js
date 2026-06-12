@@ -596,7 +596,9 @@ const BR_SLIDES=[
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:prods}=await sb.from('products').select('*, seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
+    const{data:prods,error}=await sb.from('products').select('*, seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
+    if(error){console.error('browse query error:',error);throw error;}
+    console.log('browse loaded:',prods?.length,'products');
     _brProds=prods||[];
     renderBrGrid('br-rec-grid',_brProds.slice(0,9));
     const sport=_brProds.filter(p=>p.type==='sport');
@@ -623,7 +625,7 @@ function renderBrGrid(id,prods){
   if(!prods.length){el.innerHTML='<div class="br-empty">لا توجد قطع</div>';return}
   el.innerHTML=prods.map(p=>`
     <div class="br-prod-card${p._demo?' br-prod-card--demo':''}"${p._demo?'':` onclick="openProdDetail('${p.id}')"`}>
-      ${p.image?`<img class="br-prod-img" src="${p.image}" alt="${p.name||''}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+      ${p.image?`<img class="br-prod-img" src="${p.image}" alt="${p.name||''}">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
       ${!p._demo?`<div class="br-prod-info"><div class="br-prod-name">${p.name}</div><div class="br-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>`:''}
     </div>`).join('');
 }

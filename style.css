@@ -607,8 +607,8 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .br-prod-card:active{transform:scale(.96);transition-duration:.08s}
 .br-prod-card--demo{cursor:default;pointer-events:none}
 .br-prod-card--demo:hover{transform:none;box-shadow:none}
-.br-prod-img{width:100%;aspect-ratio:3/4;background:var(--dim);object-fit:cover;display:block}
-.br-prod-img--ph{width:100%;aspect-ratio:3/4;display:block;
+.br-prod-img{width:100%;height:136px;object-fit:cover;display:block;background:var(--dim)}
+.br-prod-img--ph{width:100%;height:136px;display:block;
   background:linear-gradient(145deg,#1C1915 0%,#252019 60%,#1C1915 100%)}
 .br-prod-info{padding:5px 6px 7px}
 .br-prod-name{font-size:9px;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
