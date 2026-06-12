@@ -304,6 +304,11 @@
       </svg>
       <span class="ed-sidebar-label">Show</span>
     </button>
+    <div style="flex:1"></div>
+    <button class="ed-sidebar-icon ed-sidebar-logout" onclick="logOut()" title="Logout">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span class="ed-sidebar-label">Out</span>
+    </button>
   </div>
 
   <!-- Main Content -->
@@ -325,6 +330,17 @@
 
     <!-- Scrollable body -->
     <div class="editor-body">
+
+      <!-- Store Bio Section -->
+      <div class="ed-section">
+        <div class="ed-sec-head">
+          <span class="ed-sec-title">Store Bio</span>
+        </div>
+        <div class="ed-bio-wrap">
+          <textarea id="ed-bio" class="ed-bio-input" placeholder="أضف وصفاً لمتجرك..." rows="3"></textarea>
+          <button class="ed-bio-save" onclick="saveBio()">حفظ الوصف</button>
+        </div>
+      </div>
 
       <!-- Products Section -->
       <div class="ed-section">
@@ -449,6 +465,7 @@
         </div>
       </div>
       <div class="ap-modal-footer">
+        <button class="ap-delete" id="ap-delete" onclick="deleteProduct()" style="display:none">🗑</button>
         <button class="ap-cancel" onclick="closeAddProduct()">إلغاء</button>
         <button class="ap-done" id="ap-submit" onclick="saveProduct()">Done ✓</button>
       </div>
@@ -474,6 +491,11 @@
         <circle cx="12" cy="12" r="3"/>
       </svg>
       <span class="ed-sidebar-label">Show</span>
+    </button>
+    <div style="flex:1"></div>
+    <button class="ed-sidebar-icon ed-sidebar-logout" onclick="logOut()" title="Logout">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span class="ed-sidebar-label">Out</span>
     </button>
   </div>
 
@@ -583,7 +605,7 @@
           <div class="show-about-name" id="show-about-name">—</div>
           <div class="show-about-loc">📍 ورقلة، الجزائر</div>
           <div class="show-about-divider"></div>
-          <div class="show-about-desc">متجر متخصص في الملابس الرجالية الراقية. نوفر أفضل القطع بأسعار منافسة لتناسب كل الأذواق.</div>
+          <div class="show-about-desc" id="show-about-desc">أضف وصف متجرك من Editor Mode.</div>
           <div class="show-about-stats">
             <div class="show-astat"><span class="show-astat-n" id="show-prod-count">0</span><span class="show-astat-l">قطعة</span></div>
             <div class="show-astat"><span class="show-astat-n">5.0</span><span class="show-astat-l">تقييم</span></div>

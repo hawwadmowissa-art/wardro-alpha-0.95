@@ -39,7 +39,7 @@ function triggerStagger(id){
 }
 
 // ══ LOGO ══
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
   const onboarded=localStorage.getItem('wardro_onboarded')==='true';
   if(onboarded){const ob=document.getElementById('s-onboard');if(ob)ob.classList.add('gone')}
 
@@ -48,11 +48,18 @@ window.addEventListener('DOMContentLoaded',()=>{
   const showName=localStorage.getItem('wardro_store_name')||'—';
   const sn=document.getElementById('show-store-name');if(sn)sn.textContent=showName;
 
-  setTimeout(()=>{
+  setTimeout(async()=>{
     const logo=document.getElementById('s-logo');
     logo.classList.add('fade-out');
     setTimeout(()=>{logo.style.display='none'},1000);
     if(!onboarded)animateCounter(60,1500);
+    // Session persistence: if seller is already signed in, skip role selection
+    if(window.db&&localStorage.getItem('wardro_role')==='seller'){
+      try{
+        const{data:{session}}=await window.db.auth.getSession();
+        if(session){navigateTo('s-show','z-axis');return;}
+      }catch(_){}
+    }
     document.querySelectorAll('.rs-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),200+i*150));
   },3800);
 });
@@ -202,7 +209,7 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apImgFile=null;
+let _apSizes=[],_apCat=null,_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={};
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -247,27 +254,25 @@ async function saveProduct(){
   const sb=getSb();if(!sb)return;
   btn.textContent='جاري الحفظ...';btn.disabled=true;
   try{
-    let img_url=null;
+    const{data:{user}}=await sb.auth.getUser();
+    let img_url=_apEditId?(_apEditImg||null):null;
     if(_apImgFile){
-      const{data:{user:u0}}=await sb.auth.getUser();
       const ext=_apImgFile.name.split('.').pop();
-      const path=`products/${u0.id}/${Date.now()}.${ext}`;
+      const path=`products/${user.id}/${Date.now()}.${ext}`;
       const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
-    const{data:{user}}=await sb.auth.getUser();
-    const{error:insErr}=await sb.from('products').insert({seller_id:user.id,name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url});
-    if(insErr)throw insErr;
-    toast('✓ تمت إضافة القطعة');
-    document.getElementById('ap-name').value='';
-    document.getElementById('ap-price').value='';
-    document.getElementById('ap-color').value='';
-    document.getElementById('ap-desc').value='';
-    document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
-    const zone=document.getElementById('ap-img-zone');
-    if(zone){zone.style.backgroundImage='';zone.style.backgroundSize='';zone.style.backgroundPosition='';zone.style.borderStyle='';}
-    const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display='';
-    _apSizes=[];_apCat=null;_apImgFile=null;
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url};
+    if(_apEditId){
+      const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
+      if(error)throw error;
+      toast('✓ تم تحديث القطعة');
+    }else{
+      const{error}=await sb.from('products').insert({seller_id:user.id,...payload});
+      if(error)throw error;
+      toast('✓ تمت إضافة القطعة');
+    }
+    btn.textContent='Done ✓';btn.disabled=false;
     closeAddProduct();
     await loadEditorProducts();
   }catch(e){toast(e.message||'حدث خطأ');btn.textContent='Done ✓';btn.disabled=false}
@@ -278,11 +283,15 @@ async function loadEditorProducts(){
   try{
     const{data:{user}}=await sb.auth.getUser();
     if(!user)return;
-    const{data:seller}=await sb.from('sellers').select('profile_image').eq('id',user.id).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio').eq('id',user.id).single();
     if(seller?.profile_image){
       const circle=document.getElementById('sp-img-circle');
       if(circle){circle.style.backgroundImage=`url(${seller.profile_image})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';circle.innerHTML='';}
       localStorage.setItem('wardro_profile_image',seller.profile_image);
+    }
+    if(seller?.bio!=null){
+      const bioEl=document.getElementById('ed-bio');if(bioEl&&!bioEl.dataset.dirty)bioEl.value=seller.bio;
+      const desc=document.getElementById('show-about-desc');if(desc)desc.textContent=seller.bio||'';
     }
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
     renderEditorProducts(prods||[]);
@@ -291,6 +300,7 @@ async function loadEditorProducts(){
 }
 
 function renderEditorProducts(prods){
+  _editorProds={};prods.forEach(p=>_editorProds[p.id]=p);
   const grid=document.getElementById('prod-grid');
   const empty=document.getElementById('prod-empty');
   const badge=document.getElementById('ed-prod-count-badge');
@@ -299,10 +309,17 @@ function renderEditorProducts(prods){
   if(!prods.length){grid.style.display='none';empty.style.display='flex';return}
   empty.style.display='none';grid.style.display='grid';
   grid.innerHTML=prods.map(p=>`
-    <div class="ed-prod-card">
-      <button class="ed-prod-dots" onclick="event.stopPropagation()">···</button>
+    <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
+      <button class="ed-prod-dots" onclick="event.stopPropagation();openEditProduct('${p.id}')">···</button>
       ${p.image?`<img class="ed-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
-      <div class="ed-prod-info"><div class="ed-prod-name">${p.name}</div><div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="ed-prod-badge">In Stock</div></div>
+      <div class="ed-prod-info">
+        <div class="ed-prod-name">${p.name}</div>
+        <div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div>
+        <div class="ed-prod-info-row">
+          <div class="ed-prod-badge">In Stock</div>
+          <button class="ed-prod-pin${p.hero?' ed-prod-pin--on':''}" onclick="event.stopPropagation();toggleHero('${p.id}',${!!p.hero})" title="${p.hero?'Unpin from Hero':'Pin to Hero'}">★</button>
+        </div>
+      </div>
     </div>`).join('');
 }
 
@@ -318,7 +335,7 @@ function renderShowProducts(prods){
   const empty=document.getElementById('show-empty');
   if(grid&&empty){
     if(!prods.length){grid.style.display='none';empty.style.display='block';}
-    else{empty.style.display='none';grid.style.display='grid';grid.innerHTML=prods.slice(0,4).map(cardHtml).join('');}
+    else{empty.style.display='none';grid.style.display='flex';grid.innerHTML=prods.slice(0,4).map(cardHtml).join('');}
   }
   // All-products grid (Products tab)
   const allGrid=document.getElementById('show-all-prod-grid');
@@ -332,10 +349,50 @@ function renderShowProducts(prods){
   if(cnt)cnt.textContent=prods.length;
 }
 
-function openAddProduct(){
+function _resetModalForm(){
+  document.getElementById('ap-name').value='';
+  document.getElementById('ap-price').value='';
+  document.getElementById('ap-color').value='';
+  document.getElementById('ap-desc').value='';
+  _apSizes=[];_apCat=null;_apImgFile=null;
+  document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
+  const zone=document.getElementById('ap-img-zone');
+  if(zone){zone.style.backgroundImage='';zone.style.backgroundSize='';zone.style.backgroundPosition='';zone.style.borderStyle='';}
+  const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display='';
+}
+
+function _showModal(){
   const m=document.getElementById('ap-modal');if(!m)return;
   m.style.display='flex';
   requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('ap-modal--open')));
+}
+
+function openAddProduct(){
+  _apEditId=null;_apEditImg=null;
+  _resetModalForm();
+  const del=document.getElementById('ap-delete');if(del)del.style.display='none';
+  const title=document.querySelector('.ap-modal-title');if(title)title.textContent='Add Product';
+  _showModal();
+}
+
+function openEditProduct(id){
+  const p=_editorProds[id];if(!p)return;
+  _apEditId=p.id;_apEditImg=p.image||null;_apImgFile=null;
+  _resetModalForm();
+  document.getElementById('ap-name').value=p.name||'';
+  document.getElementById('ap-price').value=p.price||'';
+  document.getElementById('ap-color').value=p.color||'';
+  document.getElementById('ap-desc').value=p.description||'';
+  _apSizes=[...(p.sizes||[])];
+  document.querySelectorAll('#size-btns .sel-btn').forEach(b=>b.classList.toggle('active',_apSizes.includes(b.dataset.val)));
+  _apCat=p.type||null;
+  document.querySelectorAll('#cat-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apCat));
+  const zone=document.getElementById('ap-img-zone');
+  if(zone&&p.image){zone.style.backgroundImage=`url(${p.image})`;zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';zone.style.borderStyle='solid';}
+  const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display=p.image?'none':'';
+  const del=document.getElementById('ap-delete');if(del)del.style.display='';
+  const title=document.querySelector('.ap-modal-title');if(title)title.textContent='Edit Product';
+  _showModal();
 }
 
 function closeAddProduct(){
@@ -346,6 +403,56 @@ function closeAddProduct(){
 
 function apModalBackdropClose(e){
   if(e.target===e.currentTarget)closeAddProduct();
+}
+
+async function deleteProduct(){
+  if(!_apEditId)return;
+  if(!confirm('حذف هذه القطعة نهائياً؟'))return;
+  const sb=getSb();if(!sb)return;
+  try{
+    if(_apEditImg){
+      const m=_apEditImg.match(/\/product-images\/(.+)$/);
+      if(m&&m[1])await sb.storage.from('product-images').remove([decodeURIComponent(m[1])]);
+    }
+    const{error}=await sb.from('products').delete().eq('id',_apEditId);
+    if(error)throw error;
+    toast('✓ تم حذف القطعة');
+    closeAddProduct();
+    await loadEditorProducts();
+  }catch(e){toast(e.message||'خطأ في الحذف')}
+}
+
+async function toggleHero(id,currentVal){
+  const sb=getSb();if(!sb)return;
+  try{
+    await sb.from('products').update({hero:!currentVal}).eq('id',id);
+    await loadEditorProducts();
+  }catch(e){toast(e.message||'خطأ')}
+}
+
+async function saveBio(){
+  const bioEl=document.getElementById('ed-bio');
+  const bio=(bioEl?.value||'').trim();
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();if(!user)return;
+    await sb.from('sellers').update({bio}).eq('id',user.id);
+    toast('✓ تم حفظ وصف المتجر');
+    const desc=document.getElementById('show-about-desc');if(desc)desc.textContent=bio||'';
+  }catch(e){toast(e.message||'خطأ في الحفظ')}
+}
+
+async function logOut(){
+  const sb=getSb();if(!sb)return;
+  try{
+    await sb.auth.signOut();
+    localStorage.removeItem('wardro_store_name');
+    localStorage.removeItem('wardro_role');
+    localStorage.removeItem('wardro_profile_image');
+    clearInterval(_heroTimer);
+    navigateTo('s-splash','z-axis');
+    toast('✓ تم تسجيل الخروج');
+  }catch(e){toast(e.message||'خطأ في تسجيل الخروج')}
 }
 
 function previewStoreProfile(input){
@@ -396,7 +503,9 @@ function buildHeroSlider(prods){
   const dotsEl=document.getElementById('show-hero-dots');
   if(!track||!dotsEl)return;
   clearInterval(_heroTimer);_heroIdx=0;
-  const heroProds=prods.filter(p=>p.image).slice(0,3);
+  let heroProds=prods.filter(p=>p.hero&&p.image);
+  if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,3);
+  else heroProds=heroProds.slice(0,3);
   let slides;
   if(!heroProds.length){
     slides=[{bg:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];

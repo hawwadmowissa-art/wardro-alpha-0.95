@@ -529,4 +529,33 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .show-trust-ico{font-size:18px}
 .show-trust-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px}
 
+/* ══ FUNCTIONAL ADDITIONS ══ */
+/* Store Bio */
+.ed-bio-wrap{padding:0 12px 12px;display:flex;flex-direction:column;gap:8px}
+.ed-bio-input{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:10px;
+  padding:10px 12px;color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;
+  resize:none;outline:none;line-height:1.55;direction:rtl;box-sizing:border-box}
+.ed-bio-input:focus{border-color:rgba(210,175,105,.4)}
+.ed-bio-input::placeholder{color:var(--muted)}
+.ed-bio-save{align-self:flex-end;padding:7px 18px;background:rgba(210,175,105,.1);
+  border:1px solid rgba(210,175,105,.25);border-radius:9px;color:var(--gold);
+  font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;transition:all .25s}
+.ed-bio-save:hover{background:rgba(210,175,105,.22)}
+/* Hero pin toggle on product cards */
+.ed-prod-info-row{display:flex;align-items:center;justify-content:space-between;margin-top:3px}
+.ed-prod-pin{background:none;border:none;font-size:12px;cursor:pointer;
+  color:var(--muted);padding:0;line-height:1;transition:color .2s}
+.ed-prod-pin--on{color:var(--gold)}
+.ed-prod-pin:hover{color:var(--gold)}
+/* Delete button in Add Product modal */
+.ap-delete{flex:0 0 auto;padding:13px 16px;background:rgba(168,61,34,.1);
+  border:1px solid rgba(168,61,34,.25);border-radius:12px;color:#c0402a;
+  font-family:'Tajawal',sans-serif;font-size:14px;cursor:pointer;transition:all .25s}
+.ap-delete:hover{background:rgba(168,61,34,.22)}
+/* Sidebar logout button */
+.ed-sidebar-logout{color:rgba(168,61,34,.6)!important}
+.ed-sidebar-logout:hover{background:rgba(168,61,34,.1)!important;color:var(--rust)!important}
+/* Trust strip sublabel */
+.show-trust-sub{font-size:9px;color:var(--txtD);letter-spacing:.2px}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.15s!important}}
