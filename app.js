@@ -293,13 +293,16 @@ async function loadEditorProducts(){
 function renderEditorProducts(prods){
   const grid=document.getElementById('prod-grid');
   const empty=document.getElementById('prod-empty');
+  const badge=document.getElementById('ed-prod-count-badge');
+  if(badge)badge.textContent=prods.length;
   if(!grid||!empty)return;
   if(!prods.length){grid.style.display='none';empty.style.display='flex';return}
   empty.style.display='none';grid.style.display='grid';
   grid.innerHTML=prods.map(p=>`
     <div class="ed-prod-card">
+      <button class="ed-prod-dots" onclick="event.stopPropagation()">···</button>
       ${p.image?`<img class="ed-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
-      <div class="ed-prod-info"><div class="ed-prod-name">${p.name}</div><div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>
+      <div class="ed-prod-info"><div class="ed-prod-name">${p.name}</div><div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="ed-prod-badge">In Stock</div></div>
     </div>`).join('');
 }
 

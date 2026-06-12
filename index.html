@@ -287,67 +287,115 @@
 
 <!-- EDITOR MODE -->
 <div id="s-editor" class="screen">
-  <div class="top-bar">
-    <button class="back-btn" onclick="navigateTo('s-welcome','slide')">←</button>
-    <div class="top-title">Store Editor</div>
-    <button class="ghost-btn" onclick="navigateTo('s-show','slide')">Preview →</button>
-  </div>
-  <div class="editor-body">
 
-    <!-- Store Profile -->
-    <div class="ed-section">
-      <div class="ed-sec-head">
-        <span class="ed-sec-title">Store Profile</span>
+  <!-- Left Sidebar: Mode switcher -->
+  <div class="ed-sidebar">
+    <button class="ed-sidebar-icon ed-sidebar-icon--active" title="Editor Mode">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      <span class="ed-sidebar-label">Editor</span>
+    </button>
+    <button class="ed-sidebar-icon" onclick="navigateTo('s-show','slide')" title="Show Mode">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span class="ed-sidebar-label">Show</span>
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="ed-main">
+
+    <!-- Top Bar -->
+    <div class="ed-topbar">
+      <div class="ed-topbar-titles">
+        <div class="ed-topbar-main">EDITOR MODE</div>
+        <div class="ed-topbar-sub">Manage your store content</div>
       </div>
-      <div class="ed-profile-body">
-        <div class="ed-profile-img-wrap" onclick="document.getElementById('sp-img-input').click()">
-          <input type="file" id="sp-img-input" accept="image/*" onchange="previewStoreProfile(this)" hidden>
-          <div id="sp-img-circle" class="ed-profile-circle">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".45"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <button class="ed-bell-btn" onclick="toast('Notifications — قريباً')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="editor-body">
+
+      <!-- Products Section -->
+      <div class="ed-section">
+        <div class="ed-prod-hd">
+          <div class="ed-prod-hd-row1">
+            <span class="ed-sec-title">Products</span>
+            <span class="ed-prod-count-badge" id="ed-prod-count-badge">0</span>
+            <div class="ed-chips">
+              <span class="ed-chip">Requests</span>
+              <span class="ed-chip">Filters</span>
+            </div>
           </div>
-          <div class="ed-profile-badge">+</div>
+          <div class="ed-search-row">
+            <div class="ed-search-wrap">
+              <svg class="ed-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="ed-search-input" placeholder="Search products...">
+            </div>
+            <button class="ed-plus-btn" onclick="openAddProduct()">+</button>
+          </div>
         </div>
-        <div class="ed-profile-info">
-          <div class="ed-profile-name" id="ed-store-name">—</div>
-          <div class="ed-profile-hint">اضغط لتغيير صورة المتجر</div>
+        <div class="ed-sec-empty" id="prod-empty">
+          <div class="ede-icon">👔</div>
+          <div class="ede-text">أضف قطعك الأفضل هنا</div>
+        </div>
+        <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
+      </div>
+
+      <!-- Hero Slider Section -->
+      <div class="ed-section">
+        <div class="ed-sec-head">
+          <span class="ed-sec-title">Hero Slider</span>
+        </div>
+        <div class="ed-hero-slots">
+          <div class="ed-hero-slot ed-hero-slot--add" onclick="toast('Hero Slider — قريباً')">
+            <div class="ed-hero-slot-plus">+</div>
+            <div class="ed-hero-slot-label">Add Hero Slide</div>
+            <div class="ed-hero-slot-hint">1200 × 628</div>
+          </div>
+          <div class="ed-hero-slot ed-hero-slot--empty" onclick="toast('Hero Slider — قريباً')">
+            <div class="ed-hero-slot-plus">+</div>
+          </div>
+          <div class="ed-hero-slot ed-hero-slot--empty" onclick="toast('Hero Slider — قريباً')">
+            <div class="ed-hero-slot-plus">+</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Featured Products -->
-    <div class="ed-section">
-      <div class="ed-sec-head">
-        <span class="ed-sec-title">Featured Products</span>
-        <button class="ed-add-btn" onclick="openAddProduct()">+ Add Product</button>
+      <!-- Quick Add Product -->
+      <div class="ed-section">
+        <div class="ed-sec-head">
+          <span class="ed-sec-title">Quick Add Product</span>
+        </div>
+        <div class="ed-quick-row">
+          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
+        </div>
       </div>
-      <div class="ed-sec-empty" id="prod-empty">
-        <div class="ede-icon">👔</div>
-        <div class="ede-text">أضف قطعك الأفضل هنا</div>
-      </div>
-      <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
-      <div class="ed-quick-row">
-        <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-        <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-        <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-      </div>
-    </div>
 
-    <!-- Hero Slider -->
-    <div class="ed-section">
-      <div class="ed-sec-head">
-        <span class="ed-sec-title">Main Hero Slider</span>
-        <button class="ed-add-btn" onclick="toast('Hero Slider — قريباً')">+ إضافة</button>
-      </div>
-      <div class="ed-sec-empty" id="hero-empty">
-        <div class="ede-icon">🖼</div>
-        <div class="ede-text">لا توجد صور بعد — أضف صورة غلاف لمتجرك</div>
-      </div>
     </div>
-
   </div>
+
+  <!-- Hidden profile bindings (preserved for JS) -->
+  <input type="file" id="sp-img-input" accept="image/*" onchange="previewStoreProfile(this)" hidden>
+  <div id="sp-img-circle" style="display:none"></div>
+  <div id="ed-store-name" style="display:none">—</div>
 
   <!-- Add Product Modal -->
-  <div id="ap-modal" class="ap-modal" style="display:none" onclick="apModalBackdropClose(event)">
+  <div id="ap-modal" class="ap-modal" dir="rtl" style="display:none" onclick="apModalBackdropClose(event)">
     <div class="ap-modal-sheet">
       <div class="ap-modal-handle"></div>
       <div class="ap-modal-hd">
