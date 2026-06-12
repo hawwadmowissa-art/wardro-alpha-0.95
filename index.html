@@ -459,104 +459,159 @@
 <!-- SHOW MODE -->
 <div id="s-show" class="screen">
 
-  <!-- Preview Banner (sticky) -->
-  <div class="show-bar">
-    <span class="show-bar-label">أنت في وضع المعاينة</span>
-    <button class="show-bar-back" onclick="navigateTo('s-editor','slide')">← ارجع للتحرير</button>
+  <!-- Left Sidebar (Show Mode active) -->
+  <div class="ed-sidebar">
+    <button class="ed-sidebar-icon" onclick="navigateTo('s-editor','slide')" title="Editor Mode">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      <span class="ed-sidebar-label">Editor</span>
+    </button>
+    <button class="ed-sidebar-icon ed-sidebar-icon--active" title="Show Mode">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span class="ed-sidebar-label">Show</span>
+    </button>
   </div>
 
-  <div class="show-body">
+  <!-- Main Content -->
+  <div class="ed-main">
 
-    <!-- Store Header -->
-    <div class="show-store-header">
-      <div class="show-store-avatar" id="show-avatar">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <!-- Top Bar -->
+    <div class="show-topbar">
+      <div class="ed-topbar-titles">
+        <div class="ed-topbar-main">SHOW MODE</div>
+        <div class="ed-topbar-sub">View your store as customers</div>
       </div>
-      <div class="show-store-info">
-        <div class="show-store-name" id="show-store-name">—</div>
-        <div class="show-store-stats">⭐ 5.0 &nbsp;·&nbsp; <span id="show-follower-count">0 متابع</span></div>
+      <div class="show-topbar-actions">
+        <button class="show-exit-btn" onclick="navigateTo('s-editor','slide')">Exit Preview</button>
+        <button class="ed-bell-btn" onclick="toast('Notifications — قريباً')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
       </div>
-      <button class="show-follow-btn" onclick="toast('Follow — قريباً')">Follow +</button>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="show-tabs">
-      <button class="show-tab active" data-tab="home" onclick="switchShowTab('home',this)">Home</button>
-      <button class="show-tab" data-tab="products" onclick="switchShowTab('products',this)">Products</button>
-      <button class="show-tab" data-tab="about" onclick="switchShowTab('about',this)">About Store</button>
-    </div>
+    <!-- Scrollable Body -->
+    <div class="show-body">
 
-    <!-- TAB: Home -->
-    <div class="show-tab-panel" id="show-tab-home">
+      <!-- Store Header -->
+      <div class="show-store-header">
+        <div class="show-store-avatar" id="show-avatar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="show-store-info">
+          <div class="show-store-name-row">
+            <span class="show-store-name" id="show-store-name">—</span>
+            <span class="show-verified-badge">✓</span>
+          </div>
+          <div class="show-store-tagline">Premium Men's Fashion</div>
+          <div class="show-store-stats">⭐ 5.0 &nbsp;·&nbsp; <span id="show-follower-count">0 متابع</span></div>
+        </div>
+        <button class="show-follow-btn" onclick="toast('Follow — قريباً')">Follow</button>
+      </div>
+      <button class="show-share-btn" onclick="toast('Share Store — قريباً')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share Store
+      </button>
 
-      <!-- Hero Slider -->
-      <div class="show-hero" id="show-hero">
-        <div class="show-hero-track" id="show-hero-track">
-          <div class="show-hero-slide show-hero-slide--ph active">
-            <div class="show-hero-overlay"></div>
-            <div class="show-hero-content">
-              <div class="show-hero-label">NEW COLLECTION</div>
-              <div class="show-hero-title">SUMMER 2026</div>
-              <div class="show-hero-sub">Timeless style, elevated for you</div>
-              <div class="show-hero-cta">SHOP NOW →</div>
+      <!-- Tab Navigation -->
+      <div class="show-tabs">
+        <button class="show-tab active" data-tab="home" onclick="switchShowTab('home',this)">Home</button>
+        <button class="show-tab" data-tab="products" onclick="switchShowTab('products',this)">All Products</button>
+        <button class="show-tab" data-tab="collections" onclick="switchShowTab('collections',this)">Collections</button>
+        <button class="show-tab" data-tab="about" onclick="switchShowTab('about',this)">About Store</button>
+      </div>
+
+      <!-- TAB: Home -->
+      <div class="show-tab-panel" id="show-tab-home">
+
+        <!-- Hero Slider -->
+        <div class="show-hero" id="show-hero">
+          <div class="show-hero-track" id="show-hero-track">
+            <div class="show-hero-slide show-hero-slide--ph active">
+              <div class="show-hero-overlay"></div>
+              <div class="show-hero-content">
+                <div class="show-hero-label">NEW COLLECTION</div>
+                <div class="show-hero-title">SUMMER 2026</div>
+                <div class="show-hero-sub">Timeless style, elevated for you</div>
+                <div class="show-hero-cta">SHOP NOW →</div>
+              </div>
             </div>
           </div>
+          <div class="show-hero-dots" id="show-hero-dots">
+            <button class="show-hero-dot active"></button>
+          </div>
         </div>
-        <div class="show-hero-dots" id="show-hero-dots">
-          <button class="show-hero-dot active"></button>
+
+        <!-- Featured Products -->
+        <div class="show-section-hd">
+          <span class="show-section-title">Featured Products</span>
+          <span class="show-section-all" onclick="switchShowTab('products',document.querySelector('[data-tab=products]'))">View All →</span>
         </div>
+        <div class="show-empty" id="show-empty">لا توجد قطع بعد — أضف من Editor Mode</div>
+        <div class="show-prod-row" id="show-prod-grid" style="display:none"></div>
+
       </div>
 
-      <!-- Featured Products -->
-      <div class="show-section-hd">
-        <span class="show-section-title">Featured Products</span>
-        <span class="show-section-all" onclick="switchShowTab('products',document.querySelector('[data-tab=products]'))">View All →</span>
+      <!-- TAB: All Products -->
+      <div class="show-tab-panel" id="show-tab-products" style="display:none">
+        <div class="show-empty" id="show-empty-all">لا توجد قطع بعد</div>
+        <div class="show-prod-grid" id="show-all-prod-grid" style="display:none"></div>
       </div>
-      <div class="show-empty" id="show-empty">لا توجد قطع بعد — أضف من Editor Mode</div>
-      <div class="show-prod-grid" id="show-prod-grid" style="display:none"></div>
 
-    </div>
-
-    <!-- TAB: Products -->
-    <div class="show-tab-panel" id="show-tab-products" style="display:none">
-      <div class="show-empty" id="show-empty-all">لا توجد قطع بعد</div>
-      <div class="show-prod-grid" id="show-all-prod-grid" style="display:none"></div>
-    </div>
-
-    <!-- TAB: About -->
-    <div class="show-tab-panel" id="show-tab-about" style="display:none">
-      <div class="show-about-wrap">
-        <div class="show-about-avatar" id="show-about-avatar">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <div class="show-about-name" id="show-about-name">—</div>
-        <div class="show-about-loc">📍 ورقلة، الجزائر</div>
-        <div class="show-about-divider"></div>
-        <div class="show-about-desc">متجر متخصص في الملابس الرجالية الراقية. نوفر أفضل القطع بأسعار منافسة لتناسب كل الأذواق.</div>
-        <div class="show-about-stats">
-          <div class="show-astat"><span class="show-astat-n" id="show-prod-count">0</span><span class="show-astat-l">قطعة</span></div>
-          <div class="show-astat"><span class="show-astat-n">5.0</span><span class="show-astat-l">تقييم</span></div>
-          <div class="show-astat"><span class="show-astat-n">0</span><span class="show-astat-l">متابع</span></div>
+      <!-- TAB: Collections (placeholder) -->
+      <div class="show-tab-panel" id="show-tab-collections" style="display:none">
+        <div class="show-collections-ph">
+          <div class="show-collections-icon">🗂</div>
+          <div class="show-collections-text">Collections</div>
+          <div class="show-collections-sub">سيتم إضافة مجموعاتك قريباً</div>
         </div>
       </div>
-    </div>
 
-    <!-- Trust Strip -->
-    <div class="show-trust-strip">
-      <div class="show-trust-item">
-        <span class="show-trust-ico">🚀</span>
-        <span class="show-trust-lbl">Fast Delivery</span>
+      <!-- TAB: About Store -->
+      <div class="show-tab-panel" id="show-tab-about" style="display:none">
+        <div class="show-about-wrap">
+          <div class="show-about-avatar" id="show-about-avatar">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="show-about-name" id="show-about-name">—</div>
+          <div class="show-about-loc">📍 ورقلة، الجزائر</div>
+          <div class="show-about-divider"></div>
+          <div class="show-about-desc">متجر متخصص في الملابس الرجالية الراقية. نوفر أفضل القطع بأسعار منافسة لتناسب كل الأذواق.</div>
+          <div class="show-about-stats">
+            <div class="show-astat"><span class="show-astat-n" id="show-prod-count">0</span><span class="show-astat-l">قطعة</span></div>
+            <div class="show-astat"><span class="show-astat-n">5.0</span><span class="show-astat-l">تقييم</span></div>
+            <div class="show-astat"><span class="show-astat-n">0</span><span class="show-astat-l">متابع</span></div>
+          </div>
+        </div>
       </div>
-      <div class="show-trust-item">
-        <span class="show-trust-ico">🔒</span>
-        <span class="show-trust-lbl">Secure Payment</span>
-      </div>
-      <div class="show-trust-item">
-        <span class="show-trust-ico">↩</span>
-        <span class="show-trust-lbl">Easy Returns</span>
-      </div>
-    </div>
 
+      <!-- Trust Strip -->
+      <div class="show-trust-strip">
+        <div class="show-trust-item">
+          <span class="show-trust-ico">🚀</span>
+          <span class="show-trust-lbl">Fast Delivery</span>
+          <span class="show-trust-sub">1-2 Days</span>
+        </div>
+        <div class="show-trust-item">
+          <span class="show-trust-ico">🔒</span>
+          <span class="show-trust-lbl">Secure Payment</span>
+          <span class="show-trust-sub">100% Safe</span>
+        </div>
+        <div class="show-trust-item">
+          <span class="show-trust-ico">↩</span>
+          <span class="show-trust-lbl">Easy Returns</span>
+          <span class="show-trust-sub">1-7 Days</span>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
