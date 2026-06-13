@@ -594,13 +594,10 @@ const BR_SLIDES=[
 ];
 
 async function loadBrowse(){
-  const sb=getSb();
-  if(!sb){toast('❌ DB null — no supabase');return;}
-  toast('🔍 loading browse...');
+  const sb=getSb();if(!sb)return;
   try{
     const{data:prods,error}=await sb.from('products').select('*, seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
-    if(error){toast('❌ query error: '+error.message);console.error('browse query error:',error);throw error;}
-    toast('✓ '+( prods?.length||0)+' products loaded');
+    if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=prods||[];
     renderBrGrid('br-rec-grid',_brProds.slice(0,9));
