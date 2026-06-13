@@ -594,10 +594,13 @@ const BR_SLIDES=[
 ];
 
 async function loadBrowse(){
-  const sb=getSb();if(!sb)return;
+  const sb=getSb();
+  if(!sb){toast('❌ DB null — no supabase');return;}
+  toast('🔍 loading browse...');
   try{
     const{data:prods,error}=await sb.from('products').select('*, seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
-    if(error){console.error('browse query error:',error);throw error;}
+    if(error){toast('❌ query error: '+error.message);console.error('browse query error:',error);throw error;}
+    toast('✓ '+( prods?.length||0)+' products loaded');
     console.log('browse loaded:',prods?.length,'products');
     _brProds=prods||[];
     renderBrGrid('br-rec-grid',_brProds.slice(0,9));
@@ -613,7 +616,7 @@ async function loadBrowse(){
       }
     }
     renderTopStores(stores);
-  }catch(e){console.error('browse load:',e)}
+  }catch(e){toast('❌ browse: '+e.message);console.error('browse load:',e)}
 }
 
 function makeDemoProds(n){
