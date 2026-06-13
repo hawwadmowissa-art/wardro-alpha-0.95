@@ -253,5 +253,50 @@ Show Mode + Hero Slider + فلتر + تخفيضات
 4. **لا تأخذ قرارات بدون بوجمعة** — كل قرار يمر عبره
 
 ---
+## 10. Visual Authority
+
+Purpose:
+Ensure visual consistency across Wardro V2.
+
+Priority Order:
+
+1. WARDRO_V2_BLUEPRINT
+
+   * Defines product flow and functional behavior.
+
+2. Approved Visual References
+
+   * Includes approved Store Tour images and future approved UI references.
+   * Defines layout, spacing, visual hierarchy, component placement, and overall presentation.
+
+3. AGENTS.md
+
+   * Defines implementation behavior and creative freedom.
+
+Rules:
+
+* When a visual reference exists, its layout should be reproduced as closely as possible.
+* Do not redesign or reinterpret approved screens.
+* Do not move major UI elements unless explicitly requested.
+* Visual improvements are allowed only inside the same structure.
+
+Allowed:
+
+* Better spacing
+* Better typography
+* Better shadows
+* Better responsiveness
+* Better micro-interactions
+
+Not Allowed:
+
+* New navigation systems
+* Layout restructuring
+* Replacing Sidebar with Tabs
+* Repositioning major components
+
+Goal:
+Match approved visual references first.
+Improve second.
 
 *WARDRO V2 BLUEPRINT | يونيو 2026 | General 4 + بوجمعة*

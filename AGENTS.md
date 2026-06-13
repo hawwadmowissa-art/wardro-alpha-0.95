@@ -77,7 +77,17 @@ Worker (محادثة مستقلة)
 ## Fable 5 — صلاحيات "الحرية الموجّهة"
 
 ### مسموح (حرية إبداعية):
-- تحسين UX وسد الثغرات منطقياً
+-يجوز سد الثغرات الوظيفية المنطقية داخل التدفق الحالي.
+
+أمثلة:
+- إضافة إعداد لصورة المتجر إذا كانت تظهر للعميل.
+- إضافة حقل وصف إذا كان يُعرض لاحقاً.
+- إضافة خطوة ناقصة تمنع إكمال المهمة.
+
+لا يجوز:
+- إعادة تصميم الشاشة.
+- إعادة ترتيب العناصر الأساسية.
+- تغيير Layout أو Navigation.
 - استخدام العاجي (#EDE3CC) بذكاء حيث يخدم التصميم
 - اقتراح حلول وتحسينات بصرية
 - بناء الشاشات كاملة ضمن الـ Blueprint
@@ -91,3 +101,39 @@ Worker (محادثة مستقلة)
 ### قاعدة ذهبية:
 يبني ويقترح ويبدع — لكن القرارات الكبيرة تُعرض قبل التنفيذ.
 الأخضر/النبيذي = شارات حالة وظيفية فقط، بشفافية منخفضة.
+
+---
+
+## أين وصلنا — يونيو 2026
+
+### ✅ مكتمل ويعمل على الـ Live URL
+
+**رحلة البائع (كاملة):**
+- Splash → Onboarding → Role Selection → Seller Registration/Sign-In
+- Editor Mode: إضافة/تعديل/حذف منتجات، رفع صور، Pin to Hero، Store Bio
+- Show Mode: Hero Slider، Product Grid، Products Tab، About Tab
+
+**رحلة الزبون — الشاشة الرئيسية (#s-browse):**
+- Top Bar: WARDRO logo + Search + Notifications
+- Hero Slider (3 شرائح تلقائية مع dots)
+- Recommended For You — شبكة 3×3 من المنتجات الحقيقية
+- Sport Collection — منتجات Sport من Supabase
+- Top Stores — تمرير أفقي (صورة + اسم المتجر)
+- Casual Collection — منتجات Casual من Supabase
+- Bottom Nav ثابت (Home / Saved / Discover / Profile)
+- Product Detail Sheet — يصعد عند الضغط على بطاقة
+- Save Flow — حفظ في saved_items + modal تسجيل دخول للزبون
+- Customer Session Persistence — يعود مباشرة للـ Browse
+
+**قاعدة البيانات:**
+- جداول: `sellers` / `products` / `saved_items`
+- RLS: public SELECT على products وsellers | كل WRITE بـ auth.uid()
+- `supabase-config.js` منشور على GitHub Pages (anon key فقط — آمن)
+
+### 🔜 التالي (لم يُبنَ بعد)
+- Saved Tab — يعرض saved_items الخاصة بالزبون
+- Customer Registration Screen مستقلة
+- صفحة Filter/Category
+- AI Outfit — تكامل مع منتجات المتاجر الحقيقية
+
+*آخر تحديث: يونيو 2026 | General 4 / Fable 5*
