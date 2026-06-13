@@ -473,7 +473,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   background:var(--card);border:1px solid var(--brd)}
 .show-hero-track{position:relative;height:230px}
 .show-hero-slide{position:absolute;inset:0;background:var(--dim);background-size:cover;
-  background-position:center top;opacity:0;transition:opacity .75s var(--expo)}
+  background-position:center center;opacity:0;transition:opacity .75s var(--expo)}
 .show-hero-slide.active{opacity:1}
 .show-hero-slide--ph{background:linear-gradient(135deg,#181310 0%,#252018 45%,#181310 100%)}
 .show-hero-overlay{position:absolute;inset:0;
@@ -574,8 +574,8 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 
 /* Hero */
 .br-hero{position:relative;overflow:hidden;margin-bottom:20px}
-.br-hero-track{position:relative;height:195px}
-.br-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .78s var(--expo);background-size:cover;background-position:center}
+.br-hero-track{position:relative;height:264px}
+.br-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .78s var(--expo);background-size:cover;background-position:center center}
 .br-hero-slide.active{opacity:1}
 .br-hero-slide--0{background:linear-gradient(145deg,#1A1208 0%,#2E200A 40%,#3A2C14 65%,#1A1208 100%)}
 .br-hero-slide--1{background:linear-gradient(145deg,#0C0E16 0%,#161A2C 42%,#1E2234 65%,#0C0E16 100%)}

@@ -602,6 +602,8 @@ async function loadBrowse(){
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=prods||[];
+    // Rebuild hero with real product images now that they're loaded
+    buildBrowseHero(_brProds);
     renderBrGrid('br-rec-grid',_brProds.slice(0,9));
     const sport=_brProds.filter(p=>p.type==='sport');
     renderBrGrid('br-sport-grid',sport.length?sport:makeDemoProds(6));
@@ -642,13 +644,33 @@ function renderTopStores(stores){
     </div>`).join('');
 }
 
-function buildBrowseHero(){
+function buildBrowseHero(prods){
   const track=document.getElementById('br-hero-track');
   const dots=document.getElementById('br-hero-dots');
   if(!track||!dots)return;
   clearInterval(_brHeroTimer);_brHeroIdx=0;
-  track.innerHTML=BR_SLIDES.map((s,i)=>`
-    <div class="br-hero-slide br-hero-slide--${i}${i===0?' active':''}">
+
+  // Use real product images when available; fall back to editorial gradients
+  let slides;
+  if(prods&&prods.length){
+    let heroProds=prods.filter(p=>p.hero&&p.image);
+    if(!heroProds.length)heroProds=prods.filter(p=>p.image);
+    if(heroProds.length){
+      slides=heroProds.slice(0,5).map(p=>({
+        bg:p.image,
+        label:(p.type||'FEATURED').toUpperCase(),
+        title:p.name,
+        sub:p.description||'Premium quality clothing',
+        cta:`${Number(p.price||0).toLocaleString()} DZD`
+      }));
+    }
+  }
+  if(!slides){
+    slides=BR_SLIDES.map((s,i)=>({...s,bg:null,idx:i}));
+  }
+
+  track.innerHTML=slides.map((s,i)=>`
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}">
       <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
         <div class="br-hero-label">${s.label}</div>
@@ -657,8 +679,8 @@ function buildBrowseHero(){
         <button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${s.cta} →</button>
       </div>
     </div>`).join('');
-  dots.innerHTML=BR_SLIDES.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
-  if(BR_SLIDES.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%BR_SLIDES.length;goBrHeroSlide(_brHeroIdx);},3800);}
+  dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
+  if(slides.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);}
 }
 
 function goBrHeroSlide(idx){
