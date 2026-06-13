@@ -74,7 +74,7 @@ Worker (محادثة مستقلة)
 
 ---
 
-## Fable 5 — صلاحيات "الحرية الموجّهة"
+## Claude Code — صلاحيات "الحرية الموجّهة"
 
 ### مسموح (حرية إبداعية):
 -يجوز سد الثغرات الوظيفية المنطقية داخل التدفق الحالي.
@@ -125,15 +125,24 @@ Worker (محادثة مستقلة)
 - Save Flow — حفظ في saved_items + modal تسجيل دخول للزبون
 - Customer Session Persistence — يعود مباشرة للـ Browse
 
+**رحلة الزبون — شاشة Saved (#s-saved):**
+- Top Bar: سهم رجوع + عنوان "Saved" في المنتصف
+- قائمة عمودية من بطاقات المحفوظات (صورة + اسم + متجر + مقاس + توفر + سعر)
+- قلب ذهبي ♥ أعلى يمين كل بطاقة لحذف العنصر فوراً مع أنيميشن سلايد
+- Empty State: "ما حفظت حتى قطعة بعد" + زر للتصفح
+- Bottom Nav مطابق لـ Browse مع "Saved" نشط
+- Navigation: Browse Saved-tab → #s-saved | Back/Home → #s-browse
+
 **قاعدة البيانات:**
 - جداول: `sellers` / `products` / `saved_items`
 - RLS: public SELECT على products وsellers | كل WRITE بـ auth.uid()
 - `supabase-config.js` منشور على GitHub Pages (anon key فقط — آمن)
 
 ### 🔜 التالي (لم يُبنَ بعد)
-- Saved Tab — يعرض saved_items الخاصة بالزبون
+- ⚠️ stock column تحتاج قرار: الـ default هو 0 وبائعين ما حددوا stock → كل المنتجات تظهر "نفدت الكمية" — يلزم إما تغيير الـ default لـ null أو إضافة حقل is_available
 - Customer Registration Screen مستقلة
 - صفحة Filter/Category
 - AI Outfit — تكامل مع منتجات المتاجر الحقيقية
+- إصلاح stock/availability (قرار schema مطلوب)
 
-*آخر تحديث: يونيو 2026 | General 4 / Fable 5*
+*آخر تحديث: يونيو 2026 | General 4 / Claude Code*

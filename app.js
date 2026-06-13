@@ -37,6 +37,7 @@ function triggerStagger(id){
   if(id==='s-editor'){const nm=document.getElementById('ed-store-name');if(nm)nm.textContent=localStorage.getItem('wardro_store_name')||'—';loadEditorProducts();}
   if(id==='s-show'){loadShowMode();}
   if(id==='s-browse'){buildBrowseHero();loadBrowse();}
+  if(id==='s-saved'){loadSaved();}
 }
 
 // ══ LOGO ══
@@ -666,9 +667,10 @@ function goBrHeroSlide(idx){
 }
 
 function brNavSwitch(tab,btn){
-  document.querySelectorAll('.br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
+  document.querySelectorAll('#s-browse .br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
   btn.classList.add('br-nav-btn--active');
-  if(tab!=='home')toast(tab+' — قريباً');
+  if(tab==='saved'){navigateTo('s-saved','slide');}
+  else if(tab!=='home')toast(tab+' — قريباً');
 }
 
 // ── Product Detail ──
@@ -760,6 +762,110 @@ async function doCustAuth(){
       btn.textContent='Continue →';btn.disabled=false;
     }
   }catch(e){toast(e.message||'خطأ');btn.textContent='Continue →';btn.disabled=false;}
+}
+
+// ══ SAVED SCREEN ══
+function svNavSwitch(tab){
+  if(tab==='home'){
+    navigateTo('s-browse','z-axis');
+    document.querySelectorAll('#s-browse .br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
+    const homeBtn=document.querySelector('#s-browse .br-nav-btn');
+    if(homeBtn)homeBtn.classList.add('br-nav-btn--active');
+  }else toast(tab+' — قريباً');
+}
+
+async function loadSaved(){
+  const list=document.getElementById('sv-list');
+  const empty=document.getElementById('sv-empty');
+  if(list)list.innerHTML='';
+  if(empty)empty.style.display='none';
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){openCustAuth();return;}
+    const{data,error}=await sb
+      .from('saved_items')
+      .select('id, products(id, name, price, image, sizes, stock, seller:sellers(store_name))')
+      .eq('customer_id',session.user.id)
+      .order('created_at',{ascending:false});
+    if(error)throw error;
+    renderSaved(data||[]);
+  }catch(e){toast('خطأ: '+e.message);}
+}
+
+function renderSaved(items){
+  const list=document.getElementById('sv-list');
+  const empty=document.getElementById('sv-empty');
+  if(!list||!empty)return;
+  const valid=items.filter(i=>i.products);
+  if(!valid.length){
+    list.style.display='none';
+    empty.style.display='flex';
+    return;
+  }
+  empty.style.display='none';
+  list.style.display='flex';
+  list.innerHTML=valid.map(item=>{
+    const p=item.products;
+    const storeName=p.seller?.store_name||'';
+    const size=(p.sizes&&p.sizes.length)?p.sizes[0]:'—';
+    const inStock=p.stock==null||p.stock>0;
+    const availHtml=inStock
+      ?'<span class="sv-avail sv-avail--yes">متوفر</span>'
+      :'<span class="sv-avail sv-avail--no">نفدت الكمية</span>';
+    return `
+      <div class="sv-card" id="sv-card-${item.id}">
+        <button class="sv-heart" onclick="removeSavedItem('${item.id}')">♥</button>
+        <div class="sv-card-img-wrap">
+          ${p.image
+            ?`<img class="sv-card-img" src="${p.image}" alt="${p.name}" loading="lazy">`
+            :`<div class="sv-card-img sv-card-img--ph"></div>`}
+        </div>
+        <div class="sv-card-info">
+          <div class="sv-store-name">${storeName}</div>
+          <div class="sv-prod-name">${p.name}</div>
+          <div class="sv-size">المقاس: ${size}</div>
+          ${availHtml}
+          <div class="sv-price">${Number(p.price||0).toLocaleString()} DZD</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function removeSavedItem(savedItemId){
+  const sb=getSb();if(!sb)return;
+  const card=document.getElementById('sv-card-'+savedItemId);
+  if(card){card.style.opacity='.38';card.style.pointerEvents='none';}
+  try{
+    const{error}=await sb.from('saved_items').delete().eq('id',savedItemId);
+    if(error)throw error;
+    if(card){
+      const h=card.offsetHeight;
+      card.style.height=h+'px';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        card.style.transform='translateX(60px)';
+        card.style.opacity='0';
+        setTimeout(()=>{
+          card.style.height='0';
+          card.style.minHeight='0';
+          card.style.overflow='hidden';
+          card.style.marginBottom='0';
+          setTimeout(()=>{
+            card.remove();
+            const rem=document.querySelectorAll('#sv-list .sv-card');
+            if(!rem.length){
+              const l=document.getElementById('sv-list');if(l)l.style.display='none';
+              const e=document.getElementById('sv-empty');if(e)e.style.display='flex';
+            }
+          },360);
+        },360);
+      }));
+    }
+    toast('✓ تمت الإزالة');
+  }catch(e){
+    if(card){card.style.opacity='1';card.style.pointerEvents='';}
+    toast('خطأ: '+e.message);
+  }
 }
 
 
