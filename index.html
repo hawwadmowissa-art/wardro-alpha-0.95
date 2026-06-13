@@ -816,6 +816,207 @@
   </div>
 </div>
 
+<!-- DISCOVER SCREEN -->
+<div id="s-discover" class="screen">
+
+  <!-- Top Bar -->
+  <div class="dc-topbar">
+    <button class="dc-filter-btn" aria-label="فلاتر">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+    </button>
+    <div class="dc-topbar-title">Discover</div>
+  </div>
+
+  <!-- Scrollable Body -->
+  <div class="dc-body">
+
+    <!-- Header -->
+    <div class="dc-header">
+      <div class="dc-header-title">حدد ما تبحث عنه</div>
+      <div class="dc-header-sub">الحقول المطلوبة محددة بالذهبي</div>
+    </div>
+
+    <!-- نوع القطعة — REQUIRED -->
+    <div class="dc-field-card dc-field-required">
+      <div class="dc-field-label-row">
+        <span class="dc-field-label">نوع القطعة</span>
+        <span class="dc-required-badge">مطلوب•</span>
+      </div>
+      <div onclick="dcToggleTypeMenu()">
+        <div class="dc-select-trigger" id="dc-type-trigger">
+          <span class="dc-select-ico" id="dc-type-ico">👔</span>
+          <span class="dc-select-val dc-select-val--ph" id="dc-type-val">اختر النوع</span>
+          <svg class="dc-chevron" id="dc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="dc-type-menu" id="dc-type-menu" style="display:none">
+          <button class="dc-type-opt" data-val="formal" onclick="event.stopPropagation();dcSelectType(this)">🤵 رسمي</button>
+          <button class="dc-type-opt" data-val="casual" onclick="event.stopPropagation();dcSelectType(this)">👕 كاجوال</button>
+          <button class="dc-type-opt" data-val="sport" onclick="event.stopPropagation();dcSelectType(this)">🏃 رياضي</button>
+          <button class="dc-type-opt" data-val="traditional" onclick="event.stopPropagation();dcSelectType(this)">🌟 تقليدي</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- الميزانية — REQUIRED -->
+    <div class="dc-field-card dc-field-required">
+      <div class="dc-field-label-row">
+        <span class="dc-field-label">الميزانية</span>
+        <span class="dc-required-badge">مطلوب•</span>
+      </div>
+      <div class="dc-budget-display" id="dc-budget-display">0 DZD — 20,000+ DZD</div>
+      <div class="dc-slider-wrap">
+        <div class="dc-slider-track">
+          <div class="dc-slider-fill" id="dc-slider-fill"></div>
+        </div>
+        <input type="range" class="dc-range" id="dc-min" min="0" max="20000" value="0" step="500" oninput="dcOnSliderInput('min')">
+        <input type="range" class="dc-range" id="dc-max" min="0" max="20000" value="20000" step="500" oninput="dcOnSliderInput('max')">
+      </div>
+      <div class="dc-budget-labels">
+        <span>0 DZD</span>
+        <span>20,000+ DZD</span>
+      </div>
+    </div>
+
+    <!-- Optional Filters -->
+    <div class="dc-optional-label">خيارات إضافية</div>
+    <div class="dc-optional-row">
+      <button class="dc-opt-chip" id="chip-size" onclick="dcToggleOpt('size')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20l4-16M6 4h12M18 4l4 16M9 20h6"/><line x1="5" y1="10" x2="19" y2="10"/></svg>
+        <span>المقاس</span>
+      </button>
+      <button class="dc-opt-chip" id="chip-occasion" onclick="dcToggleOpt('occasion')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>المناسبة</span>
+      </button>
+      <button class="dc-opt-chip" id="chip-color" onclick="dcToggleOpt('color')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="21"/><line x1="3" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="21" y2="12"/></svg>
+        <span>اللون</span>
+      </button>
+      <button class="dc-opt-chip" id="chip-category" onclick="dcToggleOpt('category')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>الفئة</span>
+      </button>
+    </div>
+
+    <!-- Optional Panels -->
+    <div class="dc-opt-panel" id="panel-size" style="display:none">
+      <div class="dc-opt-btns">
+        <button class="dc-size-btn" data-val="S" onclick="dcToggleSizeOpt(this)">S</button>
+        <button class="dc-size-btn" data-val="M" onclick="dcToggleSizeOpt(this)">M</button>
+        <button class="dc-size-btn" data-val="L" onclick="dcToggleSizeOpt(this)">L</button>
+        <button class="dc-size-btn" data-val="XL" onclick="dcToggleSizeOpt(this)">XL</button>
+        <button class="dc-size-btn" data-val="XXL" onclick="dcToggleSizeOpt(this)">XXL</button>
+      </div>
+    </div>
+    <div class="dc-opt-panel" id="panel-occasion" style="display:none">
+      <div class="dc-opt-btns">
+        <button class="dc-size-btn" data-val="formal" onclick="dcSelectOccasion(this)">رسمي</button>
+        <button class="dc-size-btn" data-val="casual" onclick="dcSelectOccasion(this)">كاجوال</button>
+        <button class="dc-size-btn" data-val="sport" onclick="dcSelectOccasion(this)">رياضي</button>
+        <button class="dc-size-btn" data-val="traditional" onclick="dcSelectOccasion(this)">تقليدي</button>
+      </div>
+    </div>
+    <div class="dc-opt-panel" id="panel-color" style="display:none">
+      <input type="text" class="dc-color-input" id="dc-color-input" placeholder="مثال: أزرق، أسود، بيج...">
+    </div>
+    <div class="dc-opt-panel" id="panel-category" style="display:none">
+      <div class="dc-opt-btns">
+        <button class="dc-size-btn" data-val="قميص" onclick="dcToggleCatOpt(this)">قميص</button>
+        <button class="dc-size-btn" data-val="بنطلون" onclick="dcToggleCatOpt(this)">بنطلون</button>
+        <button class="dc-size-btn" data-val="جاكيت" onclick="dcToggleCatOpt(this)">جاكيت</button>
+        <button class="dc-size-btn" data-val="حذاء" onclick="dcToggleCatOpt(this)">حذاء</button>
+      </div>
+    </div>
+
+  </div><!-- /dc-body -->
+
+  <!-- CTA Button -->
+  <div class="dc-footer">
+    <button class="dc-results-btn" id="dc-results-btn" onclick="dcShowResults()">✦ أظهر النتائج</button>
+  </div>
+
+  <!-- Bottom Nav — Discover active -->
+  <nav class="br-nav">
+    <button class="br-nav-btn" onclick="dcNavSwitch('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>الرئيسية</span>
+    </button>
+    <button class="br-nav-btn" onclick="dcNavSwitch('saved')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>المحفوظات</span>
+    </button>
+    <button class="br-nav-btn br-nav-btn--active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span>اكتشف</span>
+    </button>
+    <button class="br-nav-btn" onclick="dcNavSwitch('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>الحساب</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="s-results" class="screen">
+
+  <!-- Top Bar -->
+  <div class="rs-results-topbar">
+    <button class="back-btn" onclick="navigateTo('s-discover','slide')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="rs-results-title">النتائج</div>
+    <div class="rs-results-spacer"></div>
+  </div>
+
+  <!-- Body -->
+  <div class="rs-results-body">
+
+    <div class="rs-loading" id="rs-loading" style="display:none">
+      <div class="rs-loading-spinner"></div>
+    </div>
+
+    <div class="rs-empty" id="rs-empty" style="display:none">
+      <div class="rs-empty-ico">🔍</div>
+      <div class="rs-empty-msg">ما لقيناش قطع تناسب هذا البحث</div>
+      <div class="rs-empty-sub">حاول تغيير الفلاتر أو توسيع الميزانية</div>
+      <button class="rs-empty-btn" onclick="navigateTo('s-discover','slide')">تعديل البحث</button>
+    </div>
+
+    <div class="br-prod-grid" id="rs-prod-grid"></div>
+
+    <!-- Complementary — structural only, AI wired later -->
+    <div class="rs-comp-section" id="rs-comp-section" style="display:none">
+      <div class="rs-comp-head">
+        <span class="rs-comp-title">✦ قطع تتناسق معها</span>
+      </div>
+      <div class="rs-comp-row" id="rs-comp-row"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav — Discover active -->
+  <nav class="br-nav">
+    <button class="br-nav-btn" onclick="dcNavSwitch('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>الرئيسية</span>
+    </button>
+    <button class="br-nav-btn" onclick="dcNavSwitch('saved')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>المحفوظات</span>
+    </button>
+    <button class="br-nav-btn br-nav-btn--active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span>اكتشف</span>
+    </button>
+    <button class="br-nav-btn" onclick="dcNavSwitch('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>الحساب</span>
+    </button>
+  </nav>
+
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="app.js"></script>

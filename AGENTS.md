@@ -138,11 +138,29 @@ Worker (محادثة مستقلة)
 - RLS: public SELECT على products وsellers | كل WRITE بـ auth.uid()
 - `supabase-config.js` منشور على GitHub Pages (anon key فقط — آمن)
 
+**رحلة الزبون — شاشة Discover (#s-discover):**
+- Top Bar: "Discover" في المنتصف + أيقونة فلاتر
+- نوع القطعة (مطلوب) — Dropdown: رسمي / كاجوال / رياضي / تقليدي
+- الميزانية (مطلوب) — Dual range slider (0 → 20,000+ DZD) بـ fill ذهبي
+- خيارات إضافية: 4 chips (المقاس / المناسبة / اللون / الفئة) — كل chip يفتح panel تحته
+- زر "✦ أظهر النتائج": disabled (رمادي) حتى تُملأ الحقلان المطلوبان، يُفعّل بـ CSS class
+- Bottom Nav: الرئيسية / المحفوظات / اكتشف (active) / الحساب
+
+**رحلة الزبون — شاشة النتائج (#s-results):**
+- Top Bar: سهم رجوع + "النتائج"
+- شبكة منتجات 2-column (reuses br-prod-card) — Supabase query بدون AI
+- Filter logic: type (required) + price range (required) + sizes (optional overlaps) + color (client-side match)
+- Empty State: "ما لقيناش قطع تناسب هذا البحث" + زر تعديل البحث
+- "✦ قطع تتناسق معها": section هيكلية (products من types أخرى) — AI logic يأتي لاحقاً
+- Product Detail Sheet يعمل من النتائج (products مدموجة في _brProds)
+
+**قاعدة البيانات — columns مؤكدة في products:**
+- id, seller_id, name, type, color, color_name, price, sizes[], stock, image, description, hero, created_at
+
 ### 🔜 التالي (لم يُبنَ بعد)
 - ⚠️ stock column تحتاج قرار: الـ default هو 0 وبائعين ما حددوا stock → كل المنتجات تظهر "نفدت الكمية" — يلزم إما تغيير الـ default لـ null أو إضافة حقل is_available
 - Customer Registration Screen مستقلة
-- صفحة Filter/Category
-- AI Outfit — تكامل مع منتجات المتاجر الحقيقية
+- AI Outfit — تكامل مع منتجات المتاجر الحقيقية وتوصيات "قطع تتناسق معها"
 - إصلاح stock/availability (قرار schema مطلوب)
 
 *آخر تحديث: يونيو 2026 | General 4 / Claude Code*
