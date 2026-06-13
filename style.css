@@ -574,7 +574,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 
 /* Hero */
 .br-hero{position:relative;overflow:hidden;margin-bottom:20px}
-.br-hero-track{position:relative;height:264px}
+.br-hero-track{position:relative;height:310px}
 .br-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .78s var(--expo);background-size:cover;background-position:center center}
 .br-hero-slide.active{opacity:1}
 .br-hero-slide--0{background:linear-gradient(145deg,#1A1208 0%,#2E200A 40%,#3A2C14 65%,#1A1208 100%)}
