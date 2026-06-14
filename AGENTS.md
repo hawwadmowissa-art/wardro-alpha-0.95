@@ -173,10 +173,20 @@ Worker (محادثة مستقلة)
 **قاعدة البيانات — columns مؤكدة في products:**
 - id, seller_id, name, type, color, color_name, price, sizes[], stock, image, description, hero, created_at
 
+**Polish batch — يونيو 2026:**
+- Product Detail Sheet: تخطيط عمودي (صورة فوق + تفاصيل أسفل) — بدل الأفقي المكسور
+  - X إغلاق (أعلى-يسار) + قلب (أعلى-يمين) على الصورة — handle في أعلى الشيت
+  - الترتيب: الاسم → السعر → المقاسات (دائرية) → اللون (swatches دائرية) → الوصف → الكمية → زر Save
+- Top Stores: الضغط على متجر يفتح showMode الخاص به (openStoreView → loadGuestStoreProducts)
+  - يُحمّل منتجات البائع من Supabase بدون auth (public read)
+  - `_guestSellerId` يحمي loadShowMode للبائع من التأثر
+- Splash screen: "Powered by El_djem3i" — 9px Tajawal، opacity 0.28، يظهر ثم يختفي مع أنيميشن
+- Home hero slider: ارتفاع من 310px → 355px (+14.5%)
+
 ### 🔜 التالي (لم يُبنَ بعد)
 - ⚠️ stock column تحتاج قرار: الـ default هو 0 وبائعين ما حددوا stock → كل المنتجات تظهر "نفدت الكمية" — يلزم إما تغيير الـ default لـ null أو إضافة حقل is_available
 - Customer Registration Screen مستقلة
 - AI Outfit — تكامل مع منتجات المتاجر الحقيقية وتوصيات "قطع تتناسق معها"
 - إصلاح stock/availability (قرار schema مطلوب)
 
-*آخر تحديث: يونيو 2026 | General 6 / Claude Code*
+*آخر تحديث: يونيو 2026 | General 7 / Claude Code*
