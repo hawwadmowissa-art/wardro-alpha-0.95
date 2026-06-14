@@ -500,6 +500,9 @@ let _guestSellerId=null; // set when a customer taps Top Store
 
 function loadShowMode(){
   if(_guestSellerId)return; // guest view already populated by openStoreView
+  // Ensure seller's own show mode has no guest class
+  const ss=document.getElementById('s-show');
+  if(ss)ss.classList.remove('s-show--guest');
   const img=localStorage.getItem('wardro_profile_image');
   const name=localStorage.getItem('wardro_store_name')||'—';
   // Avatar in header
@@ -517,9 +520,16 @@ function loadShowMode(){
   loadEditorProducts();
 }
 
-// Customer taps a Top Store → load that store's show mode
+// Customer taps a Top Store → read-only store view
 function openStoreView(sellerId,storeName,storeImg){
   _guestSellerId=sellerId;
+  // Mark #s-show as guest mode (CSS hides sidebar/topbar, shows back bar)
+  const ss=document.getElementById('s-show');
+  if(ss)ss.classList.add('s-show--guest');
+  // Set guest back bar title
+  const gt=document.getElementById('show-guest-store-title');
+  if(gt)gt.textContent=storeName;
+  // Set store header name
   const nameEl=document.getElementById('show-store-name');
   if(nameEl)nameEl.textContent=storeName;
   const av=document.getElementById('show-avatar');
@@ -530,6 +540,13 @@ function openStoreView(sellerId,storeName,storeImg){
   switchShowTab('home',document.querySelector('.show-tab[data-tab="home"]'));
   loadGuestStoreProducts(sellerId);
   navigateTo('s-show','slide');
+}
+
+function leaveGuestStore(){
+  _guestSellerId=null;
+  const ss=document.getElementById('s-show');
+  if(ss)ss.classList.remove('s-show--guest');
+  navigateTo('s-browse','slide');
 }
 
 async function loadGuestStoreProducts(sellerId){
