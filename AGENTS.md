@@ -174,13 +174,16 @@ Worker (محادثة مستقلة)
 - id, seller_id, name, type, color, color_name, price, sizes[], stock, image, description, hero, created_at
 
 **Polish batch — يونيو 2026:**
-- Product Detail Sheet: تخطيط عمودي (صورة فوق + تفاصيل أسفل) — بدل الأفقي المكسور
-  - X إغلاق (أعلى-يسار) + قلب (أعلى-يمين) على الصورة — handle في أعلى الشيت
-  - الترتيب: الاسم → السعر → المقاسات (دائرية) → اللون (swatches دائرية) → الوصف → الكمية → زر Save
-- Top Stores: الضغط على متجر يفتح showMode الخاص به (openStoreView → loadGuestStoreProducts)
-  - يُحمّل منتجات البائع من Supabase بدون auth (public read)
-  - `_guestSellerId` يحمي loadShowMode للبائع من التأثر
-- Splash screen: "Powered by El_djem3i" — 9px Tajawal، opacity 0.28، يظهر ثم يختفي مع أنيميشن
+- Product Detail Sheet: بطاقة مركزية مضغوطة (centered card، border-radius:24px كل الجهات، max-height:76vh)
+  - صورة المنتج كاملة بدون قص (max-width:100%;height:auto — لا object-fit:cover)
+  - X إغلاق (أعلى-يسار) + قلب (أعلى-يمين) على الصورة — handle في أعلى البطاقة
+  - الترتيب: الاسم → السعر → المقاسات (دائرية) → اللون (swatches) → الوصف → الكمية → Save
+- Top Stores (قراءة فقط للزبون): openStoreView → .s-show--guest class على #s-show
+  - CSS يخفي: .ed-sidebar، .show-topbar ("SHOW MODE" header، "Exit Preview")
+  - CSS يُظهر: .show-guest-bar (سهم رجوع + اسم المتجر)
+  - leaveGuestStore() يمسح _guestSellerId ويرجع لـ Browse
+  - showMode البائع لا يتأثر (loadShowMode يُزيل .s-show--guest)
+- Splash screen: "Powered by El_djem3i" — 9px Tajawal، opacity 0.28، fade in/out
 - Home hero slider: ارتفاع من 310px → 355px (+14.5%)
 
 ### 🔜 التالي (لم يُبنَ بعد)
@@ -189,4 +192,4 @@ Worker (محادثة مستقلة)
 - AI Outfit — تكامل مع منتجات المتاجر الحقيقية وتوصيات "قطع تتناسق معها"
 - إصلاح stock/availability (قرار schema مطلوب)
 
-*آخر تحديث: يونيو 2026 | General 7 / Claude Code*
+*آخر تحديث: يونيو 2026 | General 8 / Claude Code*
