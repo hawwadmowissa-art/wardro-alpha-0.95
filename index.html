@@ -156,34 +156,84 @@
 <!-- ROLE SELECTION -->
 <div id="s-splash" class="screen active">
   <div class="rs-inner">
-    <div class="rs-brand">W</div>
-    <div class="rs-title">Choose Your Journey</div>
-    <div class="rs-sub">حدد دورك لبدء التجربة</div>
+
+    <!-- WR Emblem -->
+    <div class="rs-emblem-wrap">
+      <div class="rs-sparkle">✦</div>
+      <svg class="rs-emblem-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer diamond frame -->
+        <path d="M50 5 L95 50 L50 95 L5 50 Z" stroke="rgba(210,175,105,.22)" stroke-width=".8" fill="none"/>
+        <!-- Corner accent dots -->
+        <circle cx="50" cy="5" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="95" cy="50" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="50" cy="95" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="5" cy="50" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <!-- Main circle -->
+        <circle cx="50" cy="50" r="30" stroke="#D2AF69" stroke-width="1.2" fill="rgba(210,175,105,.06)"/>
+        <!-- Inner ring -->
+        <circle cx="50" cy="50" r="25.5" stroke="rgba(210,175,105,.14)" stroke-width=".6" fill="none"/>
+        <!-- WR text -->
+        <text x="50" y="57" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="300" fill="#D2AF69">WR</text>
+      </svg>
+      <div class="rs-wordmark">WARDRO</div>
+      <div class="rs-fi">FASHION INTELLIGENCE</div>
+    </div>
+
+    <!-- Titles -->
+    <div class="rs-main-title">Choose Your Journey</div>
+    <div class="rs-main-sub">تجربة مخصصة تلبي احتياجاتك</div>
+
+    <!-- Role Cards — Customer first = RIGHT in RTL, Seller = LEFT -->
     <div class="rs-cards">
-      <div class="rs-card shimmer" id="rs-card-0" onclick="goCustomer()">
-        <div class="rs-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg>
+
+      <div class="rs-card rs-card--customer" id="rs-card-0" onclick="goCustomer()">
+        <div class="rs-card-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg>
         </div>
-        <div class="rs-text">
-          <div class="rs-mode">CUSTOMER MODE</div>
-          <div class="rs-name">وضع الزبون</div>
-          <div class="rs-desc">اكتشف تنسيقات مناسبة لك من أفضل متاجر الجزائر</div>
-        </div>
-        <div class="rs-arr">→</div>
+        <div class="rs-card-role">Customer</div>
+        <div class="rs-card-desc">اكتشف القطع التي تناسبك وأنشئ التنسيقات المثالية</div>
+        <div class="rs-card-arr">→</div>
       </div>
-      <div class="rs-card shimmer" id="rs-card-1" onclick="goSeller()">
-        <div class="rs-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/><circle cx="9.5" cy="16" r="1" fill="currentColor"/><circle cx="14.5" cy="16" r="1" fill="currentColor"/></svg>
+
+      <div class="rs-card rs-card--seller" id="rs-card-1" onclick="goSeller()">
+        <div class="rs-card-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/><circle cx="9.5" cy="16" r="1" fill="currentColor"/><circle cx="14.5" cy="16" r="1" fill="currentColor"/></svg>
         </div>
-        <div class="rs-text">
-          <div class="rs-mode">SELLER MODE</div>
-          <div class="rs-name">وضع البائع</div>
-          <div class="rs-desc">أدر متجرك وابيع قطعك بذكاء لآلاف الزبائن</div>
+        <div class="rs-card-role">Seller</div>
+        <div class="rs-card-desc">أدر متجرك، اعرض منتجاتك وزيادة مبيعاتك</div>
+        <div class="rs-card-arr">→</div>
+      </div>
+
+    </div>
+
+    <!-- Trust Strip -->
+    <div class="rs-trust">
+      <div class="rs-trust-item">
+        <div class="rs-trust-ico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <div class="rs-arr">→</div>
+        <div class="rs-trust-lbl">بيانات آمنة</div>
+      </div>
+      <div class="rs-trust-item">
+        <div class="rs-trust-ico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="rs-trust-lbl">ذكاء اصطناعي متطور</div>
+      </div>
+      <div class="rs-trust-item">
+        <div class="rs-trust-ico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/></svg>
+        </div>
+        <div class="rs-trust-lbl">تجربة فاخرة</div>
       </div>
     </div>
-    <div class="rs-footer"><span class="live-dot"></span>يمكنك تغيير دورك لاحقاً</div>
+
+    <!-- Footer -->
+    <div class="rs-footer">
+      <span class="live-dot"></span>
+      يمكنك تغيير دورك لاحقاً
+    </div>
+
   </div>
 </div>
 
