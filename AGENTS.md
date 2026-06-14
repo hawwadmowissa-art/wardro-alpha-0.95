@@ -108,13 +108,21 @@ Worker (محادثة مستقلة)
 
 ### ✅ مكتمل ويعمل على الـ Live URL
 
-**شاشة Role Selection (#s-splash) — مُعاد تصميمها:**
+**شاشة Role Selection (#s-splash) — مُعاد تصميمها + تفاعلية:**
 - WR diamond-frame emblem (SVG مخصص: إطار ماسي + دائرة ذهبية + "WR" بـ Georgia serif)
 - "WARDRO" wordmark + "FASHION INTELLIGENCE" tagline
 - "Choose Your Journey" / "تجربة مخصصة تلبي احتياجاتك"
-- بطاقتان جنباً إلى جنب: Customer (توهج ذهبي) + Seller (هادئة) — في RTL: Customer يميناً
+- بطاقتان جنباً إلى جنب: Customer (توهج ذهبي مبدئي) + Seller (هادئة) — في RTL: Customer يميناً
 - Trust Strip: 3 أيقونة (درع/نجمة/تاج) بحجم 26×26 + تسمية نصية
-- `goCustomer()` / `goSeller()` — routing محفوظ بدون تغيير
+- **التوهج تفاعلي**: `.rs-card--active` تنتقل مع الضغط عبر `rsSelectCard()` (360ms ثم navigate)
+
+**شاشة Welcome + Choose Mode (#s-welcome) — مُعاد تصميمها (tour6):**
+- "W" monogram + "Welcome, [اسم البائع]" + "ماذا تريد أن تفعل اليوم؟"
+- بطاقتان أفقيتان كبيرتان (glass + direction:ltr): أيقونة كبيرة يساراً + محتوى يميناً
+- EDITOR MODE: أيقونة scroll+quill SVG — "أنشئ تجربة زبونك" / "→ Start Editing"
+- SHOW MODE: أيقونة monitor+eye SVG — "شاهد ما يراه زبونك" / "→ Preview Store"
+- حُذف: trust strip السفلي + sparkle watermark
+- routing محفوظ: `navigateTo('s-editor')` / `navigateTo('s-show')`
 
 **رحلة البائع (كاملة):**
 - Splash → Onboarding → Role Selection → Seller Registration/Sign-In
@@ -171,4 +179,4 @@ Worker (محادثة مستقلة)
 - AI Outfit — تكامل مع منتجات المتاجر الحقيقية وتوصيات "قطع تتناسق معها"
 - إصلاح stock/availability (قرار schema مطلوب)
 
-*آخر تحديث: يونيو 2026 | General 5 / Claude Code*
+*آخر تحديث: يونيو 2026 | General 6 / Claude Code*
