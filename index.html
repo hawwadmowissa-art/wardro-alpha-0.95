@@ -186,7 +186,7 @@
     <!-- Role Cards — Customer first = RIGHT in RTL, Seller = LEFT -->
     <div class="rs-cards">
 
-      <div class="rs-card rs-card--customer" id="rs-card-0" onclick="goCustomer()">
+      <div class="rs-card rs-card--customer rs-card--active" id="rs-card-0" onclick="rsSelectCard('rs-card-0',goCustomer)">
         <div class="rs-card-icon">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg>
         </div>
@@ -195,7 +195,7 @@
         <div class="rs-card-arr">→</div>
       </div>
 
-      <div class="rs-card rs-card--seller" id="rs-card-1" onclick="goSeller()">
+      <div class="rs-card rs-card--seller" id="rs-card-1" onclick="rsSelectCard('rs-card-1',goSeller)">
         <div class="rs-card-icon">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/><circle cx="9.5" cy="16" r="1" fill="currentColor"/><circle cx="14.5" cy="16" r="1" fill="currentColor"/></svg>
         </div>
@@ -317,21 +317,53 @@
     <div class="wel-greeting">Welcome, <span id="wel-name" class="wel-name-hi">...</span></div>
     <div class="wel-q">ماذا تريد أن تفعل اليوم؟</div>
     <div class="wel-cards">
-      <div class="wel-card shimmer" onclick="navigateTo('s-editor','slide')">
-        <div class="wc-badge">EDITOR MODE</div>
-        <div class="wc-title">أنشئ تجربة زبونك</div>
-        <div class="wc-desc">Build your customer experience</div>
-        <div class="wc-cta">Start Editing →</div>
+
+      <!-- EDITOR MODE -->
+      <div class="wel-card" onclick="navigateTo('s-editor','slide')">
+        <div class="wc-icon-wrap">
+          <!-- Scroll + quill -->
+          <svg width="68" height="68" viewBox="0 0 68 68" fill="none" stroke="#D2AF69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="10" y="10" width="36" height="48" rx="5"/>
+            <path d="M10 20 Q28 24 46 20" fill="none"/>
+            <line x1="18" y1="30" x2="38" y2="30" stroke-opacity=".7"/>
+            <line x1="18" y1="38" x2="38" y2="38" stroke-opacity=".7"/>
+            <line x1="18" y1="46" x2="31" y2="46" stroke-opacity=".7"/>
+            <path d="M52 6 Q62 4 60 16 L42 52 L36 46 Z" fill="rgba(210,175,105,.1)"/>
+            <path d="M42 52 L38 60 L45 55"/>
+            <line x1="49" y1="22" x2="39" y2="51" stroke-width=".9" stroke-opacity=".45"/>
+          </svg>
+        </div>
+        <div class="wc-content">
+          <div class="wc-badge">EDITOR MODE</div>
+          <div class="wc-title">أنشئ تجربة زبونك</div>
+          <div class="wc-desc">Build your customer experience</div>
+          <div class="wc-cta">→ Start Editing</div>
+        </div>
       </div>
-      <div class="wel-card shimmer" onclick="navigateTo('s-show','slide')">
-        <div class="wc-badge wc-badge--show">SHOW MODE</div>
-        <div class="wc-title">شاهد ما يراه زبونك</div>
-        <div class="wc-desc">See what your customers see</div>
-        <div class="wc-cta">Preview Store →</div>
+
+      <!-- SHOW MODE -->
+      <div class="wel-card" onclick="navigateTo('s-show','slide')">
+        <div class="wc-icon-wrap">
+          <!-- Monitor + eye -->
+          <svg width="68" height="68" viewBox="0 0 68 68" fill="none" stroke="#D2AF69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="10" width="56" height="38" rx="5"/>
+            <line x1="34" y1="48" x2="34" y2="58"/>
+            <line x1="22" y1="58" x2="46" y2="58"/>
+            <path d="M16 29 Q34 16 52 29 Q34 42 16 29 Z" fill="rgba(210,175,105,.07)"/>
+            <circle cx="34" cy="29" r="6"/>
+            <circle cx="34" cy="29" r="2.5" fill="#D2AF69" stroke="none"/>
+          </svg>
+        </div>
+        <div class="wc-content">
+          <div class="wc-badge">SHOW MODE</div>
+          <div class="wc-title">شاهد ما يراه زبونك</div>
+          <div class="wc-desc">See what your customers see</div>
+          <div class="wc-cta">→ Preview Store</div>
+        </div>
       </div>
+
     </div>
-    <div class="wel-hint">أضف أول قطعة لبناء كتالوجك</div>
-    <div class="wel-tagline">بأناقة، تَبيعُ أكثر.</div>
+    <div class="wel-footer-line"><span class="live-dot"></span>يمكنك تغيير دورك لاحقاً من الإعدادات</div>
   </div>
 </div>
 

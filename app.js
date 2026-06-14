@@ -28,6 +28,13 @@ function goCustomer(){navigateTo('s-browse','slide')}
 
 function goSeller(){navigateTo('s-seller-reg','slide')}
 
+// Role Selection — move gold glow to tapped card, then navigate
+function rsSelectCard(cardId,cb){
+  document.querySelectorAll('.rs-card').forEach(function(c){c.classList.remove('rs-card--active');});
+  document.getElementById(cardId).classList.add('rs-card--active');
+  setTimeout(cb,360);
+}
+
 // ══ STAGGER ══
 function triggerStagger(id){
   const el=document.getElementById(id);if(!el)return;
