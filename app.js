@@ -770,12 +770,9 @@ function openProdDetail(id){
   document.getElementById('pd-desc').textContent=p.description||'';
   document.getElementById('pd-stock-lbl').textContent=(p.stock>0?'متوفر — '+p.stock+' قطعة':'Quantity Available');
   const cWrap=document.getElementById('pd-colors-wrap');
-  cWrap.innerHTML=p.color?`<span class="pd-color-swatch pd-color-swatch--active" style="background:${p.color}" title="${p.color_name||p.color}"></span>`:'';
+  cWrap.innerHTML=p.color?`<span class="pd-color-chip pd-color-chip--active">${p.color_name||p.color}</span>`:'';
   const sPills=document.getElementById('pd-size-pills');
   sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${s}</button>`).join('');
-  // Reset heart
-  const hrt=document.getElementById('pd-heart-btn');
-  if(hrt){hrt.classList.remove('active');hrt.textContent='♡';}
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
   const ov=document.getElementById('pd-overlay');
