@@ -108,6 +108,14 @@ Worker (محادثة مستقلة)
 
 ### ✅ مكتمل ويعمل على الـ Live URL
 
+**شاشة Role Selection (#s-splash) — مُعاد تصميمها:**
+- WR diamond-frame emblem (SVG مخصص: إطار ماسي + دائرة ذهبية + "WR" بـ Georgia serif)
+- "WARDRO" wordmark + "FASHION INTELLIGENCE" tagline
+- "Choose Your Journey" / "تجربة مخصصة تلبي احتياجاتك"
+- بطاقتان جنباً إلى جنب: Customer (توهج ذهبي) + Seller (هادئة) — في RTL: Customer يميناً
+- Trust Strip: 3 أيقونة (درع/نجمة/تاج) بحجم 26×26 + تسمية نصية
+- `goCustomer()` / `goSeller()` — routing محفوظ بدون تغيير
+
 **رحلة البائع (كاملة):**
 - Splash → Onboarding → Role Selection → Seller Registration/Sign-In
 - Editor Mode: إضافة/تعديل/حذف منتجات، رفع صور، Pin to Hero، Store Bio
@@ -163,4 +171,4 @@ Worker (محادثة مستقلة)
 - AI Outfit — تكامل مع منتجات المتاجر الحقيقية وتوصيات "قطع تتناسق معها"
 - إصلاح stock/availability (قرار schema مطلوب)
 
-*آخر تحديث: يونيو 2026 | General 4 / Claude Code*
+*آخر تحديث: يونيو 2026 | General 5 / Claude Code*
