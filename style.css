@@ -238,9 +238,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;o
 .logo-splash-brand{text-align:center;display:flex;flex-direction:column;align-items:center}
 .logo-splash-mark{font-family:'Fraunces',serif;font-size:48px;color:var(--gold);letter-spacing:0.3em;font-weight:200;line-height:1}
 .logo-splash-sub{font-family:'Tajawal',sans-serif;font-size:11px;letter-spacing:0.25em;color:var(--txt);text-transform:uppercase;margin-top:10px}
-.logo-powered-by{font-family:'Tajawal',sans-serif;font-size:9px;letter-spacing:.22em;
-  color:rgba(216,207,186,.28);margin-top:16px;opacity:0;
-  animation:poweredFade 2.4s ease .85s forwards}
+.logo-powered-by{display:flex;align-items:baseline;gap:5px;justify-content:center;
+  margin-top:16px;opacity:0;animation:poweredFade 2.4s ease .85s forwards}
+.logo-powered-label{font-family:'Tajawal',sans-serif;font-size:9px;letter-spacing:.22em;
+  color:rgba(216,207,186,.28)}
+.logo-powered-sig{font-family:'Cherish',cursive;font-size:24px;line-height:1;
+  color:rgba(216,207,186,.36);letter-spacing:.04em}
 @keyframes poweredFade{0%{opacity:0}20%{opacity:1}72%{opacity:1}100%{opacity:0}}
 /* ══ UTILS ══ */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);
