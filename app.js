@@ -587,17 +587,27 @@ function buildHeroSlider(prods){
   track.innerHTML=slides.map((s,i)=>`
     <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}${s.id?' hero-tap':''}"${s.id?` onclick="if(!_showDidSwipe)openProdDetail('${s.id}')"`:''}>${s.bg?`
       <img class="show-hero-bg" src="${s.bg}" alt="" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
+      <div class="hero-dark"></div>
+      <div class="hero-inner-glow"></div>
       <img class="show-hero-img" src="${s.bg}" alt="${s.title}" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
       <div class="show-hero-fade-left"></div>
       <div class="show-hero-fade-top"></div>
-      <div class="show-hero-fade-bottom"></div>`:`
-      <div class="show-hero-overlay"></div>`}
+      <div class="show-hero-fade-bottom"></div>
+      <div class="show-hero-content">
+        <div class="show-hero-label">${s.label}</div>
+        <div class="show-hero-title">${s.title}</div>
+        <div class="hero-divider"><span class="hero-diamond">✦</span></div>
+        <div class="show-hero-sub">${s.sub}</div>
+        <div class="show-hero-cta">${s.cta}</div>
+      </div>
+      <button class="hero-heart" onclick="event.stopPropagation();toggleHeroHeart('${s.id}',this)" aria-label="Save"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>`:`
+      <div class="show-hero-overlay"></div>
       <div class="show-hero-content">
         <div class="show-hero-label">${s.label}</div>
         <div class="show-hero-title">${s.title}</div>
         <div class="show-hero-sub">${s.sub}</div>
-        <div class="show-hero-cta">${s.cta} →</div>
-      </div>
+        <div class="show-hero-cta">${s.cta}</div>
+      </div>`}
     </div>`).join('');
   dotsEl.innerHTML=slides.map((_,i)=>`<button class="show-hero-dot${i===0?' active':''}" onclick="goHeroSlide(${i})"></button>`).join('');
   if(slides.length>1){_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);}
@@ -746,17 +756,27 @@ function buildBrowseHero(prods){
   track.innerHTML=slides.map((s,i)=>`
     <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}${s.id?' hero-tap':''}"${s.id?` onclick="if(!_brDidSwipe)openProdDetail('${s.id}')"`:''}>${s.bg?`
       <img class="br-hero-bg" src="${s.bg}" alt="" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
+      <div class="hero-dark"></div>
+      <div class="hero-inner-glow"></div>
       <img class="br-hero-img" src="${s.bg}" alt="${s.title}" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
       <div class="br-hero-fade-left"></div>
       <div class="br-hero-fade-top"></div>
-      <div class="br-hero-fade-bottom"></div>`:`
-      <div class="br-hero-overlay"></div>`}
+      <div class="br-hero-fade-bottom"></div>
+      <div class="br-hero-content">
+        <div class="br-hero-label">${s.label}</div>
+        <div class="br-hero-title">${s.title}</div>
+        <div class="hero-divider"><span class="hero-diamond">✦</span></div>
+        <div class="br-hero-sub">${s.sub}</div>
+        <div class="br-hero-cta">${s.cta}</div>
+      </div>
+      <button class="hero-heart" onclick="event.stopPropagation();toggleHeroHeart('${s.id}',this)" aria-label="Save"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>`:`
+      <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
         <div class="br-hero-label">${s.label}</div>
         <div class="br-hero-title">${s.title}</div>
         <div class="br-hero-sub">${s.sub}</div>
-        <div class="br-hero-cta">${s.cta} →</div>
-      </div>
+        <div class="br-hero-cta">${s.cta}</div>
+      </div>`}
     </div>`).join('');
   dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
   if(slides.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);}
@@ -836,6 +856,23 @@ async function saveItem(){
     }else if(error){throw error;}
     else{btn.textContent='Added to Saved ✓';btn.classList.add('pd-save-btn--saved');}
   }catch(e){toast(e.message||'خطأ في الحفظ');const btn=document.getElementById('pd-save-btn');if(btn){btn.textContent='Save';btn.disabled=false;}}
+}
+
+async function toggleHeroHeart(id,btn){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){openCustAuth();return;}
+    const saved=btn.classList.contains('hero-heart--saved');
+    if(saved){
+      await sb.from('saved_items').delete().eq('customer_id',session.user.id).eq('product_id',id);
+      btn.classList.remove('hero-heart--saved');
+    }else{
+      const{error}=await sb.from('saved_items').insert({customer_id:session.user.id,product_id:id});
+      if(!error||error.code==='23505')btn.classList.add('hero-heart--saved');
+      else throw error;
+    }
+  }catch(e){toast(e.message||'خطأ');}
 }
 
 // ── Customer Auth ──
