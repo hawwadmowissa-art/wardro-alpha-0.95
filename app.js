@@ -341,6 +341,7 @@ function renderEditorProducts(prods){
 
 function renderShowProducts(prods){
   buildHeroSlider(prods);
+  prods.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
   const cardHtml=p=>`
     <div class="show-prod-card">
       ${p.image?`<img class="show-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
@@ -495,7 +496,7 @@ function previewStoreProfile(input){
 }
 
 // ══ SHOW MODE ══
-let _heroIdx=0,_heroTimer=null,_heroLen=1;
+let _heroIdx=0,_heroTimer=null,_heroLen=1,_showDidSwipe=false;
 let _guestSellerId=null; // set when a customer taps Top Store
 
 function loadShowMode(){
@@ -572,7 +573,7 @@ function buildHeroSlider(prods){
   const track=document.getElementById('show-hero-track');
   const dotsEl=document.getElementById('show-hero-dots');
   if(!track||!dotsEl)return;
-  clearInterval(_heroTimer);_heroIdx=0;
+  clearInterval(_heroTimer);_heroTimer=null;_heroIdx=0;_showDidSwipe=false;
   let heroProds=prods.filter(p=>p.hero&&p.image);
   if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,3);
   else heroProds=heroProds.slice(0,3);
@@ -580,12 +581,17 @@ function buildHeroSlider(prods){
   if(!heroProds.length){
     slides=[{bg:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
   }else{
-    slides=heroProds.map(p=>({bg:p.image,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`}));
+    slides=heroProds.map(p=>({bg:p.image,id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`}));
   }
   _heroLen=slides.length;
   track.innerHTML=slides.map((s,i)=>`
-    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}">
-      <div class="show-hero-overlay"></div>
+    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}${s.id?' hero-tap':''}"${s.id?` onclick="if(!_showDidSwipe)openProdDetail('${s.id}')"`:''}>${s.bg?`
+      <img class="show-hero-bg" src="${s.bg}" alt="" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
+      <img class="show-hero-img" src="${s.bg}" alt="${s.title}" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
+      <div class="show-hero-fade-left"></div>
+      <div class="show-hero-fade-top"></div>
+      <div class="show-hero-fade-bottom"></div>`:`
+      <div class="show-hero-overlay"></div>`}
       <div class="show-hero-content">
         <div class="show-hero-label">${s.label}</div>
         <div class="show-hero-title">${s.title}</div>
@@ -595,6 +601,13 @@ function buildHeroSlider(prods){
     </div>`).join('');
   dotsEl.innerHTML=slides.map((_,i)=>`<button class="show-hero-dot${i===0?' active':''}" onclick="goHeroSlide(${i})"></button>`).join('');
   if(slides.length>1){_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);}
+  let _shSwX=0;
+  track.ontouchstart=e=>{_shSwX=e.touches[0].clientX;_showDidSwipe=false;clearInterval(_heroTimer);_heroTimer=null;};
+  track.ontouchend=e=>{
+    const dx=e.changedTouches[0].clientX-_shSwX;
+    if(Math.abs(dx)>35){_showDidSwipe=true;const n=dx<0?(_heroIdx+1)%_heroLen:(_heroIdx-1+_heroLen)%_heroLen;goHeroSlide(n);}
+    if(_heroLen>1)setTimeout(()=>{if(!_heroTimer)_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);},4000);
+  };
 }
 
 function goHeroSlide(idx){
@@ -645,7 +658,7 @@ function skipOnboard(){
 }
 
 // ══ CUSTOMER BROWSE ══
-let _brHeroIdx=0,_brHeroTimer=null;
+let _brHeroIdx=0,_brHeroTimer=null,_brDidSwipe=false;
 let _brProds=[];
 let _pdCurrentId=null;
 
@@ -708,7 +721,7 @@ function buildBrowseHero(prods){
   const track=document.getElementById('br-hero-track');
   const dots=document.getElementById('br-hero-dots');
   if(!track||!dots)return;
-  clearInterval(_brHeroTimer);_brHeroIdx=0;
+  clearInterval(_brHeroTimer);_brHeroTimer=null;_brHeroIdx=0;_brDidSwipe=false;
 
   // Use real product images when available; fall back to editorial gradients
   let slides;
@@ -718,6 +731,7 @@ function buildBrowseHero(prods){
     if(heroProds.length){
       slides=heroProds.slice(0,5).map(p=>({
         bg:p.image,
+        id:p.id,
         label:(p.type||'FEATURED').toUpperCase(),
         title:p.name,
         sub:p.description||'Premium quality clothing',
@@ -730,17 +744,29 @@ function buildBrowseHero(prods){
   }
 
   track.innerHTML=slides.map((s,i)=>`
-    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}">
-      <div class="br-hero-overlay"></div>
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}${s.id?' hero-tap':''}"${s.id?` onclick="if(!_brDidSwipe)openProdDetail('${s.id}')"`:''}>${s.bg?`
+      <img class="br-hero-bg" src="${s.bg}" alt="" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
+      <img class="br-hero-img" src="${s.bg}" alt="${s.title}" loading="${i===0?'eager':'lazy'}"${i===0?' fetchpriority="high"':''}>
+      <div class="br-hero-fade-left"></div>
+      <div class="br-hero-fade-top"></div>
+      <div class="br-hero-fade-bottom"></div>`:`
+      <div class="br-hero-overlay"></div>`}
       <div class="br-hero-content">
         <div class="br-hero-label">${s.label}</div>
         <div class="br-hero-title">${s.title}</div>
         <div class="br-hero-sub">${s.sub}</div>
-        <button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${s.cta} →</button>
+        <div class="br-hero-cta">${s.cta} →</div>
       </div>
     </div>`).join('');
   dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
   if(slides.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);}
+  let _bSwX=0;
+  track.ontouchstart=e=>{_bSwX=e.touches[0].clientX;_brDidSwipe=false;clearInterval(_brHeroTimer);_brHeroTimer=null;};
+  track.ontouchend=e=>{
+    const dx=e.changedTouches[0].clientX-_bSwX;
+    if(Math.abs(dx)>35){_brDidSwipe=true;const n=dx<0?(_brHeroIdx+1)%slides.length:(_brHeroIdx-1+slides.length)%slides.length;goBrHeroSlide(n);}
+    if(slides.length>1)setTimeout(()=>{if(!_brHeroTimer)_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);},4000);
+  };
 }
 
 function goBrHeroSlide(idx){
