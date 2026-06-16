@@ -593,23 +593,39 @@ async function loadGuestStoreProducts(sellerId){
   }catch(e){}
 }
 
+function _wireHeroTap(track){
+  let start=null,moved=false;
+  track.ontouchstart=e=>{const t=e.touches[0];start={x:t.clientX,y:t.clientY};moved=false;};
+  track.ontouchmove=e=>{
+    if(!start)return;
+    const t=e.touches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
+    if(Math.sqrt(dx*dx+dy*dy)>10)moved=true;
+  };
+  track.onclick=e=>{
+    if(moved){moved=false;return;}
+    const slide=e.target.closest('.show-hero-slide,.br-hero-slide');
+    const id=slide&&slide.dataset.id;
+    if(id)openProdDetail(id);
+  };
+}
+
 function buildHeroSlider(prods){
   const track=document.getElementById('show-hero-track');
   const dotsEl=document.getElementById('show-hero-dots');
   if(!track||!dotsEl)return;
   clearInterval(_heroTimer);_heroIdx=0;
-  let heroProds=prods.filter(p=>p.hero&&p.image);
+  let heroProds=prods.filter(p=>p.slider_type==='hero'&&p.image);
   if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,3);
   else heroProds=heroProds.slice(0,3);
   let slides;
   if(!heroProds.length){
-    slides=[{bg:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
+    slides=[{bg:null,id:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
   }else{
-    slides=heroProds.map(p=>({bg:p.image,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`}));
+    slides=heroProds.map(p=>({bg:p.image,id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`}));
   }
   _heroLen=slides.length;
   track.innerHTML=slides.map((s,i)=>`
-    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}">
+    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}>
       <div class="show-hero-overlay"></div>
       <div class="show-hero-content">
         <div class="show-hero-label">${s.label}</div>
@@ -620,6 +636,7 @@ function buildHeroSlider(prods){
     </div>`).join('');
   dotsEl.innerHTML=slides.map((_,i)=>`<button class="show-hero-dot${i===0?' active':''}" onclick="goHeroSlide(${i})"></button>`).join('');
   if(slides.length>1){_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);}
+  _wireHeroTap(track);
 }
 
 function goHeroSlide(idx){
@@ -738,11 +755,12 @@ function buildBrowseHero(prods){
   // Use real product images when available; fall back to editorial gradients
   let slides;
   if(prods&&prods.length){
-    let heroProds=prods.filter(p=>p.hero&&p.image);
+    let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.image);
     if(!heroProds.length)heroProds=prods.filter(p=>p.image);
     if(heroProds.length){
       slides=heroProds.slice(0,5).map(p=>({
         bg:p.image,
+        id:p.id,
         label:(p.type||'FEATURED').toUpperCase(),
         title:p.name,
         sub:p.description||'Premium quality clothing',
@@ -751,21 +769,22 @@ function buildBrowseHero(prods){
     }
   }
   if(!slides){
-    slides=BR_SLIDES.map((s,i)=>({...s,bg:null,idx:i}));
+    slides=BR_SLIDES.map((s,i)=>({...s,bg:null,id:null,idx:i}));
   }
 
   track.innerHTML=slides.map((s,i)=>`
-    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}">
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}>
       <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
         <div class="br-hero-label">${s.label}</div>
         <div class="br-hero-title">${s.title}</div>
         <div class="br-hero-sub">${s.sub}</div>
-        <button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${s.cta} →</button>
+        ${s.id?`<div class="br-hero-cta">${s.cta} →</div>`:`<button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${s.cta} →</button>`}
       </div>
     </div>`).join('');
   dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
   if(slides.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);}
+  _wireHeroTap(track);
 }
 
 function goBrHeroSlide(idx){
