@@ -429,7 +429,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .ed-prod-info{padding:6px 8px 8px}
 .ed-prod-name{font-size:10px;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ed-prod-price{font-size:10px;color:var(--gold);font-weight:700}
-.ed-prod-add-tile{aspect-ratio:3/4;background:var(--dim);border:1.5px dashed rgba(210,175,105,.25);
+.ed-prod-add-tile{width:100%;aspect-ratio:3/4;background:var(--dim);border:1.5px dashed rgba(210,175,105,.25);
   border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:all .35s var(--spring);color:var(--muted)}
 .ed-prod-add-tile span{font-size:22px;line-height:1;transition:transform .3s var(--spring);color:var(--goldD)}
