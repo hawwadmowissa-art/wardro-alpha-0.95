@@ -371,7 +371,7 @@ function renderShowProducts(prods){
   buildHeroSlider(prods);
   prods.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
   const cardHtml=p=>`
-    <div class="show-prod-card">
+    <div class="show-prod-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="show-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
       <div class="show-prod-info"><div class="show-prod-name">${p.name}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="show-prod-cat">${p.type||''}</div></div>
     </div>`;
