@@ -189,6 +189,7 @@ Worker (محادثة مستقلة)
 **Restructure — DB foundation + Editor + Customer wiring (يونيو 2026):**
 - Phase 1: عمود `products.slider_type` (none/hero/main_hero) بدّل `hero`(bool) المحذوف؛ Editor مقسّم لـ 3 أقسام (Main Hero Slider / Hero Slider / Products)
 - Phase 2: `buildHeroSlider` (Show Mode البائع) يقرأ `slider_type==='hero'`، و`buildBrowseHero` (Customer Home) يقرأ `slider_type==='main_hero'` — كلاهما كان يقرأ `p.hero` المحذوف ويسقط على placeholder. الضغط على شريحة الـ hero (في كلا الموضعين) يفتح الآن product detail sheet عبر `openProdDetail`، مع حارس swipe-vs-tap (~10px حركة لمس) لمنع فتح الـ sheet أثناء السحب. الشبكات العادية (Recommended/Store/guest-store) ما زالت تعرض منتجات الـ hero أيضاً — لا فلترة فيها.
+- Phase 2 hotfix: شرائح الـ hero (كلا الموضعين) كانت كل واحدة تبقى قابلة للنقر فوق الأخرى (`position:absolute;inset:0` بدون `pointer-events`) — النقر كان دائماً يفتح آخر شريحة في DOM بدل الشريحة الظاهرة فعلاً. الحل: `pointer-events:none` على الشريحة الأساسية و`pointer-events:auto` على `.active` فقط. كذلك بطاقات Products في صفحة المتجر (`show-prod-card` — تُستخدم لمعاينة البائع ولزيارة الزبون الضيف) ما كان عندها `onclick` نهائياً — أُضيف.
 - 🔜 Phase 3: ارتفاع الـ hero + التحسين البصري (blur/glow)
 
 ### 🔜 التالي (لم يُبنَ بعد)
