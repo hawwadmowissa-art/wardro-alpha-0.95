@@ -45,6 +45,7 @@ wardro/
 |---------|----------|---------|
 | Phase 1 — Deploy | GitHub Pages + API Key في localStorage | مايو 2026 |
 | Phase 2 — Database | Supabase متصل، sellers + products + RLS | يونيو 2026 |
+| Restructure Phase 1 — Editor Mode | عمود `slider_type` (none/hero/main_hero) بدّل `hero` (bool)؛ Editor مقسّم لـ 3 أقسام مستقلة (Main Hero Slider / Hero Slider / Products) كل واحد بـ dashed "+" tile خاص؛ Edit form فيه segmented control لتغيير القسم؛ حذف toggleHero() وQuick Add row | يونيو 2026 |
 
 ---
 
@@ -57,6 +58,11 @@ wardro/
 - Full-Screen Immersive Mode للتنسيقات
 - Variable Reward في الـ Browse (محتوى غير متوقع)
 
+**Restructure (موازي) — Editor Mode + DB foundation**
+- ✅ Phase 1: DB migration (`slider_type`) + فصل Editor لـ 3 أقسام — منتهي
+- 🔜 Phase 2: ربط جهة الزبون (buildHeroSlider/buildBrowseHero تقرأ `slider_type` بدل `hero` القديم) + إصلاح bug الضغط على الـ hero
+- 🔜 Phase 3: تلميع بصري (ارتفاع الـ hero 480px، إلخ)
+
 ---
 
 ## قواعد الكود الثابتة
@@ -65,6 +71,7 @@ wardro/
 - **الحل الأبسط دائماً** — لا تعقيد غير ضروري
 - **API calls محمية** — تحقق من `wardro_claude_key` في localStorage قبل كل call
 - **supabase-config.js** — لا تلمسه، لا ترفعه
+- **products.slider_type** (`none`/`hero`/`main_hero`) هو المرجع الوحيد لمكان ظهور القطعة — عمود `hero` (bool) القديم محذوف نهائياً. ⚠️ `buildHeroSlider`/`buildBrowseHero` بـ app.js لسا يقرأو `p.hero` القديم (دائماً undefined الآن) — لازم تحديثهم لـ `p.slider_type==='hero'`/`'main_hero'` في Restructure Phase 2 وإلا الـ hero slider عند الزبون يبقى فاضي
 
 ---
 
@@ -102,4 +109,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | General 2*
+*آخر تحديث: يونيو 2026 | Claude Code — Restructure Phase 1*
