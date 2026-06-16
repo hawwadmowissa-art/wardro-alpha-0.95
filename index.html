@@ -425,6 +425,28 @@
         </div>
       </div>
 
+      <!-- Main Hero Slider Section -->
+      <div class="ed-section">
+        <div class="ed-sec-head">
+          <div>
+            <span class="ed-sec-title">Main Hero Slider</span>
+            <div class="ed-sec-sub">Featured on Wardro Home</div>
+          </div>
+        </div>
+        <div class="ed-prod-grid" id="mainhero-grid"></div>
+      </div>
+
+      <!-- Hero Slider Section -->
+      <div class="ed-section">
+        <div class="ed-sec-head">
+          <div>
+            <span class="ed-sec-title">Hero Slider</span>
+            <div class="ed-sec-sub">Featured on your store page</div>
+          </div>
+        </div>
+        <div class="ed-prod-grid" id="hero-grid"></div>
+      </div>
+
       <!-- Products Section -->
       <div class="ed-section">
         <div class="ed-prod-hd">
@@ -449,40 +471,6 @@
           <div class="ede-text">أضف قطعك الأفضل هنا</div>
         </div>
         <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
-      </div>
-
-      <!-- Hero Slider Section -->
-      <div class="ed-section">
-        <div class="ed-sec-head">
-          <span class="ed-sec-title">Hero Slider</span>
-        </div>
-        <div class="ed-hero-slots">
-          <div class="ed-hero-slot ed-hero-slot--add" onclick="toast('Hero Slider — قريباً')">
-            <div class="ed-hero-slot-plus">+</div>
-            <div class="ed-hero-slot-label">Add Hero Slide</div>
-            <div class="ed-hero-slot-hint">1200 × 628</div>
-          </div>
-          <div class="ed-hero-slot ed-hero-slot--empty" onclick="toast('Hero Slider — قريباً')">
-            <div class="ed-hero-slot-plus">+</div>
-          </div>
-          <div class="ed-hero-slot ed-hero-slot--empty" onclick="toast('Hero Slider — قريباً')">
-            <div class="ed-hero-slot-plus">+</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Add Product -->
-      <div class="ed-section">
-        <div class="ed-sec-head">
-          <span class="ed-sec-title">Quick Add Product</span>
-        </div>
-        <div class="ed-quick-row">
-          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-          <button class="ed-quick-tile" onclick="openAddProduct()"><span>+</span></button>
-        </div>
       </div>
 
     </div>
@@ -535,6 +523,14 @@
               <button class="sel-btn" data-val="casual">Casual</button>
               <button class="sel-btn" data-val="sport">Sport</button>
               <button class="sel-btn" data-val="traditional">Traditional</button>
+            </div>
+          </div>
+          <div class="form-group" id="slidertype-group" style="display:none">
+            <label>نوع العرض</label>
+            <div class="sel-btns" id="slidertype-btns">
+              <button class="sel-btn" data-val="none">Product</button>
+              <button class="sel-btn" data-val="hero">Hero Slider</button>
+              <button class="sel-btn" data-val="main_hero">Main Hero</button>
             </div>
           </div>
           <div class="form-group">

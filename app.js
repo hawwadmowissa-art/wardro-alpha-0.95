@@ -225,7 +225,7 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={};
+let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={};
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -239,6 +239,11 @@ window.addEventListener('DOMContentLoaded',()=>{
     const b=e.target.closest('.sel-btn');if(!b)return;
     document.querySelectorAll('#cat-btns .sel-btn').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');_apCat=b.dataset.val;
+  });
+  document.getElementById('slidertype-btns')?.addEventListener('click',e=>{
+    const b=e.target.closest('.sel-btn');if(!b)return;
+    document.querySelectorAll('#slidertype-btns .sel-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');_apSliderType=b.dataset.val;
   });
 });
 
@@ -278,7 +283,7 @@ async function saveProduct(){
       const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url};
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url,slider_type:_apSliderType};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -315,16 +320,8 @@ async function loadEditorProducts(){
   }catch(e){}
 }
 
-function renderEditorProducts(prods){
-  _editorProds={};prods.forEach(p=>_editorProds[p.id]=p);
-  const grid=document.getElementById('prod-grid');
-  const empty=document.getElementById('prod-empty');
-  const badge=document.getElementById('ed-prod-count-badge');
-  if(badge)badge.textContent=prods.length;
-  if(!grid||!empty)return;
-  if(!prods.length){grid.style.display='none';empty.style.display='flex';return}
-  empty.style.display='none';grid.style.display='grid';
-  grid.innerHTML=prods.map(p=>`
+function _edProdCardHtml(p){
+  return `
     <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
       <button class="ed-prod-dots" onclick="event.stopPropagation();openEditProduct('${p.id}')">···</button>
       ${p.image?`<img class="ed-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
@@ -333,10 +330,35 @@ function renderEditorProducts(prods){
         <div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div>
         <div class="ed-prod-info-row">
           <div class="ed-prod-badge">In Stock</div>
-          <button class="ed-prod-pin${p.hero?' ed-prod-pin--on':''}" onclick="event.stopPropagation();toggleHero('${p.id}',${!!p.hero})" title="${p.hero?'Unpin from Hero':'Pin to Hero'}">★</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+}
+
+function _edAddTileHtml(sliderType){
+  return `<button class="ed-prod-add-tile" onclick="openAddProduct('${sliderType}')"><span>+</span></button>`;
+}
+
+function _renderSliderGrid(gridId,prods,sliderType){
+  const grid=document.getElementById(gridId);if(!grid)return;
+  grid.innerHTML=prods.map(_edProdCardHtml).join('')+_edAddTileHtml(sliderType);
+}
+
+function renderEditorProducts(prods){
+  _editorProds={};prods.forEach(p=>_editorProds[p.id]=p);
+  const mainHero=prods.filter(p=>p.slider_type==='main_hero');
+  const hero=prods.filter(p=>p.slider_type==='hero');
+  const none=prods.filter(p=>p.slider_type!=='main_hero'&&p.slider_type!=='hero');
+  _renderSliderGrid('mainhero-grid',mainHero,'main_hero');
+  _renderSliderGrid('hero-grid',hero,'hero');
+  const grid=document.getElementById('prod-grid');
+  const empty=document.getElementById('prod-empty');
+  const badge=document.getElementById('ed-prod-count-badge');
+  if(badge)badge.textContent=none.length;
+  if(!grid||!empty)return;
+  if(!none.length){grid.style.display='none';empty.style.display='flex';return}
+  empty.style.display='none';grid.style.display='grid';
+  grid.innerHTML=none.map(_edProdCardHtml).join('');
 }
 
 function renderShowProducts(prods){
@@ -384,9 +406,10 @@ function _showModal(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('ap-modal--open')));
 }
 
-function openAddProduct(){
-  _apEditId=null;_apEditImg=null;
+function openAddProduct(sliderType){
+  _apEditId=null;_apEditImg=null;_apSliderType=sliderType||'none';
   _resetModalForm();
+  const stGroup=document.getElementById('slidertype-group');if(stGroup)stGroup.style.display='none';
   const del=document.getElementById('ap-delete');if(del)del.style.display='none';
   const title=document.querySelector('.ap-modal-title');if(title)title.textContent='Add Product';
   _showModal();
@@ -404,6 +427,9 @@ function openEditProduct(id){
   document.querySelectorAll('#size-btns .sel-btn').forEach(b=>b.classList.toggle('active',_apSizes.includes(b.dataset.val)));
   _apCat=p.type||null;
   document.querySelectorAll('#cat-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apCat));
+  _apSliderType=p.slider_type||'none';
+  document.querySelectorAll('#slidertype-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apSliderType));
+  const stGroup=document.getElementById('slidertype-group');if(stGroup)stGroup.style.display='';
   const zone=document.getElementById('ap-img-zone');
   if(zone&&p.image){zone.style.backgroundImage=`url(${p.image})`;zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';zone.style.borderStyle='solid';}
   const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display=p.image?'none':'';
@@ -437,14 +463,6 @@ async function deleteProduct(){
     closeAddProduct();
     await loadEditorProducts();
   }catch(e){toast(e.message||'خطأ في الحذف')}
-}
-
-async function toggleHero(id,currentVal){
-  const sb=getSb();if(!sb)return;
-  try{
-    await sb.from('products').update({hero:!currentVal}).eq('id',id);
-    await loadEditorProducts();
-  }catch(e){toast(e.message||'خطأ')}
 }
 
 async function saveBio(){
