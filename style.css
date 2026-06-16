@@ -619,7 +619,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 
 /* Product cards */
 .show-empty{text-align:center;font-size:13px;color:var(--muted);padding:52px 20px}
-.show-prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.show-prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:8px}
 .show-prod-card{position:relative;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--brd);cursor:pointer;
   transition:all .35s var(--spring)}
 .show-prod-card:hover{transform:translateY(-4px);border-color:var(--brd2);box-shadow:0 12px 36px rgba(0,0,0,.4)}
