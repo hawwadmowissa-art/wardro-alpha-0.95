@@ -380,7 +380,7 @@ function renderShowProducts(prods){
   const empty=document.getElementById('show-empty');
   if(grid&&empty){
     if(!prods.length){grid.style.display='none';empty.style.display='block';}
-    else{empty.style.display='none';grid.style.display='flex';grid.innerHTML=prods.slice(0,4).map(cardHtml).join('');}
+    else{empty.style.display='none';grid.style.display='grid';grid.innerHTML=prods.slice(0,4).map(cardHtml).join('');}
   }
   // All-products grid (Products tab)
   const allGrid=document.getElementById('show-all-prod-grid');
