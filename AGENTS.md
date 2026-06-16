@@ -171,7 +171,7 @@ Worker (محادثة مستقلة)
 - Product Detail Sheet يعمل من النتائج (products مدموجة في _brProds)
 
 **قاعدة البيانات — columns مؤكدة في products:**
-- id, seller_id, name, type, color, color_name, price, sizes[], stock, image, description, hero, created_at
+- id, seller_id, name, type, color, color_name, price, sizes[], stock, image, description, slider_type (none/hero/main_hero), created_at
 
 **Polish batch — يونيو 2026:**
 - Product Detail Sheet: بطاقة مركزية مضغوطة (centered card، border-radius:24px كل الجهات، max-height:76vh)
@@ -186,10 +186,15 @@ Worker (محادثة مستقلة)
 - Splash screen: "Powered by El_djem3i" — 9px Tajawal، opacity 0.28، fade in/out
 - Home hero slider: ارتفاع من 310px → 355px (+14.5%)
 
+**Restructure — DB foundation + Editor + Customer wiring (يونيو 2026):**
+- Phase 1: عمود `products.slider_type` (none/hero/main_hero) بدّل `hero`(bool) المحذوف؛ Editor مقسّم لـ 3 أقسام (Main Hero Slider / Hero Slider / Products)
+- Phase 2: `buildHeroSlider` (Show Mode البائع) يقرأ `slider_type==='hero'`، و`buildBrowseHero` (Customer Home) يقرأ `slider_type==='main_hero'` — كلاهما كان يقرأ `p.hero` المحذوف ويسقط على placeholder. الضغط على شريحة الـ hero (في كلا الموضعين) يفتح الآن product detail sheet عبر `openProdDetail`، مع حارس swipe-vs-tap (~10px حركة لمس) لمنع فتح الـ sheet أثناء السحب. الشبكات العادية (Recommended/Store/guest-store) ما زالت تعرض منتجات الـ hero أيضاً — لا فلترة فيها.
+- 🔜 Phase 3: ارتفاع الـ hero + التحسين البصري (blur/glow)
+
 ### 🔜 التالي (لم يُبنَ بعد)
 - ⚠️ stock column تحتاج قرار: الـ default هو 0 وبائعين ما حددوا stock → كل المنتجات تظهر "نفدت الكمية" — يلزم إما تغيير الـ default لـ null أو إضافة حقل is_available
 - Customer Registration Screen مستقلة
 - AI Outfit — تكامل مع منتجات المتاجر الحقيقية وتوصيات "قطع تتناسق معها"
 - إصلاح stock/availability (قرار schema مطلوب)
 
-*آخر تحديث: يونيو 2026 | General 8 / Claude Code*
+*آخر تحديث: يونيو 2026 | Claude Code — Restructure Phase 2*
