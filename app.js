@@ -341,7 +341,13 @@ function _edAddTileHtml(sliderType){
 
 function _renderSliderGrid(gridId,prods,sliderType){
   const grid=document.getElementById(gridId);if(!grid)return;
-  grid.innerHTML=prods.map(_edProdCardHtml).join('')+_edAddTileHtml(sliderType);
+  if(!prods.length){
+    grid.classList.add('ed-prod-grid--empty');
+    grid.innerHTML=`<button class="ed-prod-add-tile ed-prod-add-tile--lg" onclick="openAddProduct('${sliderType}')"><span>+</span></button>`;
+  }else{
+    grid.classList.remove('ed-prod-grid--empty');
+    grid.innerHTML=prods.map(_edProdCardHtml).join('')+_edAddTileHtml(sliderType);
+  }
 }
 
 function renderEditorProducts(prods){
