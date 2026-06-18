@@ -46,6 +46,7 @@ wardro/
 | Phase 1 — Deploy | GitHub Pages + API Key في localStorage | مايو 2026 |
 | Phase 2 — Database | Supabase متصل، sellers + products + RLS | يونيو 2026 |
 | Restructure Phase 1 — Editor Mode | عمود `slider_type` (none/hero/main_hero) بدّل `hero` (bool)؛ Editor مقسّم لـ 3 أقسام مستقلة (Main Hero Slider / Hero Slider / Products) كل واحد بـ dashed "+" tile خاص؛ Edit form فيه segmented control لتغيير القسم؛ حذف toggleHero() وQuick Add row | يونيو 2026 |
+| Seller Approval — Step 1 (DB) | `sellers.approval_status` (default 'pending') + `products.approval_status` (default 'approved')؛ RLS مُحدَّث: public يرى المعتمدين فقط؛ is_admin() + seller_is_approved() كـ SECURITY DEFINER functions؛ البائعين السبعة الحاليين أُبقوا بحالة 'approved' | يونيو 2026 |
 
 ---
 
@@ -109,4 +110,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Restructure Phase 1*
+*آخر تحديث: يونيو 2026 | Claude Code — Seller Approval Step 1 (DB)*
