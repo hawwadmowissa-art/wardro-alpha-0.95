@@ -329,11 +329,11 @@ async function saveProduct(){
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
-      toast('✓ تم تحديث القطعة');
+      toast(approval_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تم تحديث القطعة');
     }else{
       const{error}=await sb.from('products').insert({seller_id:user.id,...payload});
       if(error)throw error;
-      toast('✓ تمت إضافة القطعة');
+      toast(approval_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تمت إضافة القطعة');
     }
     btn.textContent='Done ✓';btn.disabled=false;
     closeAddProduct();
@@ -672,8 +672,8 @@ function buildHeroSlider(prods){
   if(!track||!dotsEl)return;
   clearInterval(_heroTimer);_heroIdx=0;
   let heroProds=prods.filter(p=>(p.slider_type==='hero'||p.slider_type==='main_hero')&&p.image);
-  if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,3);
-  else heroProds=heroProds.slice(0,3);
+  if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,20);
+  else heroProds=heroProds.slice(0,20);
   let slides;
   if(!heroProds.length){
     slides=[{bg:null,id:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
@@ -816,7 +816,7 @@ function buildBrowseHero(prods){
     let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.image);
     if(!heroProds.length)heroProds=prods.filter(p=>p.image);
     if(heroProds.length){
-      slides=heroProds.slice(0,5).map(p=>({
+      slides=heroProds.slice(0,20).map(p=>({
         bg:p.image,
         id:p.id,
         label:(p.type||'FEATURED').toUpperCase(),

@@ -704,7 +704,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .br-hero-label{font-size:8px;letter-spacing:3.5px;color:var(--gold);font-weight:700;margin-bottom:4px;text-transform:uppercase}
 .br-hero-title{font-family:'Fraunces',serif;font-size:22px;font-weight:200;color:var(--cream);line-height:1.1;margin-bottom:3px}
 .br-hero-sub{font-size:10px;color:rgba(216,207,186,.55);margin-bottom:11px;line-height:1.5}
-.br-hero-cta{font-size:10px;font-weight:700;letter-spacing:1.2px;color:#0B0A08;background:var(--gold);
+.br-hero-cta{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.2px;color:#0B0A08;background:var(--gold);
   padding:7px 17px;border-radius:20px;border:none;cursor:pointer;
   transition:all .3s var(--spring);font-family:'Fraunces',serif;text-transform:uppercase}
 .br-hero-cta:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(210,175,105,.35)}
