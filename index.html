@@ -311,6 +311,45 @@
   </div>
 </div>
 
+<!-- SELLER PENDING APPROVAL -->
+<div id="s-pending" class="screen">
+  <div class="pending-inner">
+
+    <!-- WR Emblem (reused from Role Selection) -->
+    <div class="pending-emblem-wrap">
+      <svg class="pending-emblem-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 5 L95 50 L50 95 L5 50 Z" stroke="rgba(210,175,105,.22)" stroke-width=".8" fill="none"/>
+        <circle cx="50" cy="5" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="95" cy="50" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="50" cy="95" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="5" cy="50" r="2.2" fill="#D2AF69" opacity=".5"/>
+        <circle cx="50" cy="50" r="30" stroke="#D2AF69" stroke-width="1.2" fill="rgba(210,175,105,.06)"/>
+        <circle cx="50" cy="50" r="25.5" stroke="rgba(210,175,105,.14)" stroke-width=".6" fill="none"/>
+        <text x="50" y="57" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="300" fill="#D2AF69">WR</text>
+      </svg>
+    </div>
+
+    <!-- Status Card -->
+    <div class="pending-card">
+      <div class="pending-clock">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="pending-title">حسابك قيد المراجعة</div>
+      <div class="pending-sub">سنتواصل معك قريباً</div>
+      <div class="pending-divider"></div>
+      <div class="pending-info">
+        <div class="pending-store" id="pen-store-name">—</div>
+        <div class="pending-email" id="pen-email">—</div>
+      </div>
+    </div>
+
+    <button class="pending-logout" onclick="logOut()">تسجيل الخروج</button>
+  </div>
+</div>
+
 <!-- WELCOME + CHOOSE MODE -->
 <div id="s-welcome" class="screen">
   <div class="wel-inner">

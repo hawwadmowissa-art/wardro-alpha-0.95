@@ -67,7 +67,18 @@ window.addEventListener('DOMContentLoaded',async()=>{
     if(window.db&&localStorage.getItem('wardro_role')==='seller'){
       try{
         const{data:{session}}=await window.db.auth.getSession();
-        if(session){navigateTo('s-show','z-axis');return;}
+        if(session){
+          const{data:seller}=await window.db.from('sellers').select('store_name,approval_status').eq('id',session.user.id).single();
+          if(seller?.approval_status==='approved'){
+            navigateTo('s-show','z-axis');
+          }else{
+            const name=seller?.store_name||localStorage.getItem('wardro_store_name')||'—';
+            document.getElementById('pen-store-name').textContent=name;
+            document.getElementById('pen-email').textContent=session.user.email||'';
+            navigateTo('s-pending','z-axis');
+          }
+          return;
+        }
       }catch(_){}
     }
     if(window.db&&localStorage.getItem('wardro_role')==='customer'){
@@ -184,9 +195,11 @@ async function doSellerReg(){
     localStorage.setItem('wardro_role','seller');
     document.getElementById('wel-name').textContent=storeName;
     document.getElementById('show-store-name').textContent=storeName;
+    document.getElementById('pen-store-name').textContent=storeName;
+    document.getElementById('pen-email').textContent=email;
     btn.innerHTML='✓ تم إنشاء المتجر';
     btn.style.background='var(--goldD)';
-    setTimeout(()=>{btn.style.background='';navigateTo('s-welcome','mask')},700);
+    setTimeout(()=>{btn.style.background='';navigateTo('s-pending','mask')},700);
   }catch(e){
     btn.disabled=false;btn.innerHTML='Create Store →';
     const msg=(e.message||'').toLowerCase();
@@ -212,15 +225,21 @@ async function doSellerSignIn(){
   try{
     const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error)throw error;
-    const{data:seller}=await sb.from('sellers').select('store_name').eq('id',data.user.id).single();
+    const{data:seller}=await sb.from('sellers').select('store_name,approval_status').eq('id',data.user.id).single();
     const name=seller?.store_name||email.split('@')[0];
     localStorage.setItem('wardro_store_name',name);
     localStorage.setItem('wardro_role','seller');
     document.getElementById('wel-name').textContent=name;
     document.getElementById('show-store-name').textContent=name;
-    navigateTo('s-welcome','mask');
-    await loadEditorProducts();
-    toast('✓ أهلاً بعودتك!');
+    if(seller?.approval_status==='approved'){
+      navigateTo('s-welcome','mask');
+      await loadEditorProducts();
+      toast('✓ أهلاً بعودتك!');
+    }else{
+      document.getElementById('pen-store-name').textContent=name;
+      document.getElementById('pen-email').textContent=email;
+      navigateTo('s-pending','mask');
+    }
   }catch(e){toast(e.message||'بيانات غير صحيحة');btn.textContent='Sign In →';btn.disabled=false}
 }
 
