@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Wardro · Admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@200;300&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --bg:#0B0A08;--gold:#D2AF69;--goldD:#8A7040;
+      --card:#1C1915;--card2:#231F1A;
+      --txt:#D8CFBA;--cream:#EDE3CC;--muted:#5A5045;
+      --brd:rgba(210,175,105,.1);--brd2:rgba(210,175,105,.18);
+    }
+
+    body{
+      background:var(--bg);color:var(--txt);
+      font-family:'Tajawal',sans-serif;
+      display:flex;flex-direction:column;min-height:100dvh;
+      overflow-y:auto;
+    }
+
+    /* ── LOGIN ── */
+    #adm-login{
+      flex:1;display:flex;align-items:center;
+      justify-content:center;padding:24px;
+    }
+    .adm-login-inner{
+      width:100%;max-width:360px;
+      display:flex;flex-direction:column;align-items:center;gap:24px;
+    }
+    .adm-brand{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .adm-brand-wr{
+      font-family:'Fraunces',serif;font-size:30px;font-weight:200;
+      color:var(--gold);letter-spacing:.06em;
+    }
+    .adm-brand-badge{
+      font-size:9px;letter-spacing:.22em;color:var(--muted);
+      border:1px solid var(--brd);padding:2px 9px;border-radius:20px;
+      text-transform:uppercase;
+    }
+    .adm-login-card{
+      width:100%;background:var(--card);
+      border:1px solid var(--brd2);border-radius:20px;
+      padding:28px 22px;
+      display:flex;flex-direction:column;gap:12px;
+    }
+    .adm-login-title{
+      font-family:'Fraunces',serif;font-size:18px;font-weight:200;
+      color:var(--cream);text-align:center;margin-bottom:4px;
+    }
+    .adm-inp{
+      width:100%;background:var(--bg);
+      border:1px solid var(--brd2);border-radius:10px;
+      padding:12px 14px;color:var(--cream);
+      font-family:'Tajawal',sans-serif;font-size:14px;
+      outline:none;direction:ltr;text-align:left;
+      transition:border-color .2s;
+    }
+    .adm-inp:focus{border-color:var(--gold)}
+    .adm-inp::placeholder{color:var(--muted)}
+    .adm-err{
+      font-size:12px;color:#e07060;text-align:center;
+      min-height:18px;line-height:1.5;
+    }
+    .adm-btn-gold{
+      width:100%;background:var(--gold);color:var(--bg);
+      border:none;border-radius:10px;padding:13px;
+      font-family:'Tajawal',sans-serif;font-size:15px;font-weight:500;
+      cursor:pointer;transition:opacity .2s,transform .1s;
+    }
+    .adm-btn-gold:hover{opacity:.88}
+    .adm-btn-gold:active{transform:scale(.97)}
+    .adm-btn-gold:disabled{opacity:.45;cursor:not-allowed}
+
+    /* ── PANEL ── */
+    #adm-panel{display:none;flex:1;flex-direction:column}
+    #adm-panel.visible{display:flex}
+
+    .adm-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 18px;border-bottom:1px solid var(--brd);
+      position:sticky;top:0;background:var(--bg);z-index:10;
+    }
+    .adm-header-left{display:flex;align-items:center;gap:9px}
+    .adm-hdr-wr{
+      font-family:'Fraunces',serif;font-size:20px;font-weight:200;color:var(--gold);
+    }
+    .adm-hdr-badge{
+      font-size:9px;letter-spacing:.18em;color:var(--muted);
+      border:1px solid var(--brd);padding:2px 7px;border-radius:20px;
+      text-transform:uppercase;
+    }
+    .adm-logout-btn{
+      background:transparent;border:1px solid var(--brd);
+      border-radius:16px;color:var(--muted);
+      font-family:'Tajawal',sans-serif;font-size:12px;
+      padding:6px 14px;cursor:pointer;
+      transition:color .2s,border-color .2s;
+    }
+    .adm-logout-btn:hover{color:var(--txt);border-color:var(--brd2)}
+
+    .adm-tabs{
+      display:flex;border-bottom:1px solid var(--brd);padding:0 16px;
+    }
+    .adm-tab{
+      flex:1;padding:13px 6px;background:transparent;
+      border:none;border-bottom:2px solid transparent;
+      color:var(--muted);font-family:'Tajawal',sans-serif;font-size:13px;
+      cursor:pointer;transition:color .2s,border-color .2s;
+      display:flex;align-items:center;justify-content:center;gap:6px;
+    }
+    .adm-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+    .adm-tab-n{
+      background:rgba(210,175,105,.14);color:var(--gold);
+      border-radius:10px;padding:1px 7px;font-size:11px;
+      min-width:18px;text-align:center;
+    }
+    .adm-tab-n:empty{display:none}
+
+    .adm-content{
+      flex:1;padding:16px;
+      max-width:640px;width:100%;margin:0 auto;
+    }
+    .adm-panel-tab{display:none}
+    .adm-panel-tab.active{display:block}
+
+    .adm-loading{
+      text-align:center;color:var(--muted);padding:48px 0;font-size:13px;
+    }
+    .adm-empty{
+      text-align:center;color:var(--muted);
+      padding:48px 20px;font-size:14px;line-height:1.8;
+    }
+    .adm-empty-ico{font-size:26px;margin-bottom:8px;opacity:.5}
+
+    .adm-card{
+      background:var(--card);border:1px solid var(--brd);
+      border-radius:14px;padding:14px;margin-bottom:10px;
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .adm-card-row{display:flex;align-items:flex-start;gap:12px}
+    .adm-thumb{
+      width:54px;height:54px;border-radius:8px;
+      object-fit:cover;flex-shrink:0;background:var(--bg);
+    }
+    .adm-thumb-ph{
+      width:54px;height:54px;border-radius:8px;
+      background:var(--bg);border:1px solid var(--brd);
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;opacity:.35;flex-shrink:0;
+    }
+    .adm-card-info{flex:1;min-width:0}
+    .adm-card-name{
+      font-family:'Fraunces',serif;font-size:15px;font-weight:300;color:var(--cream);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .adm-card-detail{font-size:12px;color:var(--muted);margin-top:3px}
+    .adm-card-price{font-size:12px;color:var(--gold);margin-top:2px;opacity:.85}
+    .adm-card-date{font-size:11px;color:var(--muted);margin-top:4px;opacity:.65}
+
+    .adm-actions{display:flex;gap:8px}
+    .adm-approve{
+      flex:1;padding:9px;
+      background:rgba(72,168,80,.11);border:1px solid rgba(72,168,80,.22);
+      border-radius:9px;color:#6dcc7a;
+      font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;
+      transition:background .2s,transform .1s;
+    }
+    .adm-approve:hover{background:rgba(72,168,80,.2)}
+    .adm-approve:active{transform:scale(.97)}
+    .adm-approve:disabled{opacity:.4;cursor:not-allowed}
+    .adm-reject{
+      flex:1;padding:9px;
+      background:rgba(180,60,40,.1);border:1px solid rgba(180,60,40,.2);
+      border-radius:9px;color:#d47060;
+      font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;
+      transition:background .2s,transform .1s;
+    }
+    .adm-reject:hover{background:rgba(180,60,40,.2)}
+    .adm-reject:active{transform:scale(.97)}
+    .adm-reject:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ── TOAST ── */
+    #adm-toast{
+      position:fixed;bottom:28px;left:50%;
+      transform:translateX(-50%) translateY(16px);
+      background:var(--card2);border:1px solid var(--brd2);
+      border-radius:20px;padding:10px 20px;
+      font-size:13px;color:var(--txt);
+      opacity:0;transition:opacity .3s,transform .3s;
+      pointer-events:none;white-space:nowrap;z-index:99;
+    }
+    #adm-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="adm-login">
+    <div class="adm-login-inner">
+      <div class="adm-brand">
+        <div class="adm-brand-wr">WR</div>
+        <div class="adm-brand-badge">Admin Access</div>
+      </div>
+      <div class="adm-login-card">
+        <div class="adm-login-title">تسجيل دخول المشرف</div>
+        <input id="adm-email" class="adm-inp" type="email"
+               placeholder="admin@email.com" autocomplete="email">
+        <input id="adm-pass" class="adm-inp" type="password"
+               placeholder="••••••••" autocomplete="current-password">
+        <div id="adm-err" class="adm-err"></div>
+        <button id="adm-login-btn" class="adm-btn-gold" onclick="admLogin()">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="adm-panel">
+    <div class="adm-header">
+      <div class="adm-header-left">
+        <span class="adm-hdr-wr">WR</span>
+        <span class="adm-hdr-badge">Admin</span>
+      </div>
+      <button class="adm-logout-btn" onclick="admLogout()">خروج</button>
+    </div>
+    <div class="adm-tabs">
+      <button class="adm-tab active" id="stab-sellers" onclick="switchTab('sellers')">
+        البائعون
+        <span class="adm-tab-n" id="cnt-sellers"></span>
+      </button>
+      <button class="adm-tab" id="stab-prods" onclick="switchTab('prods')">
+        منتجات Main Hero
+        <span class="adm-tab-n" id="cnt-prods"></span>
+      </button>
+    </div>
+    <div class="adm-content">
+      <div class="adm-panel-tab active" id="ptab-sellers">
+        <div class="adm-loading">جاري التحميل...</div>
+      </div>
+      <div class="adm-panel-tab" id="ptab-prods">
+        <div class="adm-loading">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adm-toast"></div>
+
+  <script src="supabase-config.js"></script>
+  <script>
+    'use strict';
+
+    const ADMIN_EMAIL = 'eldjem333i@gmail.com';
+    const sb = window.db;
+
+    // ── TOAST ──
+    let _tt;
+    function toast(m) {
+      clearTimeout(_tt);
+      const el = document.getElementById('adm-toast');
+      el.textContent = m;
+      el.classList.add('show');
+      _tt = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    // ── HELPERS ──
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function fmtDate(iso) {
+      if (!iso) return '';
+      try {
+        return new Date(iso).toLocaleDateString('ar-DZ', {
+          year: 'numeric', month: 'short', day: 'numeric'
+        });
+      } catch (_) { return iso; }
+    }
+
+    // ── LOGIN ──
+    async function admLogin() {
+      const email = document.getElementById('adm-email').value.trim();
+      const pass  = document.getElementById('adm-pass').value;
+      const errEl = document.getElementById('adm-err');
+      const btn   = document.getElementById('adm-login-btn');
+      errEl.textContent = '';
+      if (!sb) { errEl.textContent = 'قاعدة البيانات غير متصلة'; return; }
+      if (!email || !pass) { errEl.textContent = 'أدخل البريد وكلمة المرور'; return; }
+      btn.disabled = true; btn.textContent = '...';
+      try {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if (error) {
+          const m = (error.message || '').toLowerCase();
+          errEl.textContent = (m.includes('invalid') || m.includes('credentials') || m.includes('no user'))
+            ? 'بيانات غير صحيحة'
+            : 'خطأ في تسجيل الدخول — حاول مجدداً';
+          btn.disabled = false; btn.textContent = 'دخول';
+          return;
+        }
+        if (data.user.email !== ADMIN_EMAIL) {
+          await sb.auth.signOut();
+          errEl.textContent = 'غير مصرح بالدخول';
+          btn.disabled = false; btn.textContent = 'دخول';
+          return;
+        }
+        revealPanel();
+      } catch (e) {
+        errEl.textContent = 'خطأ — حاول مجدداً';
+        btn.disabled = false; btn.textContent = 'دخول';
+      }
+    }
+
+    // Enter key on login
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !document.getElementById('adm-panel').classList.contains('visible'))
+        admLogin();
+    });
+
+    // ── PANEL SHOW / HIDE ──
+    function revealPanel() {
+      document.getElementById('adm-login').style.display = 'none';
+      document.getElementById('adm-panel').classList.add('visible');
+      loadSellers();
+      loadProds();
+    }
+    function concealPanel() {
+      document.getElementById('adm-panel').classList.remove('visible');
+      document.getElementById('adm-login').style.display = '';
+      document.getElementById('adm-email').value = '';
+      document.getElementById('adm-pass').value  = '';
+      document.getElementById('adm-err').textContent = '';
+      const btn = document.getElementById('adm-login-btn');
+      btn.disabled = false; btn.textContent = 'دخول';
+    }
+
+    // ── LOGOUT ──
+    async function admLogout() {
+      if (sb) await sb.auth.signOut();
+      concealPanel();
+    }
+
+    // ── TABS ──
+    function switchTab(tab) {
+      document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.adm-panel-tab').forEach(p => p.classList.remove('active'));
+      document.getElementById('stab-' + tab).classList.add('active');
+      document.getElementById('ptab-' + tab).classList.add('active');
+    }
+
+    // ── SELLERS ──
+    async function loadSellers() {
+      const el = document.getElementById('ptab-sellers');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        const adminId = session?.user?.id;
+        let q = sb.from('sellers')
+          .select('id,store_name,created_at')
+          .eq('approval_status', 'pending')
+          .order('created_at', { ascending: true });
+        if (adminId) q = q.neq('id', adminId);
+        const { data, error } = await q;
+        if (error) throw error;
+        const count = data?.length ?? 0;
+        document.getElementById('cnt-sellers').textContent = count > 0 ? count : '';
+        if (!count) {
+          el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">✓</div>ما عندك حتى بائع قيد المراجعة</div>';
+          return;
+        }
+        el.innerHTML = data.map(s => `
+          <div class="adm-card" id="sc-${s.id}">
+            <div class="adm-card-row">
+              <div class="adm-thumb-ph">🏪</div>
+              <div class="adm-card-info">
+                <div class="adm-card-name">${esc(s.store_name || '—')}</div>
+                <div class="adm-card-date">${fmtDate(s.created_at)}</div>
+              </div>
+            </div>
+            <div class="adm-actions">
+              <button class="adm-approve" onclick="doAction('seller','${s.id}','approved')">✓ موافقة</button>
+              <button class="adm-reject"  onclick="doAction('seller','${s.id}','rejected')">✕ رفض</button>
+            </div>
+          </div>`).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // ── PRODUCTS ──
+    async function loadProds() {
+      const el = document.getElementById('ptab-prods');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const { data, error } = await sb.from('products')
+          .select('id,name,price,image,created_at,seller:sellers(store_name)')
+          .eq('slider_type', 'main_hero')
+          .eq('approval_status', 'pending')
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        const count = data?.length ?? 0;
+        document.getElementById('cnt-prods').textContent = count > 0 ? count : '';
+        if (!count) {
+          el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">✓</div>ما عندك حتى منتج قيد المراجعة</div>';
+          return;
+        }
+        el.innerHTML = data.map(p => `
+          <div class="adm-card" id="pc-${p.id}">
+            <div class="adm-card-row">
+              ${p.image
+                ? `<img class="adm-thumb" src="${esc(p.image)}" alt="${esc(p.name || '')}" loading="lazy">`
+                : '<div class="adm-thumb-ph">👔</div>'}
+              <div class="adm-card-info">
+                <div class="adm-card-name">${esc(p.name || '—')}</div>
+                <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
+                <div class="adm-card-price">${Number(p.price || 0).toLocaleString()} DZD</div>
+                <div class="adm-card-date">${fmtDate(p.created_at)}</div>
+              </div>
+            </div>
+            <div class="adm-actions">
+              <button class="adm-approve" onclick="doAction('product','${p.id}','approved')">✓ موافقة</button>
+              <button class="adm-reject"  onclick="doAction('product','${p.id}','rejected')">✕ رفض</button>
+            </div>
+          </div>`).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // ── APPROVE / REJECT ──
+    async function doAction(type, id, status) {
+      if (status === 'rejected' && !confirm('متأكد؟')) return;
+      const cardId = (type === 'seller' ? 'sc-' : 'pc-') + id;
+      const card = document.getElementById(cardId);
+      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const table = type === 'seller' ? 'sellers' : 'products';
+        const { error } = await sb.from(table).update({ approval_status: status }).eq('id', id);
+        if (error) throw error;
+        toast(status === 'approved' ? '✓ تمت الموافقة' : '✓ تم الرفض');
+        if (type === 'seller') loadSellers(); else loadProds();
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    }
+
+    // ── SESSION RESTORE ──
+    (async () => {
+      if (!sb) return;
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session && session.user.email === ADMIN_EMAIL) revealPanel();
+      } catch (_) {}
+    })();
+  </script>
+</body>
+</html>
