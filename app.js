@@ -363,9 +363,15 @@ async function loadEditorProducts(){
 }
 
 function _edProdCardHtml(p){
+  const apprBadge=p.approval_status==='pending'
+    ?`<div class="ed-appr-badge ed-appr-badge--pending">قيد المراجعة</div>`
+    :p.approval_status==='rejected'
+    ?`<div class="ed-appr-badge ed-appr-badge--rejected">تم الرفض</div>`
+    :'';
   return `
     <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
       <button class="ed-prod-dots" onclick="event.stopPropagation();openEditProduct('${p.id}')">···</button>
+      ${apprBadge}
       ${p.image?`<img class="ed-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
       <div class="ed-prod-info">
         <div class="ed-prod-name">${p.name}</div>
@@ -665,19 +671,20 @@ function buildHeroSlider(prods){
   const dotsEl=document.getElementById('show-hero-dots');
   if(!track||!dotsEl)return;
   clearInterval(_heroTimer);_heroIdx=0;
-  let heroProds=prods.filter(p=>p.slider_type==='hero'&&p.image);
+  let heroProds=prods.filter(p=>(p.slider_type==='hero'||p.slider_type==='main_hero')&&p.image);
   if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,3);
   else heroProds=heroProds.slice(0,3);
   let slides;
   if(!heroProds.length){
     slides=[{bg:null,id:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
   }else{
-    slides=heroProds.map(p=>({bg:p.image,id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`}));
+    slides=heroProds.map(p=>({bg:p.image,id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`,approval_status:p.approval_status}));
   }
   _heroLen=slides.length;
   track.innerHTML=slides.map((s,i)=>`
     <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}>
       <div class="show-hero-overlay"></div>
+      ${s.approval_status==='pending'?'<div class="show-hero-appr-badge">قيد المراجعة</div>':s.approval_status==='rejected'?'<div class="show-hero-appr-badge show-hero-appr-badge--rejected">تم الرفض</div>':''}
       <div class="show-hero-content">
         <div class="show-hero-label">${s.label}</div>
         <div class="show-hero-title">${s.title}</div>

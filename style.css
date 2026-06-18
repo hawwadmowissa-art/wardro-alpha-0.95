@@ -1225,4 +1225,36 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pending-logout:hover{color:var(--txt);border-color:rgba(210,175,105,.28)}
 .pending-logout:active{transform:scale(.96);transition-duration:.08s}
 
+/* ══ APPROVAL STATUS BADGES ══ */
+.ed-appr-badge{
+  position:absolute;top:4px;left:4px;z-index:2;
+  font-family:'Tajawal',sans-serif;font-size:8px;
+  padding:2px 6px;border-radius:6px;
+  pointer-events:none;white-space:nowrap;
+}
+.ed-appr-badge--pending{
+  background:rgba(210,175,105,.1);
+  border:1px solid rgba(210,175,105,.35);
+  color:var(--gold);
+}
+.ed-appr-badge--rejected{
+  background:rgba(130,40,30,.15);
+  border:1px solid rgba(150,50,40,.3);
+  color:#c06050;
+}
+.show-hero-appr-badge{
+  position:absolute;top:12px;right:12px;z-index:3;
+  font-family:'Tajawal',sans-serif;font-size:10px;
+  padding:3px 9px;border-radius:10px;
+  pointer-events:none;
+  background:rgba(210,175,105,.12);
+  border:1px solid rgba(210,175,105,.3);
+  color:var(--gold);
+}
+.show-hero-appr-badge--rejected{
+  background:rgba(130,40,30,.15);
+  border:1px solid rgba(150,50,40,.3);
+  color:#c06050;
+}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.15s!important}}
