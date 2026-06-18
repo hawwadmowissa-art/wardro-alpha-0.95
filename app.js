@@ -324,7 +324,8 @@ async function saveProduct(){
       const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url,slider_type:_apSliderType};
+    const approval_status=_apSliderType==='main_hero'?'pending':'approved';
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url,slider_type:_apSliderType,approval_status};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
