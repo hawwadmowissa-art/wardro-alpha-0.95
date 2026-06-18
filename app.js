@@ -26,7 +26,7 @@ function navigateTo(targetId,type='z-axis'){
 
 function goCustomer(){navigateTo('s-browse','slide')}
 
-function goSeller(){navigateTo('s-seller-reg','slide')}
+function goSeller(){navigateTo('s-seller-signin','slide')}
 
 // Role Selection — move gold glow to tapped card, then navigate
 function rsSelectCard(cardId,cb){
@@ -204,7 +204,29 @@ async function doSellerReg(){
     btn.disabled=false;btn.innerHTML='Create Store →';
     const msg=(e.message||'').toLowerCase();
     if(msg.includes('already registered')||msg.includes('already been registered')){
-      setRegErr('err-email','هذا البريد الإلكتروني مستخدم بالفعل');
+      try{
+        const{data:siData,error:siErr}=await sb.auth.signInWithPassword({email,password:pass});
+        if(!siErr&&siData?.user){
+          const{data:seller}=await sb.from('sellers').select('store_name,approval_status').eq('id',siData.user.id).single();
+          const name=seller?.store_name||email.split('@')[0];
+          localStorage.setItem('wardro_store_name',name);
+          localStorage.setItem('wardro_role','seller');
+          document.getElementById('wel-name').textContent=name;
+          document.getElementById('show-store-name').textContent=name;
+          if(seller?.approval_status==='approved'){
+            navigateTo('s-welcome','mask');
+            await loadEditorProducts();
+            toast('✓ أهلاً بعودتك!');
+          }else{
+            document.getElementById('pen-store-name').textContent=name;
+            document.getElementById('pen-email').textContent=email;
+            navigateTo('s-pending','mask');
+          }
+          return;
+        }
+      }catch(_){}
+      setRegErr('err-email','هذا الحساب موجود — سجّل الدخول من فضلك');
+      setTimeout(()=>navigateTo('s-seller-signin','slide'),1600);
     }else if(msg.includes('password')&&(msg.includes('weak')||msg.includes('strong'))){
       setRegErr('err-pass','كلمة المرور ضعيفة — اختر كلمة أقوى');
     }else if(msg.includes('email')&&(msg.includes('invalid')||msg.includes('format'))){
@@ -511,6 +533,15 @@ async function logOut(){
     localStorage.removeItem('wardro_profile_image');
     clearInterval(_heroTimer);
     clearInterval(_brHeroTimer);
+    // Reset registration form
+    ['reg-store','reg-email','reg-pass','reg-pass2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    clearRegErrors();
+    const regBtn=document.getElementById('reg-submit');
+    if(regBtn){regBtn.disabled=false;regBtn.innerHTML='Create Store →';regBtn.style.background='';}
+    // Reset sign-in form
+    ['si-email','si-pass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    const siBtn=document.getElementById('si-submit');
+    if(siBtn){siBtn.disabled=false;siBtn.textContent='Sign In →';}
     navigateTo('s-splash','z-axis');
     toast('✓ تم تسجيل الخروج');
   }catch(e){toast(e.message||'خطأ في تسجيل الخروج')}
