@@ -50,6 +50,7 @@ function triggerStagger(id){
 
 // ══ LOGO ══
 window.addEventListener('DOMContentLoaded',async()=>{
+  localStorage.removeItem('wardro_claude_key');
   const onboarded=localStorage.getItem('wardro_onboarded')==='true';
   if(onboarded){const ob=document.getElementById('s-onboard');if(ob)ob.classList.add('gone')}
 
@@ -109,38 +110,7 @@ function celebratePick(el){
     setTimeout(()=>p.remove(),1300)}
 }
 
-// ══ API KEY GUARD ══
-function getApiKey(){
-  const k=localStorage.getItem('wardro_claude_key');
-  if(k&&k.trim())return k.trim();
-  showApiKeyModal();
-  return null;
-}
-function showApiKeyModal(){
-  let m=document.getElementById('api-key-modal');
-  if(m){m.style.display='flex';return}
-  m=document.createElement('div');
-  m.id='api-key-modal';
-  m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(11,10,8,.92);display:flex;align-items:center;justify-content:center;padding:24px';
-  m.innerHTML=`<div style="background:var(--card);border:1px solid var(--brd2);border-radius:18px;padding:28px 24px;width:100%;max-width:360px;text-align:center">
-    <div style="font-size:28px;margin-bottom:12px">🔑</div>
-    <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--cream);margin-bottom:8px">مفتاح Claude API</div>
-    <div style="font-size:13px;color:var(--txtD);margin-bottom:20px;line-height:1.6">أدخل مفتاح Anthropic API الخاص بك.<br>يُحفظ محلياً على جهازك فقط.</div>
-    <input id="api-key-inp" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg);border:1px solid var(--brd2);border-radius:10px;padding:12px 14px;color:var(--cream);font-size:14px;outline:none;margin-bottom:14px;text-align:left;direction:ltr">
-    <button onclick="saveApiKey()" style="width:100%;background:var(--rust);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-family:'Tajawal',sans-serif;cursor:pointer">حفظ والمتابعة</button>
-  </div>`;
-  document.body.appendChild(m);
-  setTimeout(()=>document.getElementById('api-key-inp')?.focus(),100);
-}
-function saveApiKey(){
-  const inp=document.getElementById('api-key-inp');
-  const k=(inp?.value||'').trim();
-  if(!k.startsWith('sk-')){toast('المفتاح غير صحيح — يجب أن يبدأ بـ sk-');return}
-  localStorage.setItem('wardro_claude_key',k);
-  const m=document.getElementById('api-key-modal');
-  if(m)m.style.display='none';
-  toast('✓ تم حفظ المفتاح');
-}
+// ══ AI via Edge Functions (no frontend key) ══
 
 // ══ TOAST ══
 let toastT;
@@ -152,6 +122,10 @@ function getSb(){
   toast('قاعدة البيانات غير متصلة');
   return null;
 }
+
+// ══ XSS HELPERS ══
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeUrl(u){if(!u)return'';const s=String(u).trim();return/^javascript:/i.test(s)?'':s;}
 
 // ══ SELLER AUTH ══
 function setRegErr(id,msg){
@@ -372,9 +346,9 @@ function _edProdCardHtml(p){
     <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
       <button class="ed-prod-dots" onclick="event.stopPropagation();openEditProduct('${p.id}')">···</button>
       ${apprBadge}
-      ${p.image?`<img class="ed-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
+      ${p.image?`<img class="ed-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
       <div class="ed-prod-info">
-        <div class="ed-prod-name">${p.name}</div>
+        <div class="ed-prod-name">${esc(p.name)}</div>
         <div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div>
         <div class="ed-prod-info-row">
           <div class="ed-prod-badge">In Stock</div>
@@ -420,8 +394,8 @@ function renderShowProducts(prods){
   prods.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
   const cardHtml=p=>`
     <div class="show-prod-card" onclick="openProdDetail('${p.id}')">
-      ${p.image?`<img class="show-prod-img" src="${p.image}" alt="${p.name}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
-      <div class="show-prod-info"><div class="show-prod-name">${p.name}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="show-prod-cat">${p.type||''}</div></div>
+      ${p.image?`<img class="show-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
+      <div class="show-prod-info"><div class="show-prod-name">${esc(p.name)}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="show-prod-cat">${esc(p.type||'')}</div></div>
     </div>`;
   // Featured grid (Home tab — first 4)
   const grid=document.getElementById('show-prod-grid');
@@ -682,14 +656,14 @@ function buildHeroSlider(prods){
   }
   _heroLen=slides.length;
   track.innerHTML=slides.map((s,i)=>`
-    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}>
+    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
       <div class="show-hero-overlay"></div>
       ${s.approval_status==='pending'?'<div class="show-hero-appr-badge">قيد المراجعة</div>':s.approval_status==='rejected'?'<div class="show-hero-appr-badge show-hero-appr-badge--rejected">تم الرفض</div>':''}
       <div class="show-hero-content">
-        <div class="show-hero-label">${s.label}</div>
-        <div class="show-hero-title">${s.title}</div>
-        <div class="show-hero-sub">${s.sub}</div>
-        <div class="show-hero-cta">${s.cta} →</div>
+        <div class="show-hero-label">${esc(s.label)}</div>
+        <div class="show-hero-title">${esc(s.title)}</div>
+        <div class="show-hero-sub">${esc(s.sub)}</div>
+        <div class="show-hero-cta">${esc(s.cta)} →</div>
       </div>
     </div>`).join('');
   dotsEl.innerHTML=slides.map((_,i)=>`<button class="show-hero-dot${i===0?' active':''}" onclick="goHeroSlide(${i})"></button>`).join('');
@@ -789,8 +763,8 @@ function renderBrGrid(id,prods){
   if(!prods.length){el.innerHTML='<div class="br-empty">لا توجد قطع</div>';return}
   el.innerHTML=prods.map(p=>`
     <div class="br-prod-card${p._demo?' br-prod-card--demo':''}"${p._demo?'':` onclick="openProdDetail('${p.id}')"`}>
-      ${p.image?`<img class="br-prod-img" src="${p.image}" alt="${p.name||''}">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
-      ${!p._demo?`<div class="br-prod-info"><div class="br-prod-name">${p.name}</div><div class="br-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>`:''}
+      ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+      ${!p._demo?`<div class="br-prod-info"><div class="br-prod-name">${esc(p.name)}</div><div class="br-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>`:''}
     </div>`).join('');
 }
 
@@ -798,10 +772,13 @@ function renderTopStores(stores){
   const el=document.getElementById('br-stores-row');if(!el)return;
   const list=stores.length?stores:Array.from({length:4},(_,i)=>({id:'ds-'+i,_demo:true,name:'',img:null}));
   el.innerHTML=list.map(s=>`
-    <div class="br-store-item"${s._demo?'':` onclick="openStoreView('${s.id}','${(s.name||'').replace(/'/g,"\\'")}','${s.img||''}')" `}>
-      <div class="br-store-circle"${s.img?` style="background-image:url('${s.img}')"`:''}>${!s.img?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".35"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/></svg>`:''}</div>
-      <div class="br-store-name${s._demo?' br-store-name--ph':''}">${s._demo?'':s.name}</div>
+    <div class="br-store-item"${s._demo?'':` data-sid="${esc(s.id)}" data-sname="${esc(s.name||'')}" data-simg="${esc(safeUrl(s.img||''))}"`}>
+      <div class="br-store-circle"${s.img?` style="background-image:url('${safeUrl(s.img||'')}')"`:''}>${!s.img?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".35"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/></svg>`:''}</div>
+      <div class="br-store-name${s._demo?' br-store-name--ph':''}">${s._demo?'':esc(s.name)}</div>
     </div>`).join('');
+  el.querySelectorAll('.br-store-item[data-sid]').forEach(item=>{
+    item.onclick=()=>openStoreView(item.dataset.sid,item.dataset.sname,item.dataset.simg);
+  });
 }
 
 function buildBrowseHero(prods){
@@ -831,13 +808,13 @@ function buildBrowseHero(prods){
   }
 
   track.innerHTML=slides.map((s,i)=>`
-    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${s.bg}')"`:''}>
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
       <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
-        <div class="br-hero-label">${s.label}</div>
-        <div class="br-hero-title">${s.title}</div>
-        <div class="br-hero-sub">${s.sub}</div>
-        ${s.id?`<div class="br-hero-cta">${s.cta} →</div>`:`<button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${s.cta} →</button>`}
+        <div class="br-hero-label">${esc(s.label)}</div>
+        <div class="br-hero-title">${esc(s.title)}</div>
+        <div class="br-hero-sub">${esc(s.sub)}</div>
+        ${s.id?`<div class="br-hero-cta">${esc(s.cta)} →</div>`:`<button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${esc(s.cta)} →</button>`}
       </div>
     </div>`).join('');
   dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
@@ -872,9 +849,9 @@ function openProdDetail(id){
   document.getElementById('pd-desc').textContent=p.description||'';
   document.getElementById('pd-stock-lbl').textContent=(p.stock>0?'متوفر — '+p.stock+' قطعة':'Quantity Available');
   const cWrap=document.getElementById('pd-colors-wrap');
-  cWrap.innerHTML=p.color?`<span class="pd-color-chip pd-color-chip--active">${p.color_name||p.color}</span>`:'';
+  cWrap.innerHTML=p.color?`<span class="pd-color-chip pd-color-chip--active">${esc(p.color_name||p.color)}</span>`:'';
   const sPills=document.getElementById('pd-size-pills');
-  sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${s}</button>`).join('');
+  sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
   const ov=document.getElementById('pd-overlay');
@@ -1011,13 +988,13 @@ function renderSaved(items){
         <button class="sv-heart" onclick="removeSavedItem('${item.id}')">♥</button>
         <div class="sv-card-img-wrap">
           ${p.image
-            ?`<img class="sv-card-img" src="${p.image}" alt="${p.name}" loading="lazy">`
+            ?`<img class="sv-card-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`
             :`<div class="sv-card-img sv-card-img--ph"></div>`}
         </div>
         <div class="sv-card-info">
-          <div class="sv-store-name">${storeName}</div>
-          <div class="sv-prod-name">${p.name}</div>
-          <div class="sv-size">المقاس: ${size}</div>
+          <div class="sv-store-name">${esc(storeName)}</div>
+          <div class="sv-prod-name">${esc(p.name)}</div>
+          <div class="sv-size">المقاس: ${esc(size)}</div>
           ${availHtml}
           <div class="sv-price">${Number(p.price||0).toLocaleString()} DZD</div>
         </div>
@@ -1194,9 +1171,9 @@ async function runDiscover(minPrice,maxPrice,colorFilter){
 
     grid.innerHTML=results.map(p=>`
       <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
-        ${p.image?`<img class="br-prod-img" src="${p.image}" alt="${p.name||''}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+        ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
         <div class="br-prod-info">
-          <div class="br-prod-name">${p.name||''}</div>
+          <div class="br-prod-name">${esc(p.name||'')}</div>
           <div class="br-prod-price">${Number(p.price||0).toLocaleString()} DZD</div>
         </div>
       </div>`).join('');
@@ -1213,9 +1190,9 @@ async function runDiscover(minPrice,maxPrice,colorFilter){
       if(row){
         row.innerHTML=compProds.map(p=>`
           <div class="rs-comp-card" onclick="openProdDetail('${p.id}')">
-            ${p.image?`<img class="rs-comp-img" src="${p.image}" alt="${p.name||''}" loading="lazy">`:`<div class="rs-comp-img-ph">👔</div>`}
+            ${p.image?`<img class="rs-comp-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="rs-comp-img-ph">👔</div>`}
             <div class="rs-comp-info">
-              <div class="rs-comp-name">${p.name||''}</div>
+              <div class="rs-comp-name">${esc(p.name||'')}</div>
               <div class="rs-comp-price">${Number(p.price||0).toLocaleString()} DZD</div>
             </div>
           </div>`).join('');

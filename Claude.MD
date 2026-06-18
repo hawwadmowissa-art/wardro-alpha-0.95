@@ -51,6 +51,7 @@ wardro/
 | Seller Approval — Step 2 (UI) | شاشة `#s-pending` جديدة: WR emblem + "حسابك قيد المراجعة" + اسم المتجر + إيميل + زر تسجيل خروج؛ Routing محدَّث في Registration/SignIn/Session Restore — pending/rejected يذهبون لـ #s-pending، approved للـ editor كالمعتاد | يونيو 2026 |
 | Seller Approval — Step 2 (Logout Fix) | logOut() يُعيد ضبط حقول reg + signin (قيم + أزرار + أخطاء)؛ goSeller() يوجّه لـ signin بدل reg؛ doSellerReg() يُجرّب sign-in صامت عند "already registered" ويوجّه حسب approval_status | يونيو 2026 |
 | Seller Approval — Step 3 (Admin) | `admin.html` مستقل: بوابة تسجيل دخول + فحص ADMIN_EMAIL؛ تابين (بائعون قيد المراجعة / منتجات Main Hero)؛ موافقة/رفض مع تأكيد + toast؛ Session Restore للمشرف؛ محمي من غير المصرح لهم | يونيو 2026 |
+| Security Audit — API Key + XSS | حذف `getApiKey/showApiKeyModal/saveApiKey` + cleanup `wardro_claude_key`؛ إضافة `esc()` + `safeUrl()` في `app.js`؛ تأمين كل نقاط `innerHTML`: بطاقات Editor/Show/Browse/Saved/Discover/Results/Hero Sliders + Product Detail + Top Stores (data-attributes بدل onclick injection) | يونيو 2026 |
 
 ---
 
@@ -74,8 +75,9 @@ wardro/
 - **Diff Style فقط** — لا تعيد كتابة ملف كامل، عدّل ما يحتاج تعديل
 - **لا تكسر ما يشتغل** — كل تعديل يكمل ما هو موجود
 - **الحل الأبسط دائماً** — لا تعقيد غير ضروري
-- **API calls محمية** — تحقق من `wardro_claude_key` في localStorage قبل كل call
+- **AI via Edge Functions** — لا مفاتيح API في الـ frontend؛ كل نداء لـ Claude يمر عبر Supabase Edge Function
 - **supabase-config.js** — لا تلمسه، لا ترفعه
+- **XSS — esc() + safeUrl()** — كل string من DB يُحقن في `innerHTML` يمر عبر `esc()`؛ كل URL يُستخدم في `src` أو `style background-image` يمر عبر `safeUrl()`؛ استخدم `textContent` حيثما أمكن
 - **products.slider_type** (`none`/`hero`/`main_hero`) هو المرجع الوحيد لمكان ظهور القطعة — عمود `hero` (bool) القديم محذوف نهائياً. ⚠️ `buildHeroSlider`/`buildBrowseHero` بـ app.js لسا يقرأو `p.hero` القديم (دائماً undefined الآن) — لازم تحديثهم لـ `p.slider_type==='hero'`/`'main_hero'` في Restructure Phase 2 وإلا الـ hero slider عند الزبون يبقى فاضي
 
 ---
