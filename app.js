@@ -240,7 +240,7 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={},_apProductType=null;
+let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={},_apProductType=null,_apColorTags=[];
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -265,7 +265,19 @@ window.addEventListener('DOMContentLoaded',()=>{
     const b=e.target.closest('.sel-btn');if(!b)return;
     document.querySelectorAll('#cat-btns .sel-btn').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');_apCat=b.dataset.val;
+    _apUpdateSubmitBtn();
   });
+  const _ctb=document.getElementById('color-tag-btns');
+  if(_ctb){
+    _ctb.innerHTML=_AP_COLORS.map(c=>`<button class="sel-btn" data-val="${c.key}" style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c.hex};flex-shrink:0${c.border?';border:1px solid rgba(138,138,138,.4)':''}" aria-hidden="true"></span>${esc(c.ar)}</button>`).join('');
+    _ctb.addEventListener('click',e=>{
+      const b=e.target.closest('.sel-btn');if(!b)return;
+      b.classList.toggle('active');
+      const v=b.dataset.val;
+      if(b.classList.contains('active')){if(!_apColorTags.includes(v))_apColorTags.push(v);}
+      else _apColorTags=_apColorTags.filter(c=>c!==v);
+    });
+  }
   document.getElementById('slidertype-btns')?.addEventListener('click',e=>{
     const b=e.target.closest('.sel-btn');if(!b)return;
     document.querySelectorAll('#slidertype-btns .sel-btn').forEach(x=>x.classList.remove('active'));
@@ -274,6 +286,21 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('ap-name')?.addEventListener('input',_apUpdateSubmitBtn);
   document.getElementById('ap-price')?.addEventListener('input',_apUpdateSubmitBtn);
 });
+
+const _AP_COLORS=[
+  {key:'black',ar:'أسود',hex:'#0A0A0A'},
+  {key:'white',ar:'أبيض',hex:'#FAFAFA',border:true},
+  {key:'off-white',ar:'أبيض مكسور',hex:'#EDE3CC',border:true},
+  {key:'grey',ar:'رمادي',hex:'#8A8A8A'},
+  {key:'navy',ar:'كحلي',hex:'#1F2A44'},
+  {key:'brown',ar:'بني',hex:'#5C3A1E'},
+  {key:'camel',ar:'جملي',hex:'#C19A6B'},
+  {key:'beige',ar:'بيج',hex:'#D9C6A5',border:true},
+  {key:'olive',ar:'زيتوني',hex:'#6B7A5E'},
+  {key:'dark-green',ar:'أخضر غامق',hex:'#2E4A33'},
+  {key:'burgundy',ar:'نبيذي',hex:'#7A3B3B'},
+  {key:'rust',ar:'طوباقي',hex:'#B4513A'},
+];
 
 const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size']};
 
@@ -293,7 +320,7 @@ function _apUpdateSubmitBtn(){
   const btn=document.getElementById('ap-submit');if(!btn)return;
   const name=(document.getElementById('ap-name')?.value||'').trim();
   const price=(document.getElementById('ap-price')?.value||'').trim();
-  const ok=!!(_apProductType&&name&&price&&!isNaN(price)&&parseFloat(price)>0);
+  const ok=!!(_apProductType&&_apCat&&name&&price&&!isNaN(price)&&parseFloat(price)>0);
   btn.disabled=!ok;btn.style.opacity=ok?'1':'0.45';
 }
 
@@ -316,7 +343,6 @@ async function saveProduct(){
   const btn=document.getElementById('ap-submit');
   const name=document.getElementById('ap-name').value.trim();
   const price=document.getElementById('ap-price').value;
-  const color=document.getElementById('ap-color').value.trim();
   const desc=document.getElementById('ap-desc').value.trim();
   if(!_apProductType)return toast('اختر نوع القطعة أولاً');
   if(!name)return toast('أدخل اسم القطعة');
@@ -334,7 +360,7 @@ async function saveProduct(){
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
     const approval_status=_apSliderType==='main_hero'?'pending':'approved';
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color,description:desc,image:img_url,slider_type:_apSliderType,approval_status,product_type:_apProductType};
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,slider_type:_apSliderType,approval_status,product_type:_apProductType};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -454,15 +480,16 @@ function renderShowProducts(prods){
 function _resetModalForm(){
   document.getElementById('ap-name').value='';
   document.getElementById('ap-price').value='';
-  document.getElementById('ap-color').value='';
   document.getElementById('ap-desc').value='';
-  _apSizes=[];_apCat=null;_apImgFile=null;_apProductType=null;
+  _apSizes=[];_apCat=null;_apImgFile=null;_apProductType=null;_apColorTags=[];
   document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
   const sizeBtns=document.getElementById('size-btns');
   if(sizeBtns)sizeBtns.innerHTML='<span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>';
   const zone=document.getElementById('ap-img-zone');
   if(zone){zone.style.backgroundImage='';zone.style.backgroundSize='';zone.style.backgroundPosition='';zone.style.borderStyle='';}
   const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display='';
+  const legacyNotice=document.getElementById('ap-color-legacy-notice');if(legacyNotice)legacyNotice.style.display='none';
+  const tradNotice=document.getElementById('ap-trad-notice');if(tradNotice)tradNotice.style.display='none';
   const btn=document.getElementById('ap-submit');if(btn){btn.disabled=true;btn.style.opacity='0.45';}
 }
 
@@ -487,7 +514,6 @@ function openEditProduct(id){
   _resetModalForm();
   document.getElementById('ap-name').value=p.name||'';
   document.getElementById('ap-price').value=p.price||'';
-  document.getElementById('ap-color').value=p.color||'';
   document.getElementById('ap-desc').value=p.description||'';
   _apProductType=p.product_type||'shirt';
   document.querySelectorAll('#product-type-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apProductType));
@@ -497,11 +523,17 @@ function openEditProduct(id){
     _apSizes=(p.sizes||[]).filter(s=>validSizes.includes(s));
     document.querySelectorAll('#size-btns .sel-btn').forEach(b=>b.classList.toggle('active',_apSizes.includes(b.dataset.val)));
   }
-  _apCat=p.type||null;
+  _apCat=p.type==='traditional'?null:(p.type||null);
   document.querySelectorAll('#cat-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apCat));
+  const tradNotice=document.getElementById('ap-trad-notice');
+  if(tradNotice)tradNotice.style.display=p.type==='traditional'?'block':'none';
   _apSliderType=p.slider_type||'none';
   document.querySelectorAll('#slidertype-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apSliderType));
   const stGroup=document.getElementById('slidertype-group');if(stGroup)stGroup.style.display='';
+  _apColorTags=[...(p.color_tags||[])];
+  document.querySelectorAll('#color-tag-btns .sel-btn').forEach(b=>b.classList.toggle('active',_apColorTags.includes(b.dataset.val)));
+  const legacyNotice=document.getElementById('ap-color-legacy-notice');
+  if(legacyNotice)legacyNotice.style.display=(p.color||p.color_name)?'block':'none';
   const zone=document.getElementById('ap-img-zone');
   if(zone&&p.image){zone.style.backgroundImage=`url(${p.image})`;zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';zone.style.borderStyle='solid';}
   const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display=p.image?'none':'';

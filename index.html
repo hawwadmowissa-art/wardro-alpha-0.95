@@ -563,11 +563,11 @@
           </div>
           <div class="form-group">
             <label>الفئة</label>
+            <div id="ap-trad-notice" style="display:none;font-size:11px;color:var(--gold);opacity:.85;margin-bottom:6px">نوع 'تقليدي' لم يعد مدعوماً مؤقتاً — اختر نوع جديد</div>
             <div class="sel-btns" id="cat-btns">
               <button class="sel-btn" data-val="formal">Formal</button>
               <button class="sel-btn" data-val="casual">Casual</button>
               <button class="sel-btn" data-val="sport">Sport</button>
-              <button class="sel-btn" data-val="traditional">Traditional</button>
             </div>
           </div>
           <div class="form-group" id="slidertype-group" style="display:none">
@@ -579,8 +579,9 @@
             </div>
           </div>
           <div class="form-group">
-            <label>اللون</label>
-            <input type="text" id="ap-color" placeholder="مثال: أزرق كحلي">
+            <label>اللون <span style="color:var(--muted);font-weight:400;font-size:10px">(اختياري)</span></label>
+            <div id="ap-color-legacy-notice" style="display:none;font-size:11px;color:var(--gold);opacity:.85;margin-bottom:6px">اختر الألوان من اللوحة الجديدة</div>
+            <div class="sel-btns" id="color-tag-btns"></div>
           </div>
           <div class="form-group">
             <label>وصف قصير <span style="color:var(--muted);font-weight:400">(اختياري)</span></label>
@@ -1151,6 +1152,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=20260619p2a"></script>
+<script src="app.js?v=20260619p2b"></script>
 </body>
 </html>
