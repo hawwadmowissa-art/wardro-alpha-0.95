@@ -546,13 +546,19 @@
             <input type="number" id="ap-price" placeholder="3500" dir="ltr" min="0">
           </div>
           <div class="form-group">
-            <label>الحجم <span style="color:var(--muted);font-weight:400;font-size:10px">(اختر كل الأحجام المتوفرة)</span></label>
+            <label>Product Type <span style="color:var(--rust)">*</span></label>
+            <div class="sel-btns" id="product-type-btns">
+              <button class="sel-btn" data-val="shirt">Shirt</button>
+              <button class="sel-btn" data-val="pants">Pants</button>
+              <button class="sel-btn" data-val="shoes">Shoes</button>
+              <button class="sel-btn" data-val="jacket">Jacket</button>
+              <button class="sel-btn" data-val="accessory">Accessory</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>الحجم <span style="color:var(--muted);font-weight:400;font-size:10px">(اختياري)</span></label>
             <div class="sel-btns" id="size-btns">
-              <button class="sel-btn" data-val="S">S</button>
-              <button class="sel-btn" data-val="M">M</button>
-              <button class="sel-btn" data-val="L">L</button>
-              <button class="sel-btn" data-val="XL">XL</button>
-              <button class="sel-btn" data-val="XXL">XXL</button>
+              <span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>
             </div>
           </div>
           <div class="form-group">
@@ -1145,6 +1151,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=20260618sec"></script>
+<script src="app.js?v=20260619p2a"></script>
 </body>
 </html>
