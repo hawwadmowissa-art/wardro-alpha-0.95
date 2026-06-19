@@ -807,28 +807,90 @@ const BR_SLIDES=[
   {label:'JUST FOR YOU',title:'TOP PICKS',sub:'Curated from the best stores',cta:'Discover'},
 ];
 
+function _fyshuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function _renderVGrid(gridId,secId,prods){
+  const sec=document.getElementById(secId);
+  const el=document.getElementById(gridId);
+  if(!sec||!el)return;
+  if(!prods.length){sec.style.display='none';return;}
+  sec.style.display='';
+  el.innerHTML=prods.map(p=>`
+    <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
+      ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${Number(p.price||0).toLocaleString()} DZD</div></div>
+    </div>`).join('');
+}
+
+function _renderHStrip(stripId,secId,prods){
+  const sec=document.getElementById(secId);
+  const el=document.getElementById(stripId);
+  if(!sec||!el)return;
+  if(prods.length<2){sec.style.display='none';return;}
+  sec.style.display='';
+  el.innerHTML=prods.map(p=>`
+    <div class="br-strip-card" onclick="openProdDetail('${p.id}')">
+      ${p.image?`<img class="br-strip-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-strip-img br-strip-img--ph"></div>`}
+      <div class="br-strip-info"><div class="br-strip-name">${esc(p.name||'')}</div><div class="br-strip-price">${Number(p.price||0).toLocaleString()} DZD</div></div>
+    </div>`).join('');
+}
+
+function _renderBrowseSections(prods){
+  const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
+
+  // Category + recency strips — latest 8 each (prods already sorted DESC)
+  const casualStrip=prods.filter(p=>p.type==='casual').slice(0,8);
+  const newStrip=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo).slice(0,8);
+  const sportStrip=prods.filter(p=>p.type==='sport').slice(0,8);
+  const formalStrip=prods.filter(p=>p.type==='formal').slice(0,8);
+
+  // Strip ID set — products reserved for strips
+  const stripIdSet=new Set([...casualStrip,...newStrip,...sportStrip,...formalStrip].map(p=>p.id));
+
+  // 15-20% duplication: strip products also eligible for vertical grids
+  const dupRate=0.15+Math.random()*0.05;
+  const allStripUniq=[...new Map([...casualStrip,...newStrip,...sportStrip,...formalStrip].map(p=>[p.id,p])).values()];
+  const dupEligible=allStripUniq.filter(()=>Math.random()<dupRate);
+
+  // Vertical grid pool: non-strip products + dup-eligible, Fisher-Yates shuffled per session
+  const pool=_fyshuffle([...prods.filter(p=>!stripIdSet.has(p.id)),...dupEligible]);
+
+  // Weighted allocation: positions 2/4/6/8/10 get 12/8/6/6/4 products
+  let pos=0;
+  const grids=[12,8,6,6,4].map(n=>{const s=pool.slice(pos,pos+n);pos+=n;return s;});
+
+  _renderVGrid('br-vgrid-1','br-sec-vgrid-1',grids[0]);
+  _renderHStrip('br-strip-casual','br-sec-casual',casualStrip);
+  _renderVGrid('br-vgrid-2','br-sec-vgrid-2',grids[1]);
+  _renderHStrip('br-strip-new','br-sec-new',newStrip);
+  _renderVGrid('br-vgrid-3','br-sec-vgrid-3',grids[2]);
+  _renderHStrip('br-strip-sport','br-sec-sport',sportStrip);
+  _renderVGrid('br-vgrid-4','br-sec-vgrid-4',grids[3]);
+
+  // Top Stores — R2: always show if 1+ sellers, hide only when 0 sellers
+  const stores=[],seen=new Set();
+  for(const p of prods){if(p.seller&&!seen.has(p.seller_id)){seen.add(p.seller_id);stores.push({id:p.seller_id,name:p.seller.store_name,img:p.seller.profile_image});}}
+  const storesSec=document.getElementById('br-sec-stores');
+  if(stores.length){renderTopStores(stores);if(storesSec)storesSec.style.display='';}
+  else{if(storesSec)storesSec.style.display='none';}
+
+  _renderVGrid('br-vgrid-5','br-sec-vgrid-5',grids[4]);
+  _renderHStrip('br-strip-formal','br-sec-formal',formalStrip);
+}
+
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:prods,error}=await sb.from('products').select('*, seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
+    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=prods||[];
-    // Rebuild hero with real product images now that they're loaded
     buildBrowseHero(_brProds);
-    renderBrGrid('br-rec-grid',_brProds.slice(0,9));
-    const sport=_brProds.filter(p=>p.type==='sport');
-    renderBrGrid('br-sport-grid',sport.length?sport:makeDemoProds(6));
-    const casual=_brProds.filter(p=>p.type==='casual');
-    renderBrGrid('br-casual-grid',casual.length?casual:makeDemoProds(6));
-    const stores=[],seen=new Set();
-    for(const p of _brProds){
-      if(p.seller&&!seen.has(p.seller_id)){
-        seen.add(p.seller_id);
-        stores.push({id:p.seller_id,name:p.seller.store_name,img:p.seller.profile_image});
-      }
-    }
-    renderTopStores(stores);
+    _renderBrowseSections(_brProds);
   }catch(e){toast('❌ browse: '+e.message);console.error('browse load:',e)}
 }
 

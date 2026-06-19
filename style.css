@@ -737,6 +737,20 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 /* Top Stores */
 .br-stores-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none}
 .br-stores-row::-webkit-scrollbar{display:none}
+
+/* Horizontal product strips (§3 Casual / §5 New / §7 Sport / §11 Formal) */
+.br-strip-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;-ms-overflow-style:none;scrollbar-width:none}
+.br-strip-scroll::-webkit-scrollbar{display:none}
+.br-strip-card{flex-shrink:0;width:140px;background:var(--card);border-radius:10px;overflow:hidden;
+  border:1px solid var(--brd);cursor:pointer;transition:all .3s var(--spring)}
+.br-strip-card:hover{border-color:var(--brd2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.br-strip-card:active{transform:scale(.96);transition-duration:.08s}
+.br-strip-img{width:140px;height:180px;object-fit:cover;display:block;background:var(--dim)}
+.br-strip-img--ph{width:140px;height:180px;display:block;background:linear-gradient(145deg,#1C1915 0%,#252019 60%,#1C1915 100%)}
+.br-strip-info{padding:5px 7px 7px}
+.br-strip-name{font-size:9px;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.br-strip-price{font-size:9px;color:var(--gold);font-weight:700}
+
 .br-store-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
 .br-store-circle{width:56px;height:56px;border-radius:50%;background:var(--dim);
   border:2px solid var(--brd2);background-size:cover;background-position:center;
