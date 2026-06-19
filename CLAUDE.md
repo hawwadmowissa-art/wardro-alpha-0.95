@@ -56,6 +56,7 @@ wardro/
 | Phase 2A — Product Type + Dynamic Sizes | Editor: حقل "Product Type" مطلوب (Shirt/Pants/Shoes/Jacket/Accessory) قبل size selector؛ sizes ديناميكية حسب النوع (S-XXL للملابس، 39-46 للأحذية، One Size للاكسسوار)؛ زر الحفظ disabled حتى يُختار النوع + الاسم + السعر؛ Edit mode يعبئ مسبقاً + يفلتر sizes غير المتوافقة؛ product_type يُحفظ في DB | يونيو 2026 |
 | Phase 2B — Color Chips + Hide Traditional | Editor: استبدال حقل اللون النصي بـ 12 chip ملونة (black→rust) مع سواتش + تسميات عربية؛ multi-select اختياري؛ color_tags يُحفظ في DB؛ إشعار "اختر من اللوحة الجديدة" للمنتجات القديمة؛ حذف Traditional من cat-btns + إشعار للمنتجات التقليدية يجبر إعادة الاختيار؛ زر الحفظ يتطلب الآن product_type + type + name + price | يونيو 2026 |
 | Phase 2C — Save Event Logger | Customer: _logBehavior(action, product) fire-and-forget يُدرج في user_behavior_log عند save/unsave؛ يتخطى صامتاً إذا anonymous أو seller؛ console.error عند الفشل فقط؛ _svItemMap يُحفظ في renderSaved() لتوفير بيانات المنتج لـ removeSavedItem؛ query loadSaved مُوسَّع بـ seller_id/product_type/color_tags/type | يونيو 2026 |
+| Phase 3A — Home 11-Section Redesign | Customer Home: 11 قسم ثابت متبادل (عمودي/أفقي)؛ 5 grids عشوائية (Fisher-Yates per session)؛ 4 strips أفقية (Casual/New This Week/Sport/Formal)؛ Top Stores دائم؛ R1: strip تختفي إذا < 2 منتجات؛ R2: Top Stores دائمة إذا 1+ seller؛ 15-20% تكرار مضبوط؛ توزيع 12/8/6/6/4 للـ grids؛ Section 12 مؤجلة لـ Phase 3B | يونيو 2026 |
 
 ---
 
@@ -120,4 +121,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Phase 2C: Save Event Logger (Phase 2 Complete)*
+*آخر تحديث: يونيو 2026 | Claude Code — Phase 3A: Home 11-Section Redesign*
