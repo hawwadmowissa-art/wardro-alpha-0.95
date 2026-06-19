@@ -799,6 +799,7 @@ function skipOnboard(){
 let _brHeroIdx=0,_brHeroTimer=null;
 let _brProds=[];
 let _pdCurrentId=null;
+let _svItemMap={};
 
 const BR_SLIDES=[
   {label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Explore featured stores',cta:'Explore'},
@@ -953,6 +954,23 @@ function pdSelectSize(btn){
   btn.classList.add('pd-size-pill--active');
 }
 
+function _logBehavior(action,product){
+  if(localStorage.getItem('wardro_role')==='seller')return;
+  const sb=window.db;if(!sb)return;
+  sb.auth.getSession().then(({data})=>{
+    const uid=data?.session?.user?.id;if(!uid)return;
+    sb.from('user_behavior_log').insert({
+      user_id:uid,
+      action,
+      product_id:product.id||null,
+      store_id:product.seller_id||null,
+      product_type:product.product_type||'shirt',
+      color_tags:product.color_tags||[],
+      product_category:product.type||null
+    }).then(({error})=>{if(error)console.error('behavior log:',error);});
+  }).catch(()=>{});
+}
+
 async function saveItem(){
   const sb=getSb();if(!sb)return;
   try{
@@ -964,7 +982,11 @@ async function saveItem(){
     if(error&&error.code==='23505'){
       btn.textContent='Already Saved ✓';btn.classList.add('pd-save-btn--saved');
     }else if(error){throw error;}
-    else{btn.textContent='Added to Saved ✓';btn.classList.add('pd-save-btn--saved');}
+    else{
+      btn.textContent='Added to Saved ✓';btn.classList.add('pd-save-btn--saved');
+      const p=_brProds.find(x=>x.id===_pdCurrentId);
+      if(p)_logBehavior('save',p);
+    }
   }catch(e){toast(e.message||'خطأ في الحفظ');const btn=document.getElementById('pd-save-btn');if(btn){btn.textContent='Save';btn.disabled=false;}}
 }
 
@@ -1032,7 +1054,7 @@ async function loadSaved(){
     if(!session){openCustAuth();return;}
     const{data,error}=await sb
       .from('saved_items')
-      .select('id, products(id, name, price, image, sizes, stock, seller:sellers(store_name))')
+      .select('id, products(id, name, price, image, sizes, stock, seller_id, product_type, color_tags, type, seller:sellers(store_name))')
       .eq('customer_id',session.user.id)
       .order('created_at',{ascending:false});
     if(error)throw error;
@@ -1045,6 +1067,8 @@ function renderSaved(items){
   const empty=document.getElementById('sv-empty');
   if(!list||!empty)return;
   const valid=items.filter(i=>i.products);
+  _svItemMap={};
+  valid.forEach(item=>{const p=item.products;_svItemMap[item.id]={id:p.id,seller_id:p.seller_id,product_type:p.product_type,color_tags:p.color_tags,type:p.type};});
   if(!valid.length){
     list.style.display='none';
     empty.style.display='flex';
@@ -1300,6 +1324,7 @@ async function removeSavedItem(savedItemId){
   try{
     const{error}=await sb.from('saved_items').delete().eq('id',savedItemId);
     if(error)throw error;
+    const _lp=_svItemMap[savedItemId];if(_lp)_logBehavior('unsave',_lp);
     if(card){
       const h=card.offsetHeight;
       card.style.height=h+'px';
