@@ -842,26 +842,18 @@ function _renderHStrip(stripId,secId,prods){
 function _renderBrowseSections(prods){
   const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
 
-  // Category + recency strips — latest 8 each (prods already sorted DESC)
+  // Horizontal strips — independent category subsets, max 8, sorted DESC
+  // Overlap with vertical grids is natural and expected
   const casualStrip=prods.filter(p=>p.type==='casual').slice(0,8);
   const newStrip=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo).slice(0,8);
   const sportStrip=prods.filter(p=>p.type==='sport').slice(0,8);
   const formalStrip=prods.filter(p=>p.type==='formal').slice(0,8);
 
-  // Strip ID set — products reserved for strips
-  const stripIdSet=new Set([...casualStrip,...newStrip,...sportStrip,...formalStrip].map(p=>p.id));
-
-  // 15-20% duplication: strip products also eligible for vertical grids
-  const dupRate=0.15+Math.random()*0.05;
-  const allStripUniq=[...new Map([...casualStrip,...newStrip,...sportStrip,...formalStrip].map(p=>[p.id,p])).values()];
-  const dupEligible=allStripUniq.filter(()=>Math.random()<dupRate);
-
-  // Vertical grid pool: non-strip products + dup-eligible, Fisher-Yates shuffled per session
-  const pool=_fyshuffle([...prods.filter(p=>!stripIdSet.has(p.id)),...dupEligible]);
-
-  // Weighted allocation: positions 2/4/6/8/10 get 12/8/6/6/4 products
+  // Vertical grids — ALL approved products, shuffled per session
+  // Caps: 18 / 12 / 9 / 9 / 9 products (positions §2/§4/§6/§8/§10)
+  const pool=_fyshuffle([...prods]);
   let pos=0;
-  const grids=[12,8,6,6,4].map(n=>{const s=pool.slice(pos,pos+n);pos+=n;return s;});
+  const grids=[18,12,9,9,9].map(n=>{const s=pool.slice(pos,pos+n);pos+=n;return s;});
 
   _renderVGrid('br-vgrid-1','br-sec-vgrid-1',grids[0]);
   _renderHStrip('br-strip-casual','br-sec-casual',casualStrip);
