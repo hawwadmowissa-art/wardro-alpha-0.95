@@ -1271,4 +1271,11 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   color:#c06050;
 }
 
+/* §12 اكتشف أكثر — infinite scroll */
+.br-explore-empty{font-size:12px;color:var(--muted);text-align:center;padding:18px 0;direction:rtl}
+.br-explore-end{font-size:11px;color:var(--muted);text-align:center;padding:16px 0;opacity:.6}
+.br-explore-spinner{display:flex;justify-content:center;padding:16px 0}
+.br-explore-spin{width:20px;height:20px;border:2px solid rgba(210,175,105,.15);border-top-color:var(--gold);border-radius:50%;animation:br-spin .8s linear infinite}
+@keyframes br-spin{to{transform:rotate(360deg)}}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.15s!important}}

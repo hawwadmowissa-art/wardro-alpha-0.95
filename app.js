@@ -800,6 +800,7 @@ let _brHeroIdx=0,_brHeroTimer=null;
 let _brProds=[];
 let _pdCurrentId=null;
 let _svItemMap={};
+let _explorePool=[],_exploreOffset=0,_exploreObserver=null,_explorePending=false;
 
 const BR_SLIDES=[
   {label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Explore featured stores',cta:'Explore'},
@@ -872,6 +873,68 @@ function _renderBrowseSections(prods){
 
   _renderVGrid('br-vgrid-5','br-sec-vgrid-5',grids[4]);
   _renderHStrip('br-strip-formal','br-sec-formal',formalStrip);
+
+  // §12 — pool is products not consumed by upper grids, freshly shuffled
+  const usedIds=new Set(grids.flat().map(p=>p.id));
+  _initExplore(_fyshuffle(prods.filter(p=>!usedIds.has(p.id))));
+}
+
+// ══ EXPLORE INFINITE SCROLL (§12) ══
+function _initExplore(pool){
+  if(_exploreObserver){_exploreObserver.disconnect();_exploreObserver=null;}
+  _explorePool=pool;_exploreOffset=0;_explorePending=false;
+  const grid=document.getElementById('br-vgrid-explore');
+  const emptyEl=document.getElementById('br-explore-empty');
+  const spinner=document.getElementById('br-explore-spinner');
+  const endEl=document.getElementById('br-explore-end');
+  const sentinel=document.getElementById('br-explore-sentinel');
+  if(!grid)return;
+  grid.innerHTML='';
+  if(emptyEl)emptyEl.style.display='none';
+  if(spinner)spinner.style.display='none';
+  if(endEl)endEl.style.display='none';
+  if(!pool.length){if(emptyEl)emptyEl.style.display='block';return;}
+  _exploreRenderBatch();
+  if(_exploreOffset>=pool.length){if(endEl)endEl.style.display='block';return;}
+  if(!sentinel)return;
+  _exploreObserver=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting)_exploreLoadMore();
+  },{rootMargin:'200px'});
+  _exploreObserver.observe(sentinel);
+}
+
+function _exploreRenderBatch(){
+  const grid=document.getElementById('br-vgrid-explore');if(!grid)return;
+  const batch=_explorePool.slice(_exploreOffset,_exploreOffset+30);
+  _exploreOffset+=batch.length;
+  grid.insertAdjacentHTML('beforeend',batch.map(p=>`
+    <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
+      ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${Number(p.price||0).toLocaleString()} DZD</div></div>
+    </div>`).join(''));
+}
+
+function _exploreLoadMore(){
+  if(_explorePending)return;
+  if(_exploreOffset>=_explorePool.length){
+    if(_exploreObserver){_exploreObserver.disconnect();_exploreObserver=null;}
+    const endEl=document.getElementById('br-explore-end');
+    if(endEl)endEl.style.display='block';
+    return;
+  }
+  _explorePending=true;
+  const spinner=document.getElementById('br-explore-spinner');
+  if(spinner)spinner.style.display='flex';
+  requestAnimationFrame(()=>{
+    _exploreRenderBatch();
+    if(spinner)spinner.style.display='none';
+    _explorePending=false;
+    if(_exploreOffset>=_explorePool.length){
+      if(_exploreObserver){_exploreObserver.disconnect();_exploreObserver=null;}
+      const endEl=document.getElementById('br-explore-end');
+      if(endEl)endEl.style.display='block';
+    }
+  });
 }
 
 async function loadBrowse(){
