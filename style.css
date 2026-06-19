@@ -762,7 +762,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .br-store-name--ph{width:38px;height:7px;background:var(--dim);border-radius:4px}
 
 /* Bottom Nav */
-.br-nav{display:flex;background:rgba(11,10,8,.96);backdrop-filter:blur(20px);
+.br-nav{display:flex;direction:ltr;background:rgba(11,10,8,.96);backdrop-filter:blur(20px);
   border-top:1px solid var(--brd);padding:8px 0 16px;flex-shrink:0}
 .br-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
   background:transparent;border:none;cursor:pointer;color:var(--muted);padding:4px 0;
