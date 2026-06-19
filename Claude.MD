@@ -52,6 +52,7 @@ wardro/
 | Seller Approval — Step 2 (Logout Fix) | logOut() يُعيد ضبط حقول reg + signin (قيم + أزرار + أخطاء)؛ goSeller() يوجّه لـ signin بدل reg؛ doSellerReg() يُجرّب sign-in صامت عند "already registered" ويوجّه حسب approval_status | يونيو 2026 |
 | Seller Approval — Step 3 (Admin) | `admin.html` مستقل: بوابة تسجيل دخول + فحص ADMIN_EMAIL؛ تابين (بائعون قيد المراجعة / منتجات Main Hero)؛ موافقة/رفض مع تأكيد + toast؛ Session Restore للمشرف؛ محمي من غير المصرح لهم | يونيو 2026 |
 | Security Audit — API Key + XSS | حذف `getApiKey/showApiKeyModal/saveApiKey` + cleanup `wardro_claude_key`؛ إضافة `esc()` + `safeUrl()` في `app.js`؛ تأمين كل نقاط `innerHTML`: بطاقات Editor/Show/Browse/Saved/Discover/Results/Hero Sliders + Product Detail + Top Stores (data-attributes بدل onclick injection) | يونيو 2026 |
+| Phase 3 DB Foundation — Migration | `products.product_type` (text NOT NULL DEFAULT 'shirt' CHECK IN shirt/pants/shoes/jacket/accessory)؛ `products.color_tags` (text[] NOT NULL DEFAULT '{}')؛ جدول `user_behavior_log` جديد (id/user_id/action/product_id/store_id/product_type/color_tags/product_category/created_at) مع RLS: users يكتبون/يقرأون سجلاتهم فقط، admin يقرأ الكل عبر is_admin()، لا UPDATE/DELETE (immutable log) | يونيو 2026 |
 
 ---
 
@@ -116,4 +117,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Seller Approval Step 3 (Admin Page)*
+*آخر تحديث: يونيو 2026 | Claude Code — Phase 3 DB Foundation Migration*
