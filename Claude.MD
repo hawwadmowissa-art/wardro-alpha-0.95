@@ -55,6 +55,7 @@ wardro/
 | Phase 3 DB Foundation — Migration | `products.product_type` (text NOT NULL DEFAULT 'shirt' CHECK IN shirt/pants/shoes/jacket/accessory)؛ `products.color_tags` (text[] NOT NULL DEFAULT '{}')؛ جدول `user_behavior_log` جديد (id/user_id/action/product_id/store_id/product_type/color_tags/product_category/created_at) مع RLS: users يكتبون/يقرأون سجلاتهم فقط، admin يقرأ الكل عبر is_admin()، لا UPDATE/DELETE (immutable log) | يونيو 2026 |
 | Phase 2A — Product Type + Dynamic Sizes | Editor: حقل "Product Type" مطلوب (Shirt/Pants/Shoes/Jacket/Accessory) قبل size selector؛ sizes ديناميكية حسب النوع (S-XXL للملابس، 39-46 للأحذية، One Size للاكسسوار)؛ زر الحفظ disabled حتى يُختار النوع + الاسم + السعر؛ Edit mode يعبئ مسبقاً + يفلتر sizes غير المتوافقة؛ product_type يُحفظ في DB | يونيو 2026 |
 | Phase 2B — Color Chips + Hide Traditional | Editor: استبدال حقل اللون النصي بـ 12 chip ملونة (black→rust) مع سواتش + تسميات عربية؛ multi-select اختياري؛ color_tags يُحفظ في DB؛ إشعار "اختر من اللوحة الجديدة" للمنتجات القديمة؛ حذف Traditional من cat-btns + إشعار للمنتجات التقليدية يجبر إعادة الاختيار؛ زر الحفظ يتطلب الآن product_type + type + name + price | يونيو 2026 |
+| Phase 2C — Save Event Logger | Customer: _logBehavior(action, product) fire-and-forget يُدرج في user_behavior_log عند save/unsave؛ يتخطى صامتاً إذا anonymous أو seller؛ console.error عند الفشل فقط؛ _svItemMap يُحفظ في renderSaved() لتوفير بيانات المنتج لـ removeSavedItem؛ query loadSaved مُوسَّع بـ seller_id/product_type/color_tags/type | يونيو 2026 |
 
 ---
 
@@ -119,4 +120,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Phase 2B: Color Chips + Hide Traditional*
+*آخر تحديث: يونيو 2026 | Claude Code — Phase 2C: Save Event Logger (Phase 2 Complete)*
