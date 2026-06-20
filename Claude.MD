@@ -58,6 +58,7 @@ wardro/
 | Phase 2C — Save Event Logger | Customer: _logBehavior(action, product) fire-and-forget يُدرج في user_behavior_log عند save/unsave؛ يتخطى صامتاً إذا anonymous أو seller؛ console.error عند الفشل فقط؛ _svItemMap يُحفظ في renderSaved() لتوفير بيانات المنتج لـ removeSavedItem؛ query loadSaved مُوسَّع بـ seller_id/product_type/color_tags/type | يونيو 2026 |
 | Phase 3A — Home 11-Section Redesign | Customer Home: 11 قسم ثابت متبادل (عمودي/أفقي)؛ 5 grids عشوائية (Fisher-Yates per session)؛ 4 strips أفقية (Casual/New This Week/Sport/Formal)؛ Top Stores دائم؛ R1: strip تختفي إذا < 2 منتجات؛ R2: Top Stores دائمة إذا 1+ seller؛ 15-20% تكرار مضبوط؛ توزيع 18/12/9/9/9 للـ grids | يونيو 2026 |
 | Phase 3B — Section 12 "اكتشف أكثر" | قسم ثاني عشر ونهائي في الـ Home: lazy-load infinite scroll للمنتجات خارج الـ 57 الأولى في الـ upper grids؛ IntersectionObserver (200px rootMargin)؛ 30 منتج per batch؛ shuffle مستقل per session؛ empty state "ولا قطعة جديدة دابا" عند catalogs ≤ 57 منتج؛ "✓ شفت كلش" عند استنفاد البضاعة؛ gold spinner أثناء التحميل | يونيو 2026 |
+| Phase 4 — Discover Color Panel | استبدال حقل اللون النصي في Discover بـ 12 swatch دائري يستخدم _AP_COLORS كـ single source of truth؛ multi-select مع gold ring للمحدد؛ بادج عداد على الـ chip (اللون (N))؛ زر "مسح الكل" يظهر عند الاختيار؛ _discoverSelectedColors[] يُمرَّر لـ runDiscover → Supabase .overlaps('color_tags', ...) بدل client-side filter؛ color اختياري لا يؤثر على enablement logic | يونيو 2026 |
 
 ---
 
@@ -122,4 +123,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Phase 3B: Section 12 "اكتشف أكثر" Infinite Scroll*
+*آخر تحديث: يونيو 2026 | Claude Code — Phase 4: Discover Color Panel 12-Chip Palette*
