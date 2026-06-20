@@ -59,6 +59,7 @@ wardro/
 | Phase 3A — Home 11-Section Redesign | Customer Home: 11 قسم ثابت متبادل (عمودي/أفقي)؛ 5 grids عشوائية (Fisher-Yates per session)؛ 4 strips أفقية (Casual/New This Week/Sport/Formal)؛ Top Stores دائم؛ R1: strip تختفي إذا < 2 منتجات؛ R2: Top Stores دائمة إذا 1+ seller؛ 15-20% تكرار مضبوط؛ توزيع 18/12/9/9/9 للـ grids | يونيو 2026 |
 | Phase 3B — Section 12 "اكتشف أكثر" | قسم ثاني عشر ونهائي في الـ Home: lazy-load infinite scroll للمنتجات خارج الـ 57 الأولى في الـ upper grids؛ IntersectionObserver (200px rootMargin)؛ 30 منتج per batch؛ shuffle مستقل per session؛ empty state "ولا قطعة جديدة دابا" عند catalogs ≤ 57 منتج؛ "✓ شفت كلش" عند استنفاد البضاعة؛ gold spinner أثناء التحميل | يونيو 2026 |
 | Phase 4 — Discover Color Panel | استبدال حقل اللون النصي في Discover بـ 12 swatch دائري يستخدم _AP_COLORS كـ single source of truth؛ multi-select مع gold ring للمحدد؛ بادج عداد على الـ chip (اللون (N))؛ زر "مسح الكل" يظهر عند الاختيار؛ _discoverSelectedColors[] يُمرَّر لـ runDiscover → Supabase .overlaps('color_tags', ...) بدل client-side filter؛ color اختياري لا يؤثر على enablement logic | يونيو 2026 |
+| Profile MVP | شاشة #s-profile: avatar دائري (الحرف الأول من الإيميل، Fraunces gold)؛ إيميل كامل؛ 3 صفوف (سياسة الخصوصية/شروط الاستخدام → openLegalModal، تسجيل الخروج → signOut+navigate)؛ صف خطر "حذف الحساب" (نبيذي)؛ مودال تأكيد الحذف مع countdown 3 ثوانٍ قبل تفعيل "نعم، احذف حسابي"؛ الحذف يمسح saved_items + user_behavior_log ثم signOut؛ brNavSwitch/svNavSwitch/dcNavSwitch تدعم الآن 'profile' | يونيو 2026 |
 | Sleeper B — Availability Toggle | `products.is_available` (boolean NOT NULL DEFAULT true) أُضيف؛ كل الصفوف الموجودة = true تلقائياً؛ Editor: toggle pill "متوفر / غير متوفر" يُحفظ عند Save ويُعبَّأ عند Edit؛ Product Detail: pill "متوفر" (أخضر) / "غير متوفر" (نبيذي) يحلّ محلّ "Quantity Available" الإنجليزي؛ Saved list: منطق مُصلَح — يقرأ is_available بدل stock؛ "نفدت الكمية" غيّرنا لـ "غير متوفر"؛ products.stock يبقى كما هو | يونيو 2026 |
 | Phase 5 — Legal Docs Integration | window.openLegalModal(docType, callback) reusable modal: fetch .md من Legal Docs/ بـ URL encoding، parser بسيط (عناوين/bullets/intro)، scroll-to-enable accept؛ .legal-line فوق CTA الأونبوردينغ (slide 3 فقط، informational)؛ .legal-check checkbox يحجب "Create Store" في Seller Reg حتى الموافقة؛ Accept في الـ modal يُفعّل الـ callback (auto-check box)؛ Backdrop/ESC/X يُغلق دون callback | يونيو 2026 |
 
@@ -125,4 +126,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Sleeper B: Availability Toggle*
+*آخر تحديث: يونيو 2026 | Claude Code — Profile MVP*
