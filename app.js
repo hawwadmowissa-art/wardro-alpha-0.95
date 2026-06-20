@@ -1057,6 +1057,7 @@ function brNavSwitch(tab,btn){
   btn.classList.add('br-nav-btn--active');
   if(tab==='saved'){navigateTo('s-saved','slide');}
   else if(tab==='discover'){navigateTo('s-discover','slide');}
+  else if(tab==='profile'){openCustomerProfile();}
   else if(tab!=='home')toast(tab+' — قريباً');
 }
 
@@ -1190,6 +1191,7 @@ function svNavSwitch(tab){
     const homeBtn=document.querySelector('#s-browse .br-nav-btn');
     if(homeBtn)homeBtn.classList.add('br-nav-btn--active');
   }else if(tab==='discover'){navigateTo('s-discover','slide');}
+  else if(tab==='profile'){openCustomerProfile();}
   else toast(tab+' — قريباً');
 }
 
@@ -1490,6 +1492,7 @@ function dcNavSwitch(tab){
     document.querySelectorAll('#s-browse .br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
     const h=document.querySelector('#s-browse .br-nav-btn');if(h)h.classList.add('br-nav-btn--active');
   }else if(tab==='saved'){navigateTo('s-saved','slide');}
+  else if(tab==='profile'){openCustomerProfile();}
   else toast(tab+' — قريباً');
 }
 
@@ -1527,6 +1530,68 @@ async function removeSavedItem(savedItemId){
   }catch(e){
     if(card){card.style.opacity='1';card.style.pointerEvents='';}
     toast('خطأ: '+e.message);
+  }
+}
+
+// ══ CUSTOMER PROFILE ══
+async function openCustomerProfile(){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){openCustAuth();return;}
+    const email=session.user.email||'';
+    const letter=(email.charAt(0)||'?').toUpperCase();
+    const lEl=document.getElementById('pf-avatar-letter');
+    const eEl=document.getElementById('pf-email');
+    if(lEl)lEl.textContent=letter;
+    if(eEl)eEl.textContent=email;
+  }catch(_){}
+  navigateTo('s-profile','slide');
+}
+
+async function profileLogout(){
+  const sb=getSb();if(!sb)return;
+  try{await sb.auth.signOut();}catch(_){}
+  localStorage.removeItem('wardro_role');
+  navigateTo('s-splash','z-axis');
+}
+
+function openDeleteAccountModal(){
+  const overlay=document.getElementById('del-modal');
+  const btn=document.getElementById('del-modal-confirm');
+  if(!overlay||!btn)return;
+  btn.disabled=true;btn.style.opacity='0.4';btn.style.cursor='not-allowed';
+  btn.textContent='نعم، احذف حسابي';
+  overlay.style.display='flex';
+  requestAnimationFrame(()=>overlay.classList.add('del-modal--open'));
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{btn.disabled=false;btn.style.opacity='1';btn.style.cursor='';},3000);
+}
+
+function closeDeleteModal(){
+  const overlay=document.getElementById('del-modal');if(!overlay)return;
+  overlay.classList.remove('del-modal--open');
+  setTimeout(()=>{overlay.style.display='none';document.body.style.overflow='';},250);
+}
+
+async function confirmDeleteAccount(){
+  const sb=getSb();if(!sb)return;
+  const btn=document.getElementById('del-modal-confirm');
+  if(btn){btn.disabled=true;btn.textContent='جاري الحذف...';}
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(session){
+      const uid=session.user.id;
+      await sb.from('saved_items').delete().eq('user_id',uid);
+      await sb.from('user_behavior_log').delete().eq('user_id',uid);
+    }
+    await sb.auth.signOut();
+    localStorage.removeItem('wardro_role');
+    closeDeleteModal();
+    setTimeout(()=>{navigateTo('s-splash','z-axis');toast('تم حذف حسابك');},300);
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='نعم، احذف حسابي';btn.style.opacity='1';btn.style.cursor='';}
+    toast('خطأ: '+(e.message||'حاول مجدداً'));
   }
 }
 

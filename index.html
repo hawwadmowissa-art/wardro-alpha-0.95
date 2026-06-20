@@ -1215,6 +1215,70 @@
 
 </div>
 
+<!-- PROFILE SCREEN -->
+<div id="s-profile" class="screen">
+  <div class="pf-topbar">
+    <div class="pf-title">حسابي</div>
+  </div>
+  <div class="pf-body">
+    <div class="pf-identity">
+      <div class="pf-avatar"><span class="pf-avatar-letter" id="pf-avatar-letter">?</span></div>
+      <div class="pf-email" id="pf-email">—</div>
+    </div>
+    <div class="pf-menu">
+      <button class="pf-row" onclick="window.openLegalModal('privacy',null)">
+        <span class="pf-row-label">سياسة الخصوصية</span>
+        <svg class="pf-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="pf-row" onclick="window.openLegalModal('terms',null)">
+        <span class="pf-row-label">شروط الاستخدام</span>
+        <svg class="pf-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="pf-row" onclick="profileLogout()">
+        <span class="pf-row-label">تسجيل الخروج</span>
+        <svg class="pf-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+    <hr class="pf-danger-sep">
+    <div class="pf-menu">
+      <button class="pf-row pf-row--danger" onclick="openDeleteAccountModal()">
+        <span class="pf-row-label">حذف الحساب</span>
+        <svg class="pf-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="br-nav">
+    <button class="br-nav-btn" onclick="navigateTo('s-browse','z-axis')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-saved','slide')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>Saved</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-discover','slide')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span>Discover</span>
+    </button>
+    <button class="br-nav-btn br-nav-btn--active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
+</div>
+
+<!-- DELETE ACCOUNT MODAL -->
+<div id="del-modal" class="del-modal-overlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="del-modal-card">
+    <div class="del-modal-title">حذف الحساب نهائياً</div>
+    <div class="del-modal-body">سيتم حذف حسابك وكل بياناتك المرتبطة به نهائياً. لا يمكن التراجع عن هذا الإجراء.</div>
+    <div class="del-modal-footer">
+      <button class="del-modal-cancel" onclick="closeDeleteModal()">إلغاء</button>
+      <button class="del-modal-confirm" id="del-modal-confirm" onclick="confirmDeleteAccount()" disabled>نعم، احذف حسابي</button>
+    </div>
+  </div>
+</div>
+
 <!-- LEGAL MODAL -->
 <div id="legal-modal" class="legal-modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title">
   <div class="legal-modal-card" id="legal-modal-card">
@@ -1233,6 +1297,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=20260620sleeperb"></script>
+<script src="app.js?v=20260620profilemvp"></script>
 </body>
 </html>
