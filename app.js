@@ -286,6 +286,20 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('ap-name')?.addEventListener('input',_apUpdateSubmitBtn);
   document.getElementById('ap-price')?.addEventListener('input',_apUpdateSubmitBtn);
   _initDiscoverColorSwatches();
+  // Legal modal wiring
+  const _lmOverlay=document.getElementById('legal-modal');
+  document.getElementById('legal-modal-close')?.addEventListener('click',closeLegalModal);
+  document.getElementById('legal-modal-accept')?.addEventListener('click',_legalAccept);
+  if(_lmOverlay)_lmOverlay.addEventListener('click',e=>{if(e.target===_lmOverlay)closeLegalModal();});
+  document.querySelectorAll('#s-seller-reg .legal-link').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();e.preventDefault();
+    window.openLegalModal(btn.dataset.doc,()=>{const cb=document.getElementById('seller-legal-check');if(cb){cb.checked=true;updateCreateStoreButtonState();}});
+  }));
+  document.getElementById('seller-legal-check')?.addEventListener('change',updateCreateStoreButtonState);
+  document.querySelectorAll('#ob-legal-line .legal-link').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();e.preventDefault();window.openLegalModal(btn.dataset.doc,null);
+  }));
+  updateCreateStoreButtonState();
 });
 
 const _AP_COLORS=[
@@ -596,7 +610,9 @@ async function logOut(){
     ['reg-store','reg-email','reg-pass','reg-pass2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     clearRegErrors();
     const regBtn=document.getElementById('reg-submit');
-    if(regBtn){regBtn.disabled=false;regBtn.innerHTML='Create Store →';regBtn.style.background='';}
+    if(regBtn){regBtn.innerHTML='Create Store →';regBtn.style.background='';}
+    const legalCb=document.getElementById('seller-legal-check');if(legalCb)legalCb.checked=false;
+    updateCreateStoreButtonState();
     // Reset sign-in form
     ['si-email','si-pass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     const siBtn=document.getElementById('si-submit');
@@ -783,7 +799,7 @@ function nextSlide(){
   const btn=document.getElementById('ob-next');
   if(btn){
     if(obSlide===1)btn.textContent='Continue →';
-    if(obSlide===2)btn.textContent='START EXPERIENCE →';
+    if(obSlide===2){btn.textContent='START EXPERIENCE →';const ll=document.getElementById('ob-legal-line');if(ll)ll.style.display='block';}
   }
 }
 function skipOnboard(){
@@ -1496,6 +1512,110 @@ async function removeSavedItem(savedItemId){
     if(card){card.style.opacity='1';card.style.pointerEvents='';}
     toast('خطأ: '+e.message);
   }
+}
+
+// ══ LEGAL MODAL ══
+const _LEGAL_TITLES={privacy:'سياسة الخصوصية',terms:'شروط الاستخدام'};
+const _LEGAL_PATHS={privacy:encodeURI('Legal Docs/privacy-policy.md'),terms:encodeURI('Legal Docs/terms-of-service.md')};
+let _legalCb=null,_legalEsc=null,_legalRetryDoc=null;
+
+function _parseMd(text){
+  const blocks=text.split(/\n\n+/).map(b=>b.trim()).filter(Boolean);
+  let html='';let skipTitle=true;let isIntro=true;
+  blocks.forEach(block=>{
+    if(skipTitle){skipTitle=false;return;}
+    if(block.startsWith('آخر تحديث:')){
+      html+=`<p style="font-size:12px;opacity:.55;margin-top:18px;text-align:center">${esc(block)}</p>`;return;
+    }
+    if(isIntro){
+      isIntro=false;
+      html+=`<p style="font-size:15px;opacity:.9;margin:0 0 14px;line-height:1.9">${esc(block)}</p>`;return;
+    }
+    const hasBullets=block.includes('•');
+    if(hasBullets){
+      const lines=block.split('\n');let out='';let si=0;
+      if(lines[0]&&!lines[0].trim().startsWith('•')){out+=`<p style="margin:0 0 6px">${esc(lines[0].trim())}</p>`;si=1;}
+      out+='<ul style="margin:6px 0 12px;padding-right:18px;list-style:none">';
+      for(let i=si;i<lines.length;i++){
+        const t=lines[i].trim();
+        if(t.startsWith('•'))out+=`<li style="margin-bottom:7px;position:relative;padding-right:14px"><span style="position:absolute;right:0;color:#D2AF69">•</span>${esc(t.replace(/^•\s*/,''))}</li>`;
+        else if(t)out+=`<li style="margin-bottom:7px">${esc(t)}</li>`;
+      }
+      out+='</ul>';html+=out;return;
+    }
+    const lines=block.split('\n').filter(l=>l.trim());if(!lines.length)return;
+    if(lines.length===1){
+      const t=lines[0].trim();
+      const isH=t.length<60&&!t.endsWith('.')&&!t.endsWith('،')&&!t.includes('@');
+      html+=isH?`<h3 style="font-family:'Fraunces',serif;font-size:17px;font-weight:300;color:#D2AF69;margin:18px 0 8px">${esc(t)}</h3>`:`<p style="margin:0 0 10px">${esc(t)}</p>`;
+      return;
+    }
+    html+=`<h3 style="font-family:'Fraunces',serif;font-size:17px;font-weight:300;color:#D2AF69;margin:18px 0 8px">${esc(lines[0])}</h3>`;
+    lines.slice(1).forEach(l=>{if(l.trim())html+=`<p style="margin:0 0 9px">${esc(l.trim())}</p>`;});
+  });
+  return html;
+}
+
+function _legalScrollCheck(){
+  const body=document.getElementById('legal-modal-body');if(!body)return;
+  if(body.scrollHeight-body.scrollTop-body.clientHeight<=40){
+    const btn=document.getElementById('legal-modal-accept');
+    if(btn&&btn.disabled){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='';}
+    body.removeEventListener('scroll',_legalScrollCheck);
+  }
+}
+
+function closeLegalModal(){
+  const overlay=document.getElementById('legal-modal');if(!overlay)return;
+  overlay.classList.remove('legal-modal--open');
+  setTimeout(()=>{
+    overlay.style.display='none';
+    document.body.style.overflow='';
+    document.getElementById('legal-modal-body')?.removeEventListener('scroll',_legalScrollCheck);
+  },280);
+  if(_legalEsc){document.removeEventListener('keydown',_legalEsc);_legalEsc=null;}
+  _legalCb=null;
+}
+
+function _legalAccept(){const cb=_legalCb;closeLegalModal();if(cb)cb();}
+
+function _legalRetry(){window.openLegalModal(_legalRetryDoc,_legalCb);}
+
+window.openLegalModal=function(docType,onAcceptCallback){
+  const overlay=document.getElementById('legal-modal');
+  const bodyEl=document.getElementById('legal-modal-body');
+  const titleEl=document.getElementById('legal-modal-title');
+  const acceptBtn=document.getElementById('legal-modal-accept');
+  if(!overlay||!bodyEl||!titleEl||!acceptBtn)return;
+  _legalCb=onAcceptCallback||null;_legalRetryDoc=docType;
+  titleEl.textContent=_LEGAL_TITLES[docType]||docType;
+  bodyEl.innerHTML='<p style="color:var(--muted);font-size:14px;text-align:center;padding:36px 0;direction:rtl">جاري التحميل...</p>';
+  acceptBtn.disabled=true;acceptBtn.style.opacity='0.4';acceptBtn.style.cursor='not-allowed';
+  overlay.style.display='flex';
+  requestAnimationFrame(()=>overlay.classList.add('legal-modal--open'));
+  document.body.style.overflow='hidden';
+  if(_legalEsc)document.removeEventListener('keydown',_legalEsc);
+  _legalEsc=e=>{if(e.key==='Escape')closeLegalModal();};
+  document.addEventListener('keydown',_legalEsc);
+  fetch(_LEGAL_PATHS[docType])
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(text=>{
+      bodyEl.innerHTML=`<div style="direction:rtl;line-height:1.9;color:#D8CFBA;font-family:'Tajawal',sans-serif;font-size:14px">${_parseMd(text)}</div>`;
+      bodyEl.addEventListener('scroll',_legalScrollCheck,{passive:true});
+      setTimeout(_legalScrollCheck,120);
+    })
+    .catch(()=>{
+      bodyEl.innerHTML='<div style="text-align:center;padding:36px 16px;direction:rtl"><p style="color:var(--muted);margin-bottom:14px;font-family:\'Tajawal\',sans-serif">تعذّر تحميل الوثيقة. حاول لاحقاً.</p><button id="legal-retry-btn" style="background:none;border:none;color:#D2AF69;font-family:\'Tajawal\',sans-serif;font-size:14px;text-decoration:underline;cursor:pointer;padding:0">إعادة المحاولة</button></div>';
+      document.getElementById('legal-retry-btn')?.addEventListener('click',_legalRetry);
+    });
+};
+
+function updateCreateStoreButtonState(){
+  const btn=document.getElementById('reg-submit');
+  const checked=!!document.getElementById('seller-legal-check')?.checked;
+  if(!btn)return;
+  btn.disabled=!checked;btn.style.opacity=checked?'1':'0.45';
+  btn.style.pointerEvents=checked?'':'none';
 }
 
 
