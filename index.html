@@ -603,6 +603,13 @@
             <label>وصف قصير <span style="color:var(--muted);font-weight:400">(اختياري)</span></label>
             <textarea id="ap-desc" rows="3" placeholder="مثال: قميص فاخر للمناسبات الرسمية"></textarea>
           </div>
+          <div class="form-group">
+            <label>حالة التوفر</label>
+            <div class="avail-toggle" id="ap-avail-toggle">
+              <button type="button" class="avail-btn avail-btn--yes active" id="ap-avail-yes" onclick="setAvailability(true)">متوفر</button>
+              <button type="button" class="avail-btn avail-btn--no" id="ap-avail-no" onclick="setAvailability(false)">غير متوفر</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="ap-modal-footer">
@@ -974,8 +981,8 @@
         </div>
         <div class="pd-desc" id="pd-desc"></div>
         <div class="pd-stock-row">
-          <span class="pd-stock-dot"></span>
-          <span class="pd-stock-lbl" id="pd-stock-lbl">Quantity Available</span>
+          <span class="pd-stock-dot" id="pd-stock-dot"></span>
+          <span class="pd-stock-lbl" id="pd-stock-lbl"></span>
         </div>
         <button class="pd-save-btn" id="pd-save-btn" onclick="saveItem()">Save</button>
       </div>

@@ -240,7 +240,7 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={},_apProductType=null,_apColorTags=[];
+let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true;
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -331,6 +331,12 @@ function _renderSizeBtns(type){
   }
 }
 
+function setAvailability(avail){
+  _apAvailable=avail;
+  document.getElementById('ap-avail-yes')?.classList.toggle('active',avail);
+  document.getElementById('ap-avail-no')?.classList.toggle('active',!avail);
+}
+
 function _apUpdateSubmitBtn(){
   const btn=document.getElementById('ap-submit');if(!btn)return;
   const name=(document.getElementById('ap-name')?.value||'').trim();
@@ -375,7 +381,7 @@ async function saveProduct(){
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
     const approval_status=_apSliderType==='main_hero'?'pending':'approved';
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,slider_type:_apSliderType,approval_status,product_type:_apProductType};
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,slider_type:_apSliderType,approval_status,product_type:_apProductType,is_available:_apAvailable};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -506,6 +512,9 @@ function _resetModalForm(){
   const legacyNotice=document.getElementById('ap-color-legacy-notice');if(legacyNotice)legacyNotice.style.display='none';
   const tradNotice=document.getElementById('ap-trad-notice');if(tradNotice)tradNotice.style.display='none';
   const btn=document.getElementById('ap-submit');if(btn){btn.disabled=true;btn.style.opacity='0.45';}
+  _apAvailable=true;
+  document.getElementById('ap-avail-yes')?.classList.add('active');
+  document.getElementById('ap-avail-no')?.classList.remove('active');
 }
 
 function _showModal(){
@@ -554,6 +563,9 @@ function openEditProduct(id){
   const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display=p.image?'none':'';
   const del=document.getElementById('ap-delete');if(del)del.style.display='';
   const title=document.querySelector('.ap-modal-title');if(title)title.textContent='Edit Product';
+  _apAvailable=p.is_available!==false;
+  document.getElementById('ap-avail-yes')?.classList.toggle('active',_apAvailable);
+  document.getElementById('ap-avail-no')?.classList.toggle('active',!_apAvailable);
   _apUpdateSubmitBtn();
   _showModal();
 }
@@ -1059,7 +1071,11 @@ function openProdDetail(id){
   document.getElementById('pd-name').textContent=p.name;
   document.getElementById('pd-price').textContent=Number(p.price).toLocaleString()+' DZD';
   document.getElementById('pd-desc').textContent=p.description||'';
-  document.getElementById('pd-stock-lbl').textContent=(p.stock>0?'متوفر — '+p.stock+' قطعة':'Quantity Available');
+  const _avail=p.is_available!==false;
+  const _lbl=document.getElementById('pd-stock-lbl');
+  const _dot=document.getElementById('pd-stock-dot');
+  if(_lbl){_lbl.textContent=_avail?'متوفر':'غير متوفر';_lbl.className='pd-stock-lbl '+(_avail?'pd-stock-lbl--yes':'pd-stock-lbl--no');}
+  if(_dot){_dot.className='pd-stock-dot'+(_avail?'':' pd-stock-dot--no');}
   const cWrap=document.getElementById('pd-colors-wrap');
   cWrap.innerHTML=p.color?`<span class="pd-color-chip pd-color-chip--active">${esc(p.color_name||p.color)}</span>`:'';
   const sPills=document.getElementById('pd-size-pills');
@@ -1188,7 +1204,7 @@ async function loadSaved(){
     if(!session){openCustAuth();return;}
     const{data,error}=await sb
       .from('saved_items')
-      .select('id, products(id, name, price, image, sizes, stock, seller_id, product_type, color_tags, type, seller:sellers(store_name))')
+      .select('id, products(id, name, price, image, sizes, stock, is_available, seller_id, product_type, color_tags, type, seller:sellers(store_name))')
       .eq('customer_id',session.user.id)
       .order('created_at',{ascending:false});
     if(error)throw error;
@@ -1214,10 +1230,10 @@ function renderSaved(items){
     const p=item.products;
     const storeName=p.seller?.store_name||'';
     const size=(p.sizes&&p.sizes.length)?p.sizes[0]:'—';
-    const inStock=p.stock==null||p.stock>0;
-    const availHtml=inStock
+    const isAvail=p.is_available!==false;
+    const availHtml=isAvail
       ?'<span class="sv-avail sv-avail--yes">متوفر</span>'
-      :'<span class="sv-avail sv-avail--no">نفدت الكمية</span>';
+      :'<span class="sv-avail sv-avail--no">غير متوفر</span>';
     return `
       <div class="sv-card" id="sv-card-${item.id}">
         <button class="sv-heart" onclick="removeSavedItem('${item.id}')">♥</button>
