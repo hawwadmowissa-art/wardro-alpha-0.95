@@ -285,6 +285,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   });
   document.getElementById('ap-name')?.addEventListener('input',_apUpdateSubmitBtn);
   document.getElementById('ap-price')?.addEventListener('input',_apUpdateSubmitBtn);
+  _initDiscoverColorSwatches();
 });
 
 const _AP_COLORS=[
@@ -1221,7 +1222,7 @@ function renderSaved(items){
 }
 
 // ══ DISCOVER ══
-let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcOccasion=null;
+let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcOccasion=null,_discoverSelectedColors=[];
 
 function dcInitSlider(){
   // Do NOT reset type/sizes between visits so filters persist
@@ -1309,7 +1310,7 @@ function dcToggleOpt(key){
     const c=document.getElementById('chip-'+k);
     if(!c)return;
     const hasSelection=(k==='size'&&_dcSizes.length)||(k==='occasion'&&_dcOccasion)||
-      (k==='color'&&(document.getElementById('dc-color-input')?.value||'').trim())||
+      (k==='color'&&_discoverSelectedColors.length)||
       (k==='category'&&document.querySelector('#panel-category .dc-size-btn--active'));
     const isOpen=document.getElementById('panel-'+k)?.style.display!=='none';
     c.classList.toggle('dc-opt-chip--active',isOpen||!!hasSelection);
@@ -1338,16 +1339,48 @@ function dcToggleCatOpt(btn){
   if(!wasActive)btn.classList.add('dc-size-btn--active');
 }
 
+function _initDiscoverColorSwatches(){
+  const grid=document.getElementById('dc-color-swatches');
+  if(!grid)return;
+  grid.innerHTML=_AP_COLORS.map(c=>`<button class="dc-color-swatch" data-key="${c.key}" onclick="dcToggleColorSwatch('${c.key}')" aria-label="${esc(c.ar)}"><span class="dc-color-swatch-circle" style="background:${c.hex}${c.border?';outline:1px solid rgba(138,138,138,.4)':''}"></span><span class="dc-color-swatch-label">${esc(c.ar)}</span></button>`).join('');
+}
+
+function dcToggleColorSwatch(key){
+  const idx=_discoverSelectedColors.indexOf(key);
+  if(idx===-1)_discoverSelectedColors.push(key);
+  else _discoverSelectedColors.splice(idx,1);
+  document.querySelectorAll('.dc-color-swatch').forEach(btn=>btn.classList.toggle('dc-color-swatch--selected',_discoverSelectedColors.includes(btn.dataset.key)));
+  const clearBtn=document.getElementById('dc-color-clear-btn');
+  if(clearBtn)clearBtn.style.display=_discoverSelectedColors.length?'block':'none';
+  _dcUpdateColorChipLabel();
+}
+
+function dcClearColors(){
+  _discoverSelectedColors=[];
+  document.querySelectorAll('.dc-color-swatch').forEach(btn=>btn.classList.remove('dc-color-swatch--selected'));
+  const clearBtn=document.getElementById('dc-color-clear-btn');
+  if(clearBtn)clearBtn.style.display='none';
+  _dcUpdateColorChipLabel();
+}
+
+function _dcUpdateColorChipLabel(){
+  const lbl=document.getElementById('chip-color-label');
+  if(!lbl)return;
+  lbl.textContent=_discoverSelectedColors.length?`اللون (${_discoverSelectedColors.length})`:'اللون';
+  const chip=document.getElementById('chip-color');
+  const panelOpen=document.getElementById('panel-color')?.style.display!=='none';
+  if(chip)chip.classList.toggle('dc-opt-chip--active',!!_discoverSelectedColors.length||panelOpen);
+}
+
 async function dcShowResults(){
   if(!document.getElementById('dc-results-btn').classList.contains('dc-results-btn--active'))return;
   const min=parseInt(document.getElementById('dc-min').value)||0;
   const max=parseInt(document.getElementById('dc-max').value)||20000;
-  const color=(document.getElementById('dc-color-input')?.value||'').trim().toLowerCase();
   navigateTo('s-results','slide');
-  setTimeout(()=>runDiscover(min,max,color),320);
+  setTimeout(()=>runDiscover(min,max,[..._discoverSelectedColors]),320);
 }
 
-async function runDiscover(minPrice,maxPrice,colorFilter){
+async function runDiscover(minPrice,maxPrice,selectedColors){
   const grid=document.getElementById('rs-prod-grid');
   const loading=document.getElementById('rs-loading');
   const empty=document.getElementById('rs-empty');
@@ -1368,19 +1401,13 @@ async function runDiscover(minPrice,maxPrice,colorFilter){
       .gte('price',minPrice)
       .lte('price',maxPrice);
     if(_dcSizes.length){q=q.overlaps('sizes',_dcSizes);}
+    if(selectedColors&&selectedColors.length){q=q.overlaps('color_tags',selectedColors);}
     const{data:prods,error}=await q.order('price',{ascending:true});
     if(error)throw error;
 
     if(loading)loading.style.display='none';
 
-    // Client-side color filter
-    let results=prods||[];
-    if(colorFilter){
-      results=results.filter(p=>{
-        const c=(p.color||p.color_name||'').toLowerCase();
-        return c.includes(colorFilter);
-      });
-    }
+    const results=prods||[];
 
     if(!results.length){if(empty)empty.style.display='flex';return;}
 

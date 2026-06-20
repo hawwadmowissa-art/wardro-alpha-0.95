@@ -1092,14 +1092,32 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   background:rgba(210,175,105,.18);border-color:var(--gold);color:var(--gold);
 }
 
-.dc-color-input{
-  width:100%;background:rgba(11,10,8,.5);
-  border:1px solid rgba(210,175,105,.2);border-radius:10px;
-  padding:11px 13px;color:var(--cream);font-size:14px;
-  font-family:'Tajawal',sans-serif;outline:none;text-align:right;
+.dc-color-clear-btn{
+  display:block;margin:0 auto 10px;
+  background:none;border:1px solid rgba(210,175,105,.3);border-radius:20px;
+  color:var(--gold);font-family:'Tajawal',sans-serif;font-size:12px;
+  padding:4px 14px;cursor:pointer;transition:background .15s;
 }
-.dc-color-input::placeholder{color:var(--muted)}
-.dc-color-input:focus{border-color:var(--gold)}
+.dc-color-clear-btn:hover{background:rgba(210,175,105,.1)}
+.dc-color-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:4px 2px}
+.dc-color-swatch{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:none;border:none;cursor:pointer;padding:6px 4px;
+  border-radius:10px;transition:background .15s;
+}
+.dc-color-swatch:hover{background:rgba(210,175,105,.08)}
+.dc-color-swatch-circle{
+  width:36px;height:36px;border-radius:50%;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  transition:box-shadow .15s;
+  outline:2.5px solid transparent;outline-offset:3px;
+}
+.dc-color-swatch--selected .dc-color-swatch-circle{outline-color:#D2AF69}
+.dc-color-swatch-label{
+  font-family:'Tajawal',sans-serif;font-size:10px;
+  color:var(--muted);text-align:center;line-height:1.2;
+}
+.dc-color-swatch--selected .dc-color-swatch-label{color:var(--gold)}
 
 /* CTA Button */
 .dc-footer{padding:14px 18px 6px;flex-shrink:0}
