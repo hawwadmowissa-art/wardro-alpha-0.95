@@ -73,7 +73,7 @@ wardro/
 
 **Restructure (موازي) — Editor Mode + DB foundation**
 - ✅ Phase 1: DB migration (`slider_type`) + فصل Editor لـ 3 أقسام — منتهي
-- 🔜 Phase 2: ربط جهة الزبون (buildHeroSlider/buildBrowseHero تقرأ `slider_type` بدل `hero` القديم) + إصلاح bug الضغط على الـ hero
+- ✅ Phase 2: ربط جهة الزبون — تم (تأكيد يونيو 2026): `buildHeroSlider` (س726) و`buildBrowseHero` (س989) يقرأان `slider_type` بشكل صحيح؛ لا أثر لـ `p.hero` في app.js
 - 🔜 Phase 3: تلميع بصري (ارتفاع الـ hero 480px، إلخ)
 
 ---
@@ -85,7 +85,7 @@ wardro/
 - **AI via Edge Functions** — لا مفاتيح API في الـ frontend؛ كل نداء لـ Claude يمر عبر Supabase Edge Function
 - **supabase-config.js** — لا تلمسه، لا ترفعه
 - **XSS — esc() + safeUrl()** — كل string من DB يُحقن في `innerHTML` يمر عبر `esc()`؛ كل URL يُستخدم في `src` أو `style background-image` يمر عبر `safeUrl()`؛ استخدم `textContent` حيثما أمكن
-- **products.slider_type** (`none`/`hero`/`main_hero`) هو المرجع الوحيد لمكان ظهور القطعة — عمود `hero` (bool) القديم محذوف نهائياً. ⚠️ `buildHeroSlider`/`buildBrowseHero` بـ app.js لسا يقرأو `p.hero` القديم (دائماً undefined الآن) — لازم تحديثهم لـ `p.slider_type==='hero'`/`'main_hero'` في Restructure Phase 2 وإلا الـ hero slider عند الزبون يبقى فاضي
+- **products.slider_type** (`none`/`hero`/`main_hero`) هو المرجع الوحيد لمكان ظهور القطعة — عمود `hero` (bool) القديم محذوف نهائياً. ✅ تم التحقق (يونيو 2026): `buildHeroSlider` و`buildBrowseHero` يقرأان `slider_type` بشكل صحيح — لا أثر لـ `p.hero` في app.js، والـ hero sliders تعمل على الـ live site
 
 ---
 
