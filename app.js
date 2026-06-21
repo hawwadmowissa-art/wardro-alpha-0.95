@@ -403,10 +403,16 @@ async function loadEditorProducts(){
     const{data:{user}}=await sb.auth.getUser();
     if(!user)return;
     const{data:seller}=await sb.from('sellers').select('profile_image,bio').eq('id',user.id).single();
+    const circle=document.getElementById('sp-img-circle');
+    const spLetter=document.getElementById('sp-img-letter');
     if(seller?.profile_image){
-      const circle=document.getElementById('sp-img-circle');
-      if(circle){circle.style.backgroundImage=`url(${seller.profile_image})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';circle.innerHTML='';}
+      if(circle){circle.style.backgroundImage=`url(${safeUrl(seller.profile_image)})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';}
+      if(spLetter)spLetter.style.display='none';
       localStorage.setItem('wardro_profile_image',seller.profile_image);
+    }else if(circle){
+      circle.style.backgroundImage='';
+      const sname=localStorage.getItem('wardro_store_name')||'—';
+      if(spLetter){spLetter.textContent=(sname[0]||'?').toUpperCase();spLetter.style.display='';}
     }
     if(seller?.bio!=null){
       const bioEl=document.getElementById('ed-bio');if(bioEl&&!bioEl.dataset.dirty)bioEl.value=seller.bio;
@@ -634,26 +640,47 @@ async function logOut(){
   }catch(e){toast(e.message||'خطأ في تسجيل الخروج')}
 }
 
-function previewStoreProfile(input){
+async function previewStoreProfile(input){
   if(!input.files[0])return;
   const file=input.files[0];
-  const r=new FileReader();
-  r.onload=async ev=>{
-    const circle=document.getElementById('sp-img-circle');
-    if(circle){circle.style.backgroundImage=`url(${ev.target.result})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';circle.innerHTML='';}
-    const sb=getSb();if(!sb)return;
-    const{data:{user}}=await sb.auth.getUser();if(!user)return;
-    const ext=file.name.split('.').pop();
-    const path=`store-profiles/${user.id}.${ext}`;
-    const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
-    if(!upErr){
-      const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);
-      await sb.from('sellers').update({profile_image:pu.publicUrl}).eq('id',user.id);
-      localStorage.setItem('wardro_profile_image',pu.publicUrl);
-      toast('✓ تم تحديث صورة المتجر');
-    }
-  };
-  r.readAsDataURL(file);
+  if(!file.type.startsWith('image/')){toast('الرجاء اختيار صورة');input.value='';return;}
+  const circle=document.getElementById('sp-img-circle');
+  const spLetter=document.getElementById('sp-img-letter');
+  const previewUrl=URL.createObjectURL(file);
+  if(circle){circle.style.backgroundImage=`url(${previewUrl})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';}
+  if(spLetter)spLetter.style.display='none';
+  const sb=getSb();if(!sb)return;
+  const{data:{user}}=await sb.auth.getUser();if(!user)return;
+  let uploadFile=file;
+  if(file.size>500*1024){try{uploadFile=await _resizeStoreImage(file);}catch(_){}}
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`${user.id}/profile.${ext}`;
+  const{error:upErr}=await sb.storage.from('store-profiles').upload(path,uploadFile,{upsert:true});
+  URL.revokeObjectURL(previewUrl);
+  if(upErr){toast('فشل رفع الصورة — حاول مجدداً');return;}
+  const{data:pu}=sb.storage.from('store-profiles').getPublicUrl(path);
+  await sb.from('sellers').update({profile_image:pu.publicUrl}).eq('id',user.id);
+  localStorage.setItem('wardro_profile_image',pu.publicUrl);
+  // Refresh circle with persisted URL (avoid ObjectURL expiry)
+  if(circle){circle.style.backgroundImage=`url(${safeUrl(pu.publicUrl)})`;circle.style.backgroundSize='cover';circle.style.backgroundPosition='center';}
+  toast('✓ تم تحديث صورة المتجر');
+}
+
+async function _resizeStoreImage(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const scale=Math.min(1,Math.sqrt((500*1024)/file.size));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      canvas.toBlob(blob=>resolve(blob||file),'image/jpeg',0.85);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
+    img.src=url;
+  });
 }
 
 // ══ SHOW MODE ══
@@ -669,10 +696,16 @@ function loadShowMode(){
   const name=localStorage.getItem('wardro_store_name')||'—';
   // Avatar in header
   const av=document.getElementById('show-avatar');
-  if(av&&img){av.style.backgroundImage=`url(${img})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
+  if(av){
+    if(img){av.style.backgroundImage=`url(${safeUrl(img)})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
+    else{av.style.backgroundImage='';av.innerHTML=`<span class="store-av-letter">${esc((name[0]||'?').toUpperCase())}</span>`;}
+  }
   // Avatar in About tab
   const avAbout=document.getElementById('show-about-avatar');
-  if(avAbout&&img){avAbout.style.backgroundImage=`url(${img})`;avAbout.style.backgroundSize='cover';avAbout.style.backgroundPosition='center';avAbout.innerHTML='';}
+  if(avAbout){
+    if(img){avAbout.style.backgroundImage=`url(${safeUrl(img)})`;avAbout.style.backgroundSize='cover';avAbout.style.backgroundPosition='center';avAbout.innerHTML='';}
+    else{avAbout.style.backgroundImage='';avAbout.innerHTML=`<span class="store-av-letter">${esc((name[0]||'?').toUpperCase())}</span>`;}
+  }
   // Store name in About tab
   const aboutName=document.getElementById('show-about-name');
   if(aboutName)aboutName.textContent=name;
@@ -697,7 +730,7 @@ function openStoreView(sellerId,storeName,storeImg){
   const av=document.getElementById('show-avatar');
   if(av){
     if(storeImg){av.style.backgroundImage=`url(${storeImg})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
-    else{av.style.backgroundImage='';av.innerHTML='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';}
+    else{av.style.backgroundImage='';av.innerHTML=`<span class="store-av-letter">${esc((storeName||'?')[0].toUpperCase())}</span>`;}
   }
   switchShowTab('home',document.querySelector('.show-tab[data-tab="home"]'));
   loadGuestStoreProducts(sellerId);
@@ -715,11 +748,16 @@ async function loadGuestStoreProducts(sellerId){
   const sb=getSb();if(!sb)return;
   try{
     const{data:seller}=await sb.from('sellers').select('profile_image,bio').eq('id',sellerId).single();
+    const guestName=document.getElementById('show-store-name')?.textContent||'?';
+    const av=document.getElementById('show-avatar');
+    const avAbout=document.getElementById('show-about-avatar');
     if(seller?.profile_image){
-      const av=document.getElementById('show-avatar');
-      if(av){av.style.backgroundImage=`url(${seller.profile_image})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
-      const avAbout=document.getElementById('show-about-avatar');
-      if(avAbout){avAbout.style.backgroundImage=`url(${seller.profile_image})`;avAbout.style.backgroundSize='cover';avAbout.style.backgroundPosition='center';avAbout.innerHTML='';}
+      if(av){av.style.backgroundImage=`url(${safeUrl(seller.profile_image)})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
+      if(avAbout){avAbout.style.backgroundImage=`url(${safeUrl(seller.profile_image)})`;avAbout.style.backgroundSize='cover';avAbout.style.backgroundPosition='center';avAbout.innerHTML='';}
+    }else{
+      const letter=`<span class="store-av-letter">${esc((guestName[0]||'?').toUpperCase())}</span>`;
+      if(av){av.style.backgroundImage='';av.innerHTML=letter;}
+      if(avAbout){avAbout.style.backgroundImage='';avAbout.innerHTML=letter;}
     }
     const aboutDesc=document.getElementById('show-about-desc');
     if(aboutDesc)aboutDesc.textContent=seller?.bio||'';
@@ -997,7 +1035,7 @@ function renderTopStores(stores){
   const list=stores.length?stores:Array.from({length:4},(_,i)=>({id:'ds-'+i,_demo:true,name:'',img:null}));
   el.innerHTML=list.map(s=>`
     <div class="br-store-item"${s._demo?'':` data-sid="${esc(s.id)}" data-sname="${esc(s.name||'')}" data-simg="${esc(safeUrl(s.img||''))}"`}>
-      <div class="br-store-circle"${s.img?` style="background-image:url('${safeUrl(s.img||'')}')"`:''}>${!s.img?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".35"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/></svg>`:''}</div>
+      <div class="br-store-circle"${s.img?` style="background-image:url('${safeUrl(s.img||'')}')"`:''}>${!s.img&&!s._demo?`<span class="store-av-letter" style="font-size:26px">${esc((s.name||'?')[0].toUpperCase())}</span>`:''}${!s.img&&s._demo?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".35"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/></svg>`:''}</div>
       <div class="br-store-name${s._demo?' br-store-name--ph':''}">${s._demo?'':esc(s.name)}</div>
     </div>`).join('');
   el.querySelectorAll('.br-store-item[data-sid]').forEach(item=>{

@@ -469,14 +469,23 @@
     <!-- Scrollable body -->
     <div class="editor-body">
 
-      <!-- Store Bio Section -->
+      <!-- Store Info Section -->
       <div class="ed-section">
         <div class="ed-sec-head">
-          <span class="ed-sec-title">Store Bio</span>
+          <span class="ed-sec-title">Store Info</span>
         </div>
-        <div class="ed-bio-wrap">
-          <textarea id="ed-bio" class="ed-bio-input" placeholder="أضف وصفاً لمتجرك..." rows="3"></textarea>
-          <button class="ed-bio-save" onclick="saveBio()">حفظ الوصف</button>
+        <div class="ed-store-info-wrap">
+          <div class="sp-img-wrap">
+            <div class="sp-img-circle" id="sp-img-circle">
+              <span class="sp-img-letter" id="sp-img-letter">?</span>
+            </div>
+            <button class="sp-img-btn" onclick="document.getElementById('sp-img-input').click()">تغيير صورة المتجر</button>
+            <input type="file" id="sp-img-input" accept="image/*" onchange="previewStoreProfile(this)" hidden>
+          </div>
+          <div class="ed-bio-wrap" style="flex:1;padding:0 0 0 0">
+            <textarea id="ed-bio" class="ed-bio-input" placeholder="أضف وصفاً لمتجرك..." rows="4"></textarea>
+            <button class="ed-bio-save" onclick="saveBio()">حفظ الوصف</button>
+          </div>
         </div>
       </div>
 
@@ -531,9 +540,7 @@
     </div>
   </div>
 
-  <!-- Hidden profile bindings (preserved for JS) -->
-  <input type="file" id="sp-img-input" accept="image/*" onchange="previewStoreProfile(this)" hidden>
-  <div id="sp-img-circle" style="display:none"></div>
+  <!-- Hidden store name binding (preserved for JS) -->
   <div id="ed-store-name" style="display:none">—</div>
 
   <!-- Add Product Modal -->

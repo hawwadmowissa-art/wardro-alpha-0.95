@@ -566,7 +566,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 
 /* Store Header */
 .show-store-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.show-store-avatar{width:60px;height:60px;border-radius:50%;background:var(--dim);
+.show-store-avatar{width:80px;height:80px;border-radius:50%;background:var(--dim);
   border:2px solid var(--brd2);flex-shrink:0;display:flex;align-items:center;justify-content:center;
   overflow:hidden;background-size:cover;background-position:center;color:var(--muted)}
 .show-store-info{flex:1;min-width:0}
@@ -652,6 +652,21 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 
 /* ══ FUNCTIONAL ADDITIONS ══ */
 /* Store Bio */
+/* Store avatar letter fallback — used in Top Stores, Store View header/about */
+.store-av-letter{font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:var(--gold);line-height:1;pointer-events:none}
+
+/* Editor Store Info — profile image upload */
+.ed-store-info-wrap{display:flex;gap:16px;align-items:flex-start;padding:12px}
+.sp-img-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.sp-img-circle{width:120px;height:120px;border-radius:50%;background:#1C1915;
+  border:2px solid var(--brd2);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background-size:cover;background-position:center;cursor:pointer;flex-shrink:0}
+.sp-img-letter{font-family:'Fraunces',serif;font-size:44px;font-weight:300;color:var(--gold);line-height:1}
+.sp-img-btn{font-family:'Tajawal',sans-serif;font-size:11px;color:var(--gold);background:transparent;
+  border:1px solid var(--brd2);border-radius:20px;padding:6px 12px;cursor:pointer;
+  white-space:nowrap;transition:border-color .3s var(--spring)}
+.sp-img-btn:hover{border-color:var(--gold)}
+
 .ed-bio-wrap{padding:0 12px 12px;display:flex;flex-direction:column;gap:8px}
 .ed-bio-input{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:10px;
   padding:10px 12px;color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;
@@ -752,12 +767,12 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .br-strip-price{font-size:9px;color:var(--gold);font-weight:700}
 
 .br-store-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer}
-.br-store-circle{width:56px;height:56px;border-radius:50%;background:var(--dim);
+.br-store-circle{width:84px;height:84px;border-radius:50%;background:var(--dim);
   border:2px solid var(--brd2);background-size:cover;background-position:center;
   display:flex;align-items:center;justify-content:center;
   transition:border-color .3s var(--spring);flex-shrink:0;color:var(--muted)}
 .br-store-item:hover .br-store-circle{border-color:var(--gold)}
-.br-store-name{font-size:9px;color:var(--muted);text-align:center;max-width:62px;
+.br-store-name{font-size:11px;font-family:'Tajawal',sans-serif;color:var(--muted);text-align:center;max-width:92px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .br-store-name--ph{width:38px;height:7px;background:var(--dim);border-radius:4px}
 
