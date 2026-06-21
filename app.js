@@ -1109,6 +1109,8 @@ function openProdDetail(id){
   else{img.style.display='none';if(ph)ph.style.display='flex';}
   document.getElementById('pd-name').textContent=p.name;
   document.getElementById('pd-price').textContent=Number(p.price).toLocaleString()+' DZD';
+  const _sn=document.getElementById('pd-store-name');
+  if(_sn){const _nm=p.seller?.store_name;if(_nm){_sn.textContent='من متجر '+_nm;_sn.style.display='';_sn.onclick=()=>{closeProdDetail();openStoreView(p.seller_id,_nm,p.seller?.profile_image||null);};}else{_sn.textContent='';_sn.style.display='none';_sn.onclick=null;}}
   document.getElementById('pd-desc').textContent=p.description||'';
   const _avail=p.is_available!==false;
   const _lbl=document.getElementById('pd-stock-lbl');
