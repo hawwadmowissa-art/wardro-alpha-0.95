@@ -773,27 +773,23 @@ function _wireHeroTap(track,cfg){
     clearTimeout(resumeId);
     resumeId=setTimeout(()=>{if(cfg.getLen()>1)cfg.startTimer();},RESUME);
   }
-  track.onpointerdown=e=>{
-    start={x:e.clientX,y:e.clientY};moved=false;
-    cfg.stopTimer();clearTimeout(resumeId);
-    try{track.setPointerCapture(e.pointerId);}catch(_){}
-  };
-  track.onpointermove=e=>{
+  function _onStart(x,y){start={x,y};moved=false;cfg.stopTimer();clearTimeout(resumeId);}
+  function _onMove(x,y){if(!start)return;const dx=x-start.x,dy=y-start.y;if(Math.sqrt(dx*dx+dy*dy)>10)moved=true;}
+  function _onEnd(x){
     if(!start)return;
-    const dx=e.clientX-start.x,dy=e.clientY-start.y;
-    if(Math.sqrt(dx*dx+dy*dy)>10)moved=true;
-  };
-  track.onpointerup=e=>{
-    if(!start)return;
-    const dx=e.clientX-start.x;
-    start=null;
-    if(Math.abs(dx)>=SWIPE){
-      const n=((cfg.getIdx()+(dx<0?1:-1))%cfg.getLen()+cfg.getLen())%cfg.getLen();
-      cfg.setIdx(n);cfg.goFn(n);moved=true;
-    }
+    const dx=x-start.x;start=null;
+    if(Math.abs(dx)>=SWIPE){const n=((cfg.getIdx()+(dx<0?1:-1))%cfg.getLen()+cfg.getLen())%cfg.getLen();cfg.setIdx(n);cfg.goFn(n);moved=true;}
     scheduleResume();
-  };
+  }
+  // Pointer events — desktop mouse + pen
+  track.onpointerdown=e=>{_onStart(e.clientX,e.clientY);};
+  track.onpointermove=e=>{_onMove(e.clientX,e.clientY);};
+  track.onpointerup=e=>{_onEnd(e.clientX);};
   track.onpointercancel=()=>{start=null;scheduleResume();};
+  // Native touch events — real mobile (share state; onpointerup nulls start first so ontouchend exits early when both fire)
+  track.ontouchstart=e=>{const t=e.touches[0];_onStart(t.clientX,t.clientY);};
+  track.ontouchmove=e=>{const t=e.touches[0];_onMove(t.clientX,t.clientY);};
+  track.ontouchend=e=>{const t=e.changedTouches[0];_onEnd(t.clientX);};
   track.onclick=e=>{
     if(moved){moved=false;return;}
     const slide=e.target.closest('.show-hero-slide,.br-hero-slide');

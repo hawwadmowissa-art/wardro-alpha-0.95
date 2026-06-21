@@ -592,7 +592,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 /* Hero Slider */
 .show-hero{position:relative;border-radius:16px;overflow:hidden;margin-bottom:22px;
   background:var(--card);border:1px solid var(--brd)}
-.show-hero-track{position:relative;height:400px}
+.show-hero-track{position:relative;height:400px;touch-action:pan-y}
 .show-hero-slide{position:absolute;inset:0;background:var(--dim);background-size:cover;
   background-position:center center;opacity:0;transition:opacity .75s var(--expo);pointer-events:none}
 .show-hero-slide.active{opacity:1;pointer-events:auto}
@@ -707,8 +707,8 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .br-body::-webkit-scrollbar{display:none}
 
 /* Hero */
-.br-hero{position:relative;overflow:hidden;margin-bottom:20px}
-.br-hero-track{position:relative;height:400px}
+.br-hero{position:relative;overflow:hidden;margin-bottom:28px}
+.br-hero-track{position:relative;height:400px;touch-action:pan-y}
 .br-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .78s var(--expo);background-size:cover;background-position:center center;pointer-events:none}
 .br-hero-slide.active{opacity:1;pointer-events:auto}
 .br-hero-slide--0{background:linear-gradient(145deg,#1A1208 0%,#2E200A 40%,#3A2C14 65%,#1A1208 100%)}
