@@ -1052,7 +1052,7 @@ function buildBrowseHero(prods){
   // Use real product images when available; fall back to editorial gradients
   let slides;
   if(prods&&prods.length){
-    let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.image);
+    let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.approval_status==='approved'&&p.image);
     if(!heroProds.length)heroProds=prods.filter(p=>p.image);
     if(heroProds.length){
       slides=heroProds.slice(0,20).map(p=>({
