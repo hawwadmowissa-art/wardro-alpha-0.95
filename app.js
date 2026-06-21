@@ -766,14 +766,34 @@ async function loadGuestStoreProducts(sellerId){
   }catch(e){}
 }
 
-function _wireHeroTap(track){
-  let start=null,moved=false;
-  track.ontouchstart=e=>{const t=e.touches[0];start={x:t.clientX,y:t.clientY};moved=false;};
-  track.ontouchmove=e=>{
+function _wireHeroTap(track,cfg){
+  const SWIPE=50,RESUME=4000;
+  let start=null,moved=false,resumeId=null;
+  function scheduleResume(){
+    clearTimeout(resumeId);
+    resumeId=setTimeout(()=>{if(cfg.getLen()>1)cfg.startTimer();},RESUME);
+  }
+  track.onpointerdown=e=>{
+    start={x:e.clientX,y:e.clientY};moved=false;
+    cfg.stopTimer();clearTimeout(resumeId);
+    try{track.setPointerCapture(e.pointerId);}catch(_){}
+  };
+  track.onpointermove=e=>{
     if(!start)return;
-    const t=e.touches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
+    const dx=e.clientX-start.x,dy=e.clientY-start.y;
     if(Math.sqrt(dx*dx+dy*dy)>10)moved=true;
   };
+  track.onpointerup=e=>{
+    if(!start)return;
+    const dx=e.clientX-start.x;
+    start=null;
+    if(Math.abs(dx)>=SWIPE){
+      const n=((cfg.getIdx()+(dx<0?1:-1))%cfg.getLen()+cfg.getLen())%cfg.getLen();
+      cfg.setIdx(n);cfg.goFn(n);moved=true;
+    }
+    scheduleResume();
+  };
+  track.onpointercancel=()=>{start=null;scheduleResume();};
   track.onclick=e=>{
     if(moved){moved=false;return;}
     const slide=e.target.closest('.show-hero-slide,.br-hero-slide');
@@ -809,8 +829,9 @@ function buildHeroSlider(prods){
       </div>
     </div>`).join('');
   dotsEl.innerHTML=slides.map((_,i)=>`<button class="show-hero-dot${i===0?' active':''}" onclick="goHeroSlide(${i})"></button>`).join('');
-  if(slides.length>1){_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);}
-  _wireHeroTap(track);
+  function _startHeroTimer(){clearInterval(_heroTimer);if(_heroLen>1)_heroTimer=setInterval(()=>{_heroIdx=(_heroIdx+1)%_heroLen;goHeroSlide(_heroIdx);},3800);}
+  _startHeroTimer();
+  _wireHeroTap(track,{goFn:goHeroSlide,getIdx:()=>_heroIdx,setIdx:i=>{_heroIdx=i;},getLen:()=>_heroLen,stopTimer:()=>{clearInterval(_heroTimer);_heroTimer=null;},startTimer:_startHeroTimer});
 }
 
 function goHeroSlide(idx){
@@ -1078,8 +1099,9 @@ function buildBrowseHero(prods){
       </div>
     </div>`).join('');
   dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');
-  if(slides.length>1){_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);}
-  _wireHeroTap(track);
+  function _startBrHeroTimer(){clearInterval(_brHeroTimer);if(slides.length>1)_brHeroTimer=setInterval(()=>{_brHeroIdx=(_brHeroIdx+1)%slides.length;goBrHeroSlide(_brHeroIdx);},3800);}
+  _startBrHeroTimer();
+  _wireHeroTap(track,{goFn:goBrHeroSlide,getIdx:()=>_brHeroIdx,setIdx:i=>{_brHeroIdx=i;},getLen:()=>slides.length,stopTimer:()=>{clearInterval(_brHeroTimer);_brHeroTimer=null;},startTimer:_startBrHeroTimer});
 }
 
 function goBrHeroSlide(idx){
