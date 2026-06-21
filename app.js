@@ -380,16 +380,16 @@ async function saveProduct(){
       const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
     }
-    const approval_status=_apSliderType==='main_hero'?'pending':'approved';
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,slider_type:_apSliderType,approval_status,product_type:_apProductType,is_available:_apAvailable};
+    const hero_status=_apSliderType==='main_hero'?'pending':'none';
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
-      toast(approval_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تم تحديث القطعة');
+      toast(hero_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تم تحديث القطعة');
     }else{
       const{error}=await sb.from('products').insert({seller_id:user.id,...payload});
       if(error)throw error;
-      toast(approval_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تمت إضافة القطعة');
+      toast(hero_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تمت إضافة القطعة');
     }
     btn.textContent='Done ✓';btn.disabled=false;btn.style.opacity='1';
     closeAddProduct();
@@ -425,10 +425,8 @@ async function loadEditorProducts(){
 }
 
 function _edProdCardHtml(p){
-  const apprBadge=p.approval_status==='pending'
+  const apprBadge=p.hero_status==='pending'
     ?`<div class="ed-appr-badge ed-appr-badge--pending">قيد المراجعة</div>`
-    :p.approval_status==='rejected'
-    ?`<div class="ed-appr-badge ed-appr-badge--rejected">تم الرفض</div>`
     :'';
   return `
     <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
@@ -1052,7 +1050,7 @@ function buildBrowseHero(prods){
   // Use real product images when available; fall back to editorial gradients
   let slides;
   if(prods&&prods.length){
-    let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.approval_status==='approved'&&p.image);
+    let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.hero_status==='approved'&&p.image);
     if(!heroProds.length)heroProds=prods.filter(p=>p.image);
     if(heroProds.length){
       slides=heroProds.slice(0,20).map(p=>({

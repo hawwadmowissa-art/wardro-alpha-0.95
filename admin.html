@@ -436,7 +436,7 @@
         const { data, error } = await sb.from('products')
           .select('id,name,price,image,type,description,created_at,seller:sellers(store_name)')
           .eq('slider_type', 'main_hero')
-          .eq('approval_status', 'pending')
+          .eq('hero_status', 'pending')
           .order('created_at', { ascending: true });
         if (error) throw error;
         const count = data?.length ?? 0;
@@ -480,8 +480,14 @@
       if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
       try {
         const table = type === 'seller' ? 'sellers' : 'products';
-        const updateData = { approval_status: status };
-        if (type === 'product' && status === 'rejected') updateData.slider_type = 'none';
+        let updateData;
+        if (type === 'seller') {
+          updateData = { approval_status: status };
+        } else {
+          updateData = status === 'approved'
+            ? { hero_status: 'approved' }
+            : { hero_status: 'rejected', slider_type: 'none' };
+        }
         const { error } = await sb.from(table).update(updateData).eq('id', id);
         if (error) throw error;
         toast(status === 'approved' ? '✓ تمت الموافقة' : '✓ تم الرفض');
