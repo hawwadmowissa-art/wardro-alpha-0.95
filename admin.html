@@ -161,6 +161,19 @@
     .adm-card-detail{font-size:12px;color:var(--muted);margin-top:3px}
     .adm-card-price{font-size:12px;color:var(--gold);margin-top:2px;opacity:.85}
     .adm-card-date{font-size:11px;color:var(--muted);margin-top:4px;opacity:.65}
+    .adm-card-email{
+      font-size:12px;color:rgba(216,207,186,.55);margin-top:4px;
+      cursor:pointer;direction:ltr;text-align:right;
+      transition:color .2s;word-break:break-all;
+    }
+    .adm-card-email:hover{color:var(--txt)}
+    .adm-prod-img-lg{
+      width:100%;max-height:280px;object-fit:contain;
+      border-radius:8px;background:var(--bg);display:block;
+    }
+    .adm-thumb-ph--lg{
+      width:100%;height:200px;font-size:40px;border-radius:8px;
+    }
 
     .adm-actions{display:flex;gap:8px}
     .adm-approve{
@@ -352,19 +365,22 @@
       document.getElementById('ptab-' + tab).classList.add('active');
     }
 
+    // ── COPY EMAIL ──
+    async function copyEmail(email) {
+      try {
+        await navigator.clipboard.writeText(email);
+        toast('تم النسخ');
+      } catch (_) {
+        toast('فشل النسخ');
+      }
+    }
+
     // ── SELLERS ──
     async function loadSellers() {
       const el = document.getElementById('ptab-sellers');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
-        const { data: { session } } = await sb.auth.getSession();
-        const adminId = session?.user?.id;
-        let q = sb.from('sellers')
-          .select('id,store_name,created_at')
-          .eq('approval_status', 'pending')
-          .order('created_at', { ascending: true });
-        if (adminId) q = q.neq('id', adminId);
-        const { data, error } = await q;
+        const { data, error } = await sb.rpc('get_pending_sellers_with_email');
         if (error) throw error;
         const count = data?.length ?? 0;
         document.getElementById('cnt-sellers').textContent = count > 0 ? count : '';
@@ -378,6 +394,7 @@
               <div class="adm-thumb-ph">🏪</div>
               <div class="adm-card-info">
                 <div class="adm-card-name">${esc(s.store_name || '—')}</div>
+                <div class="adm-card-email" onclick="copyEmail('${esc(s.email || '')}')">${esc(s.email || '—')}</div>
                 <div class="adm-card-date">${fmtDate(s.created_at)}</div>
               </div>
             </div>
@@ -410,16 +427,14 @@
         }
         el.innerHTML = data.map(p => `
           <div class="adm-card" id="pc-${p.id}">
-            <div class="adm-card-row">
-              ${p.image
-                ? `<img class="adm-thumb" src="${esc(p.image)}" alt="${esc(p.name || '')}" loading="lazy">`
-                : '<div class="adm-thumb-ph">👔</div>'}
-              <div class="adm-card-info">
-                <div class="adm-card-name">${esc(p.name || '—')}</div>
-                <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
-                <div class="adm-card-price">${Number(p.price || 0).toLocaleString()} DZD</div>
-                <div class="adm-card-date">${fmtDate(p.created_at)}</div>
-              </div>
+            ${p.image
+              ? `<img class="adm-prod-img-lg" src="${esc(p.image)}" alt="${esc(p.name || '')}" loading="lazy">`
+              : '<div class="adm-thumb-ph adm-thumb-ph--lg">👔</div>'}
+            <div class="adm-card-info">
+              <div class="adm-card-name">${esc(p.name || '—')}</div>
+              <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
+              <div class="adm-card-price">${Number(p.price || 0).toLocaleString()} DZD</div>
+              <div class="adm-card-date">${fmtDate(p.created_at)}</div>
             </div>
             <div class="adm-actions">
               <button class="adm-approve" onclick="doAction('product','${p.id}','approved')">✓ موافقة</button>
