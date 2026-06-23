@@ -1,0 +1,68 @@
+- generic [ref=e320]:
+  - generic [ref=e321]:
+    - button [ref=e322] [cursor=pointer]:
+      - img [ref=e323]
+    - generic [ref=e325]: Test Store
+  - generic [ref=e327]:
+    - generic [ref=e328]:
+      - generic [ref=e330]:
+        - generic [ref=e331]:
+          - generic [ref=e332]: Test Store
+          - generic [ref=e333]: ✓
+        - generic [ref=e334]: Premium Men's Fashion
+        - generic [ref=e335]: ⭐ 5.0 · 0 متابع
+      - button "Follow" [ref=e336] [cursor=pointer]
+    - button "Share Store" [ref=e337] [cursor=pointer]:
+      - img [ref=e338]
+      - text: Share Store
+    - generic [ref=e344]:
+      - button "Home" [ref=e345] [cursor=pointer]
+      - button "All Products" [ref=e346] [cursor=pointer]
+      - button "Collections" [ref=e347] [cursor=pointer]
+      - button "About Store" [ref=e348] [cursor=pointer]
+    - generic [ref=e349]:
+      - generic [ref=e350]:
+        - generic [ref=e351]:
+          - generic:
+            - generic:
+              - generic: SPORT
+              - generic: Sport Jacket
+              - generic: Premium sport jacket
+              - generic: 5,500 DZD →
+          - generic [ref=e1036]:
+            - generic [ref=e1037]: CASUAL
+            - generic [ref=e1038]: Casual Shirt
+            - generic [ref=e1039]: Comfortable casual shirt
+            - generic [ref=e1040]: 3,500 DZD →
+        - generic [ref=e359]:
+          - button [ref=e1020] [cursor=pointer]
+          - button [ref=e1021] [cursor=pointer]
+      - generic [ref=e366]:
+        - generic [ref=e367]: Featured Products
+        - generic [ref=e368] [cursor=pointer]: View All →
+      - generic [ref=e369]:
+        - generic [ref=e1022] [cursor=pointer]:
+          - img "Sport Jacket" [ref=e1023]
+          - generic [ref=e1024]:
+            - generic [ref=e1025]: Sport Jacket
+            - generic [ref=e1026]: 5,500 DZD
+            - generic [ref=e1027]: sport
+        - generic [ref=e1028] [cursor=pointer]:
+          - img "Casual Shirt" [ref=e1029]
+          - generic [ref=e1030]:
+            - generic [ref=e1031]: Casual Shirt
+            - generic [ref=e1032]: 3,500 DZD
+            - generic [ref=e1033]: casual
+    - generic [ref=e394]:
+      - generic [ref=e395]:
+        - generic [ref=e396]: 🚀
+        - generic [ref=e397]: Fast Delivery
+        - generic [ref=e398]: 1-2 Days
+      - generic [ref=e399]:
+        - generic [ref=e400]: 🔒
+        - generic [ref=e401]: Secure Payment
+        - generic [ref=e402]: 100% Safe
+      - generic [ref=e403]:
+        - generic [ref=e404]: ↩
+        - generic [ref=e405]: Easy Returns
+        - generic [ref=e406]: 1-7 Days

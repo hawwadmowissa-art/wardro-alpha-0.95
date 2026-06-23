@@ -1,0 +1,50 @@
+- generic [ref=e579]:
+  - generic [ref=e580]:
+    - button "Editor" [ref=e581] [cursor=pointer]:
+      - img [ref=e582]
+      - generic [ref=e585]: Editor
+    - button "Show" [ref=e586] [cursor=pointer]:
+      - img [ref=e587]
+      - generic [ref=e590]: Show
+    - button "Out" [ref=e591] [cursor=pointer]:
+      - img [ref=e592]
+      - generic [ref=e595]: Out
+  - generic [ref=e596]:
+    - generic [ref=e597]:
+      - generic [ref=e598]:
+        - generic [ref=e599]: EDITOR MODE
+        - generic [ref=e600]: Manage your store content
+      - button [ref=e601] [cursor=pointer]:
+        - img [ref=e602]
+    - generic [ref=e605]:
+      - generic [ref=e606]:
+        - generic [ref=e608]: Store Info
+        - generic [ref=e609]:
+          - generic [ref=e610]:
+            - generic [ref=e612] [cursor=pointer]: "?"
+            - button "تغيير صورة المتجر" [ref=e613] [cursor=pointer]
+          - generic [ref=e614]:
+            - textbox "أضف وصفاً لمتجرك..." [ref=e615]
+            - button "حفظ الوصف" [ref=e616] [cursor=pointer]
+      - generic [ref=e619]:
+        - text: Main Hero Slider
+        - generic [ref=e620]: Featured on Wardro Home
+      - generic [ref=e624]:
+        - text: Hero Slider
+        - generic [ref=e625]: Featured on your store page
+      - generic [ref=e627]:
+        - generic [ref=e628]:
+          - generic [ref=e629]:
+            - generic [ref=e630]: Products
+            - generic [ref=e631]: "0"
+            - generic [ref=e632]:
+              - generic [ref=e633] [cursor=pointer]: Requests
+              - generic [ref=e634] [cursor=pointer]: Filters
+          - generic [ref=e635]:
+            - generic [ref=e636]:
+              - img
+              - textbox "Search products..." [ref=e637]
+            - button "+" [ref=e638] [cursor=pointer]
+        - generic [ref=e639]:
+          - generic [ref=e640]: 👔
+          - generic [ref=e641]: أضف قطعك الأفضل هنا

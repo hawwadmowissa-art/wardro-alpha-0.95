@@ -1,0 +1,722 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - link "Homepage" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+        - generic [ref=e13]:
+          - navigation "Global" [ref=e16]:
+            - list [ref=e17]:
+              - listitem [ref=e18]:
+                - button "Platform" [ref=e20] [cursor=pointer]:
+                  - text: Platform
+                  - img [ref=e21]
+              - listitem [ref=e23]:
+                - button "Solutions" [ref=e25] [cursor=pointer]:
+                  - text: Solutions
+                  - img [ref=e26]
+              - listitem [ref=e28]:
+                - button "Resources" [ref=e30] [cursor=pointer]:
+                  - text: Resources
+                  - img [ref=e31]
+              - listitem [ref=e33]:
+                - button "Open Source" [ref=e35] [cursor=pointer]:
+                  - text: Open Source
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - button "Enterprise" [ref=e40] [cursor=pointer]:
+                  - text: Enterprise
+                  - img [ref=e41]
+              - listitem [ref=e43]:
+                - link "Pricing" [ref=e44] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+                  - generic [ref=e45]: Pricing
+          - generic [ref=e46]:
+            - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+              - img [ref=e51]
+            - link "Sign in" [ref=e54] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fhawwadmowissa-art%2Fwardro-alpha-0.95%2Factions
+            - link "Sign up" [ref=e55] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Factions%2Findex&source=header-repo&source_repo=hawwadmowissa-art%2Fwardro-alpha-0.95
+            - button "Appearance settings" [ref=e58] [cursor=pointer]:
+              - img
+  - main [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e66]:
+          - img [ref=e67]
+          - link "hawwadmowissa-art" [ref=e70] [cursor=pointer]:
+            - /url: /hawwadmowissa-art
+          - generic [ref=e71]: /
+          - strong [ref=e72]:
+            - link "wardro-alpha-0.95" [ref=e73] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95
+          - generic [ref=e74]: Public
+        - generic [ref=e75]:
+          - list:
+            - listitem [ref=e76]:
+              - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                - /url: /login?return_to=%2Fhawwadmowissa-art%2Fwardro-alpha-0.95
+                - img [ref=e78]
+                - text: Notifications
+            - listitem [ref=e80]:
+              - link "Fork 0" [ref=e81] [cursor=pointer]:
+                - /url: /login?return_to=%2Fhawwadmowissa-art%2Fwardro-alpha-0.95
+                - img [ref=e82]
+                - text: Fork
+                - generic "0" [ref=e84]
+            - listitem [ref=e85]:
+              - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                - /url: /login?return_to=%2Fhawwadmowissa-art%2Fwardro-alpha-0.95
+                - img [ref=e88]
+                - text: Star
+                - generic "0 users starred this repository" [ref=e90]: "0"
+      - navigation "Repository" [ref=e91]:
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - link "Code" [ref=e94] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95
+              - img [ref=e95]
+              - generic [ref=e97]: Code
+          - listitem [ref=e98]:
+            - link "Issues" [ref=e99] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/issues
+              - img [ref=e100]
+              - generic [ref=e103]: Issues
+          - listitem [ref=e104]:
+            - link "Pull requests" [ref=e105] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/pulls
+              - img [ref=e106]
+              - generic [ref=e108]: Pull requests
+          - listitem [ref=e109]:
+            - link "Actions" [ref=e110] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions
+              - img [ref=e111]
+              - generic [ref=e113]: Actions
+          - listitem [ref=e114]:
+            - link "Projects" [ref=e115] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/projects
+              - img [ref=e116]
+              - generic [ref=e118]: Projects
+          - listitem [ref=e119]:
+            - link "Security and quality" [ref=e120] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/security
+              - img [ref=e121]
+              - generic [ref=e123]: Security and quality
+          - listitem [ref=e124]:
+            - link "Insights" [ref=e125] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/pulse
+              - img [ref=e126]
+              - generic [ref=e128]: Insights
+    - generic [ref=e130]:
+      - 'heading "Actions: hawwadmowissa-art/wardro-alpha-0.95" [level=1] [ref=e131]'
+      - generic [ref=e134]:
+        - generic [ref=e135]:
+          - heading "Actions" [level=2] [ref=e137]
+          - navigation "Actions Workflows" [ref=e141]:
+            - list [ref=e143]:
+              - listitem [ref=e144]:
+                - link "All workflows" [ref=e145] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions
+                  - generic [ref=e146]: All workflows
+              - listitem [ref=e147]
+              - listitem [ref=e148]:
+                - list "Workflows" [ref=e152]:
+                  - listitem [ref=e153]:
+                    - link "pages-build-deployment" [ref=e154] [cursor=pointer]:
+                      - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/workflows/pages/pages-build-deployment
+                      - generic [ref=e155]: pages-build-deployment
+              - listitem [ref=e156]
+              - listitem [ref=e157]:
+                - generic [ref=e160]:
+                  - heading "Management" [level=3] [ref=e162]
+                  - list "Management" [ref=e163]:
+                    - listitem [ref=e164]:
+                      - link "Caches" [ref=e165] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/caches
+                        - generic:
+                          - img
+                        - generic [ref=e166]: Caches
+                    - listitem [ref=e167]:
+                      - link "Deployments" [ref=e168] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art/wardro-alpha-0.95/deployments
+                        - generic:
+                          - img
+                        - generic [ref=e169]: Deployments
+                        - generic:
+                          - img
+        - generic [ref=e172]:
+          - generic [ref=e173]:
+            - generic [ref=e174]:
+              - heading "All workflows" [level=2] [ref=e176]:
+                - generic [ref=e178]: All workflows
+              - search [ref=e182]:
+                - combobox "Filter workflow runs" [ref=e183]
+                - img
+            - generic [ref=e184]: Showing runs from all workflows
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - strong [ref=e189]: 70 workflow runs
+              - generic [ref=e190]:
+                - button "Workflow" [ref=e194] [cursor=pointer]:
+                  - generic [ref=e196]: Workflow
+                  - generic:
+                    - img
+                - button "Event" [ref=e200] [cursor=pointer]:
+                  - generic [ref=e202]: Event
+                  - generic:
+                    - img
+                - button "Status" [ref=e206] [cursor=pointer]:
+                  - generic [ref=e208]: Status
+                  - generic:
+                    - img
+                - button "Branch" [ref=e212] [cursor=pointer]:
+                  - generic [ref=e214]: Branch
+                  - generic:
+                    - img
+                - button "Actor" [ref=e218] [cursor=pointer]:
+                  - generic [ref=e220]: Actor
+                  - generic:
+                    - img
+            - generic [ref=e221]:
+              - generic [ref=e223]:
+                - generic [ref=e224]:
+                  - 'link "queued: Run 70 of pages-build-deployment. pages build and deployment" [ref=e225] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27851512619
+                    - img "queued:" [ref=e227]
+                    - generic [ref=e229]: pages build and deployment
+                  - generic [ref=e230]:
+                    - text: "pages-build-deployment #70:"
+                    - generic [ref=e231]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e232] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e234] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e237]:
+                  - generic [ref=e238]:
+                    - img [ref=e240]
+                    - generic "Jun 20, 2026, 12:36 AM GMT+2" [ref=e242]: now
+                  - generic [ref=e243]:
+                    - img [ref=e244]
+                    - text: Queued
+              - generic [ref=e247]:
+                - generic [ref=e248]:
+                  - 'link "completed successfully: Run 69 of pages-build-deployment. pages build and deployment" [ref=e249] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27850522642
+                    - img "completed successfully:" [ref=e251]
+                    - generic [ref=e253]: pages build and deployment
+                  - generic [ref=e254]:
+                    - text: "pages-build-deployment #69:"
+                    - generic [ref=e255]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e256] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e258] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e261]:
+                  - generic [ref=e262]:
+                    - img [ref=e264]
+                    - generic "Jun 20, 2026, 12:05 AM GMT+2" [ref=e266]: 31 minutes ago
+                  - generic [ref=e267]:
+                    - img "Run duration" [ref=e268]
+                    - text: 1m 37s
+              - generic [ref=e271]:
+                - generic [ref=e272]:
+                  - 'link "completed successfully: Run 68 of pages-build-deployment. pages build and deployment" [ref=e273] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27847064887
+                    - img "completed successfully:" [ref=e275]
+                    - generic [ref=e277]: pages build and deployment
+                  - generic [ref=e278]:
+                    - text: "pages-build-deployment #68:"
+                    - generic [ref=e279]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e280] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e282] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e285]:
+                  - generic [ref=e286]:
+                    - img [ref=e288]
+                    - generic "Jun 19, 2026, 10:29 PM GMT+2" [ref=e290]: Today at 10:29 PM
+                  - generic [ref=e291]:
+                    - img "Run duration" [ref=e292]
+                    - text: 38s
+              - generic [ref=e295]:
+                - generic [ref=e296]:
+                  - 'link "completed successfully: Run 67 of pages-build-deployment. pages build and deployment" [ref=e297] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27846626550
+                    - img "completed successfully:" [ref=e299]
+                    - generic [ref=e301]: pages build and deployment
+                  - generic [ref=e302]:
+                    - text: "pages-build-deployment #67:"
+                    - generic [ref=e303]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e304] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e306] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e309]:
+                  - generic [ref=e310]:
+                    - img [ref=e312]
+                    - generic "Jun 19, 2026, 10:18 PM GMT+2" [ref=e314]: Today at 10:18 PM
+                  - generic [ref=e315]:
+                    - img "Run duration" [ref=e316]
+                    - text: 43s
+              - generic [ref=e319]:
+                - generic [ref=e320]:
+                  - 'link "completed successfully: Run 66 of pages-build-deployment. pages build and deployment" [ref=e321] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27839219233
+                    - img "completed successfully:" [ref=e323]
+                    - generic [ref=e325]: pages build and deployment
+                  - generic [ref=e326]:
+                    - text: "pages-build-deployment #66:"
+                    - generic [ref=e327]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e328] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e330] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e333]:
+                  - generic [ref=e334]:
+                    - img [ref=e336]
+                    - generic "Jun 19, 2026, 7:12 PM GMT+2" [ref=e338]: Today at 7:12 PM
+                  - generic [ref=e339]:
+                    - img "Run duration" [ref=e340]
+                    - text: 1m 43s
+              - generic [ref=e343]:
+                - generic [ref=e344]:
+                  - 'link "completed successfully: Run 65 of pages-build-deployment. pages build and deployment" [ref=e345] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27836703144
+                    - img "completed successfully:" [ref=e347]
+                    - generic [ref=e349]: pages build and deployment
+                  - generic [ref=e350]:
+                    - text: "pages-build-deployment #65:"
+                    - generic [ref=e351]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e352] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e354] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e357]:
+                  - generic [ref=e358]:
+                    - img [ref=e360]
+                    - generic "Jun 19, 2026, 6:14 PM GMT+2" [ref=e362]: Today at 6:14 PM
+                  - generic [ref=e363]:
+                    - img "Run duration" [ref=e364]
+                    - text: 1m 39s
+              - generic [ref=e367]:
+                - generic [ref=e368]:
+                  - 'link "completed successfully: Run 64 of pages-build-deployment. pages build and deployment" [ref=e369] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27836227590
+                    - img "completed successfully:" [ref=e371]
+                    - generic [ref=e373]: pages build and deployment
+                  - generic [ref=e374]:
+                    - text: "pages-build-deployment #64:"
+                    - generic [ref=e375]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e376] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e378] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e381]:
+                  - generic [ref=e382]:
+                    - img [ref=e384]
+                    - generic "Jun 19, 2026, 6:04 PM GMT+2" [ref=e386]: Today at 6:04 PM
+                  - generic [ref=e387]:
+                    - img "Run duration" [ref=e388]
+                    - text: 50s
+              - generic [ref=e391]:
+                - generic [ref=e392]:
+                  - 'link "completed successfully: Run 63 of pages-build-deployment. pages build and deployment" [ref=e393] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27835812260
+                    - img "completed successfully:" [ref=e395]
+                    - generic [ref=e397]: pages build and deployment
+                  - generic [ref=e398]:
+                    - text: "pages-build-deployment #63:"
+                    - generic [ref=e399]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e400] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e402] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e405]:
+                  - generic [ref=e406]:
+                    - img [ref=e408]
+                    - generic "Jun 19, 2026, 5:55 PM GMT+2" [ref=e410]: Today at 5:55 PM
+                  - generic [ref=e411]:
+                    - img "Run duration" [ref=e412]
+                    - text: 1m 7s
+              - generic [ref=e415]:
+                - generic [ref=e416]:
+                  - 'link "completed successfully: Run 62 of pages-build-deployment. pages build and deployment" [ref=e417] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27833780813
+                    - img "completed successfully:" [ref=e419]
+                    - generic [ref=e421]: pages build and deployment
+                  - generic [ref=e422]:
+                    - text: "pages-build-deployment #62:"
+                    - generic [ref=e423]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e424] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e426] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e429]:
+                  - generic [ref=e430]:
+                    - img [ref=e432]
+                    - generic "Jun 19, 2026, 5:12 PM GMT+2" [ref=e434]: Today at 5:12 PM
+                  - generic [ref=e435]:
+                    - img "Run duration" [ref=e436]
+                    - text: 1m 16s
+              - generic [ref=e439]:
+                - generic [ref=e440]:
+                  - 'link "completed successfully: Run 61 of pages-build-deployment. pages build and deployment" [ref=e441] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27823204895
+                    - img "completed successfully:" [ref=e443]
+                    - generic [ref=e445]: pages build and deployment
+                  - generic [ref=e446]:
+                    - text: "pages-build-deployment #61:"
+                    - generic [ref=e447]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e448] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e450] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e453]:
+                  - generic [ref=e454]:
+                    - img [ref=e456]
+                    - generic "Jun 19, 2026, 1:32 PM GMT+2" [ref=e458]: Today at 1:32 PM
+                  - generic [ref=e459]:
+                    - img "Run duration" [ref=e460]
+                    - text: 47s
+              - generic [ref=e463]:
+                - generic [ref=e464]:
+                  - 'link "completed successfully: Run 60 of pages-build-deployment. pages build and deployment" [ref=e465] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27822691571
+                    - img "completed successfully:" [ref=e467]
+                    - generic [ref=e469]: pages build and deployment
+                  - generic [ref=e470]:
+                    - text: "pages-build-deployment #60:"
+                    - generic [ref=e471]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e472] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e474] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e477]:
+                  - generic [ref=e478]:
+                    - img [ref=e480]
+                    - generic "Jun 19, 2026, 1:21 PM GMT+2" [ref=e482]: Today at 1:21 PM
+                  - generic [ref=e483]:
+                    - img "Run duration" [ref=e484]
+                    - text: 52s
+              - generic [ref=e487]:
+                - generic [ref=e488]:
+                  - 'link "completed successfully: Run 59 of pages-build-deployment. pages build and deployment" [ref=e489] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27822508220
+                    - img "completed successfully:" [ref=e491]
+                    - generic [ref=e493]: pages build and deployment
+                  - generic [ref=e494]:
+                    - text: "pages-build-deployment #59:"
+                    - generic [ref=e495]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e496] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e498] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e501]:
+                  - generic [ref=e502]:
+                    - img [ref=e504]
+                    - generic "Jun 19, 2026, 1:16 PM GMT+2" [ref=e506]: Today at 1:16 PM
+                  - generic [ref=e507]:
+                    - img "Run duration" [ref=e508]
+                    - text: 49s
+              - generic [ref=e511]:
+                - generic [ref=e512]:
+                  - 'link "completed successfully: Run 58 of pages-build-deployment. pages build and deployment" [ref=e513] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27821563062
+                    - img "completed successfully:" [ref=e515]
+                    - generic [ref=e517]: pages build and deployment
+                  - generic [ref=e518]:
+                    - text: "pages-build-deployment #58:"
+                    - generic [ref=e519]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e520] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e522] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e525]:
+                  - generic [ref=e526]:
+                    - img [ref=e528]
+                    - generic "Jun 19, 2026, 12:56 PM GMT+2" [ref=e530]: Today at 12:56 PM
+                  - generic [ref=e531]:
+                    - img "Run duration" [ref=e532]
+                    - text: 38s
+              - generic [ref=e535]:
+                - generic [ref=e536]:
+                  - 'link "completed successfully: Run 57 of pages-build-deployment. pages build and deployment" [ref=e537] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27821038531
+                    - img "completed successfully:" [ref=e539]
+                    - generic [ref=e541]: pages build and deployment
+                  - generic [ref=e542]:
+                    - text: "pages-build-deployment #57:"
+                    - generic [ref=e543]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e544] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e546] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e549]:
+                  - generic [ref=e550]:
+                    - img [ref=e552]
+                    - generic "Jun 19, 2026, 12:44 PM GMT+2" [ref=e554]: Today at 12:44 PM
+                  - generic [ref=e555]:
+                    - img "Run duration" [ref=e556]
+                    - text: 39s
+              - generic [ref=e559]:
+                - generic [ref=e560]:
+                  - 'link "completed successfully: Run 56 of pages-build-deployment. pages build and deployment" [ref=e561] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27808387267
+                    - img "completed successfully:" [ref=e563]
+                    - generic [ref=e565]: pages build and deployment
+                  - generic [ref=e566]:
+                    - text: "pages-build-deployment #56:"
+                    - generic [ref=e567]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e568] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e570] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e573]:
+                  - generic [ref=e574]:
+                    - img [ref=e576]
+                    - generic "Jun 19, 2026, 7:57 AM GMT+2" [ref=e578]: Today at 7:57 AM
+                  - generic [ref=e579]:
+                    - img "Run duration" [ref=e580]
+                    - text: 42s
+              - generic [ref=e583]:
+                - generic [ref=e584]:
+                  - 'link "completed successfully: Run 55 of pages-build-deployment. pages build and deployment" [ref=e585] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27806755929
+                    - img "completed successfully:" [ref=e587]
+                    - generic [ref=e589]: pages build and deployment
+                  - generic [ref=e590]:
+                    - text: "pages-build-deployment #55:"
+                    - generic [ref=e591]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e592] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e594] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e597]:
+                  - generic [ref=e598]:
+                    - img [ref=e600]
+                    - generic "Jun 19, 2026, 7:09 AM GMT+2" [ref=e602]: Today at 7:09 AM
+                  - generic [ref=e603]:
+                    - img "Run duration" [ref=e604]
+                    - text: 45s
+              - generic [ref=e607]:
+                - generic [ref=e608]:
+                  - 'link "completed successfully: Run 54 of pages-build-deployment. pages build and deployment" [ref=e609] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27769693671
+                    - img "completed successfully:" [ref=e611]
+                    - generic [ref=e613]: pages build and deployment
+                  - generic [ref=e614]:
+                    - text: "pages-build-deployment #54:"
+                    - generic [ref=e615]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e616] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e618] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e621]:
+                  - generic [ref=e622]:
+                    - img [ref=e624]
+                    - generic "Jun 18, 2026, 5:16 PM GMT+2" [ref=e626]: Jun 18, 5:16 PM GMT+2
+                  - generic [ref=e627]:
+                    - img "Run duration" [ref=e628]
+                    - text: 2m 49s
+              - generic [ref=e631]:
+                - generic [ref=e632]:
+                  - 'link "completed successfully: Run 53 of pages-build-deployment. pages build and deployment" [ref=e633] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27768877376
+                    - img "completed successfully:" [ref=e635]
+                    - generic [ref=e637]: pages build and deployment
+                  - generic [ref=e638]:
+                    - text: "pages-build-deployment #53:"
+                    - generic [ref=e639]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e640] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e642] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e645]:
+                  - generic [ref=e646]:
+                    - img [ref=e648]
+                    - generic "Jun 18, 2026, 5:04 PM GMT+2" [ref=e650]: Jun 18, 5:04 PM GMT+2
+                  - generic [ref=e651]:
+                    - img "Run duration" [ref=e652]
+                    - text: 3m 9s
+              - generic [ref=e655]:
+                - generic [ref=e656]:
+                  - 'link "completed successfully: Run 52 of pages-build-deployment. pages build and deployment" [ref=e657] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27757472796
+                    - img "completed successfully:" [ref=e659]
+                    - generic [ref=e661]: pages build and deployment
+                  - generic [ref=e662]:
+                    - text: "pages-build-deployment #52:"
+                    - generic [ref=e663]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e664] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e666] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e669]:
+                  - generic [ref=e670]:
+                    - img [ref=e672]
+                    - generic "Jun 18, 2026, 1:51 PM GMT+2" [ref=e674]: Jun 18, 1:51 PM GMT+2
+                  - generic [ref=e675]:
+                    - img "Run duration" [ref=e676]
+                    - text: 48s
+              - generic [ref=e679]:
+                - generic [ref=e680]:
+                  - 'link "completed successfully: Run 51 of pages-build-deployment. pages build and deployment" [ref=e681] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27756386457
+                    - img "completed successfully:" [ref=e683]
+                    - generic [ref=e685]: pages build and deployment
+                  - generic [ref=e686]:
+                    - text: "pages-build-deployment #51:"
+                    - generic [ref=e687]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e688] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e690] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e693]:
+                  - generic [ref=e694]:
+                    - img [ref=e696]
+                    - generic "Jun 18, 2026, 1:30 PM GMT+2" [ref=e698]: Jun 18, 1:30 PM GMT+2
+                  - generic [ref=e699]:
+                    - img "Run duration" [ref=e700]
+                    - text: 1m 1s
+              - generic [ref=e703]:
+                - generic [ref=e704]:
+                  - 'link "completed successfully: Run 50 of pages-build-deployment. pages build and deployment" [ref=e705] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27755048587
+                    - img "completed successfully:" [ref=e707]
+                    - generic [ref=e709]: pages build and deployment
+                  - generic [ref=e710]:
+                    - text: "pages-build-deployment #50:"
+                    - generic [ref=e711]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e712] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e714] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e717]:
+                  - generic [ref=e718]:
+                    - img [ref=e720]
+                    - generic "Jun 18, 2026, 1:03 PM GMT+2" [ref=e722]: Jun 18, 1:03 PM GMT+2
+                  - generic [ref=e723]:
+                    - img "Run duration" [ref=e724]
+                    - text: 56s
+              - generic [ref=e727]:
+                - generic [ref=e728]:
+                  - 'link "completed successfully: Run 49 of pages-build-deployment. pages build and deployment" [ref=e729] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27754006721
+                    - img "completed successfully:" [ref=e731]
+                    - generic [ref=e733]: pages build and deployment
+                  - generic [ref=e734]:
+                    - text: "pages-build-deployment #49:"
+                    - generic [ref=e735]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e736] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e738] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e741]:
+                  - generic [ref=e742]:
+                    - img [ref=e744]
+                    - generic "Jun 18, 2026, 12:42 PM GMT+2" [ref=e746]: Jun 18, 12:42 PM GMT+2
+                  - generic [ref=e747]:
+                    - img "Run duration" [ref=e748]
+                    - text: 54s
+              - generic [ref=e751]:
+                - generic [ref=e752]:
+                  - 'link "completed successfully: Run 48 of pages-build-deployment. pages build and deployment" [ref=e753] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27753402159
+                    - img "completed successfully:" [ref=e755]
+                    - generic [ref=e757]: pages build and deployment
+                  - generic [ref=e758]:
+                    - text: "pages-build-deployment #48:"
+                    - generic [ref=e759]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e760] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e762] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e765]:
+                  - generic [ref=e766]:
+                    - img [ref=e768]
+                    - generic "Jun 18, 2026, 12:31 PM GMT+2" [ref=e770]: Jun 18, 12:31 PM GMT+2
+                  - generic [ref=e771]:
+                    - img "Run duration" [ref=e772]
+                    - text: 55s
+              - generic [ref=e775]:
+                - generic [ref=e776]:
+                  - 'link "completed successfully: Run 47 of pages-build-deployment. pages build and deployment" [ref=e777] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27752163091
+                    - img "completed successfully:" [ref=e779]
+                    - generic [ref=e781]: pages build and deployment
+                  - generic [ref=e782]:
+                    - text: "pages-build-deployment #47:"
+                    - generic [ref=e783]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e784] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e786] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e789]:
+                  - generic [ref=e790]:
+                    - img [ref=e792]
+                    - generic "Jun 18, 2026, 12:07 PM GMT+2" [ref=e794]: Jun 18, 12:07 PM GMT+2
+                  - generic [ref=e795]:
+                    - img "Run duration" [ref=e796]
+                    - text: 52s
+              - generic [ref=e799]:
+                - generic [ref=e800]:
+                  - 'link "completed successfully: Run 46 of pages-build-deployment. pages build and deployment" [ref=e801] [cursor=pointer]':
+                    - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions/runs/27750400518
+                    - img "completed successfully:" [ref=e803]
+                    - generic [ref=e805]: pages build and deployment
+                  - generic [ref=e806]:
+                    - text: "pages-build-deployment #46:"
+                    - generic [ref=e807]:
+                      - text: by
+                      - link "hawwadmowissa-art" [ref=e808] [cursor=pointer]:
+                        - /url: /hawwadmowissa-art
+                - link "main" [ref=e810] [cursor=pointer]:
+                  - /url: /hawwadmowissa-art/wardro-alpha-0.95/tree/refs/heads/main
+                - generic [ref=e813]:
+                  - generic [ref=e814]:
+                    - img [ref=e816]
+                    - generic "Jun 18, 2026, 11:34 AM GMT+2" [ref=e818]: Jun 18, 11:34 AM GMT+2
+                  - generic [ref=e819]:
+                    - img "Run duration" [ref=e820]
+                    - text: 39s
+          - navigation "Pagination" [ref=e824]:
+            - generic "Previous page" [ref=e825]: Previous
+            - emphasis [ref=e826] [cursor=pointer]: "1"
+            - link "Page 2" [ref=e827] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions?page=2
+              - text: "2"
+            - link "Page 3" [ref=e828] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions?page=3
+              - text: "3"
+            - link "Next page" [ref=e829] [cursor=pointer]:
+              - /url: /hawwadmowissa-art/wardro-alpha-0.95/actions?page=2
+              - text: Next

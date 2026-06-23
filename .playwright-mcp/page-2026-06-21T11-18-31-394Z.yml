@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e13]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: WR
+        - generic [ref=e17]: Admin
+      - button "خروج" [ref=e18] [cursor=pointer]
+    - generic [ref=e19]:
+      - button "البائعون 1" [ref=e20] [cursor=pointer]:
+        - text: البائعون
+        - generic [ref=e21]: "1"
+      - button "منتجات Main Hero 1" [ref=e22] [cursor=pointer]:
+        - text: منتجات Main Hero
+        - generic [ref=e23]: "1"
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]: 🏪
+        - generic [ref=e29]:
+          - generic [ref=e30]: متجر الاختبار
+          - generic [ref=e31] [cursor=pointer]: seller@test.com
+          - generic [ref=e32]: 21 يونيو 2026
+      - generic [ref=e33]:
+        - button "✓ موافقة" [ref=e34] [cursor=pointer]
+        - button "✕ رفض" [ref=e35] [cursor=pointer]
+  - generic: تم النسخ

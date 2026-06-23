@@ -1,0 +1,57 @@
+- generic [ref=e298]:
+  - generic [ref=e299]:
+    - button "فلاتر" [ref=e300] [cursor=pointer]:
+      - img [ref=e301]
+    - generic [ref=e302]: Discover
+  - generic [ref=e303]:
+    - generic [ref=e304]:
+      - generic [ref=e305]: حدد ما تبحث عنه
+      - generic [ref=e306]: الحقول المطلوبة محددة بالذهبي
+    - generic [ref=e307]:
+      - generic [ref=e308]:
+        - generic [ref=e309]: نوع القطعة
+        - generic [ref=e310]: مطلوب•
+      - generic [ref=e312] [cursor=pointer]:
+        - generic [ref=e313]: 👔
+        - generic [ref=e314]: اختر النوع
+        - img [ref=e315]
+    - generic [ref=e317]:
+      - generic [ref=e318]:
+        - generic [ref=e319]: الميزانية
+        - generic [ref=e320]: مطلوب•
+      - generic [ref=e321]: 0 DZD — 20,000+ DZD
+      - generic [ref=e322]:
+        - slider: "0"
+        - slider: "20000"
+      - generic [ref=e323]:
+        - generic [ref=e324]: 0 DZD
+        - generic [ref=e325]: 20,000+ DZD
+    - generic [ref=e326]: خيارات إضافية
+    - generic [ref=e327]:
+      - button "المقاس" [ref=e328] [cursor=pointer]:
+        - img [ref=e329]
+        - generic [ref=e331]: المقاس
+      - button "المناسبة" [ref=e332] [cursor=pointer]:
+        - img [ref=e333]
+        - generic [ref=e335]: المناسبة
+      - button "اللون" [ref=e336] [cursor=pointer]:
+        - img [ref=e337]
+        - generic [ref=e340]: اللون
+      - button "الفئة" [ref=e341] [cursor=pointer]:
+        - img [ref=e342]
+        - generic [ref=e347]: الفئة
+  - generic [ref=e348]:
+    - button "✦ أظهر النتائج"
+  - navigation [ref=e349]:
+    - button "Home" [ref=e350] [cursor=pointer]:
+      - img [ref=e351]
+      - generic [ref=e354]: Home
+    - button "Saved" [ref=e355] [cursor=pointer]:
+      - img [ref=e356]
+      - generic [ref=e358]: Saved
+    - button "Discover" [ref=e359] [cursor=pointer]:
+      - img [ref=e360]
+      - generic [ref=e363]: Discover
+    - button "Profile" [ref=e364] [cursor=pointer]:
+      - img [ref=e365]
+      - generic [ref=e368]: Profile

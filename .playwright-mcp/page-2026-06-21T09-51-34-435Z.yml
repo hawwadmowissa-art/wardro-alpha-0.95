@@ -1,0 +1,232 @@
+- generic [ref=e76]:
+  - generic [ref=e77]:
+    - generic [ref=e78]:
+      - generic [ref=e79]:
+        - text: WARDRO
+        - generic [ref=e80]: ✦
+      - generic [ref=e81]: FASHION INTELLIGENCE
+    - generic [ref=e82]:
+      - button [ref=e83] [cursor=pointer]:
+        - img [ref=e84]
+      - button [ref=e87] [cursor=pointer]:
+        - img [ref=e88]
+  - generic [ref=e91]:
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - generic:
+          - generic:
+            - generic: TRADITIONAL
+            - generic: Cream/triple white outfit
+            - generic: Baskets Star Voyager Premium
+            - generic: 54,000 DZD →
+        - generic [ref=e792]:
+          - generic [ref=e793]: FORMAL
+          - generic [ref=e794]: MIXED Shoes
+          - generic [ref=e795]: Yeezy 700 V2 Cream
+          - generic [ref=e796] [cursor=pointer]: 7,200 DZD →
+        - generic:
+          - generic:
+            - generic: CASUAL
+            - generic: 𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲
+            - generic: 𝐅𝐨𝐫 𝐫𝐞𝐚𝐥 𝐭𝐢𝐦𝐞𝐬
+            - generic: 4,000 DZD →
+        - generic:
+          - generic:
+            - generic: TRADITIONAL
+            - generic: 𝐕𝐢𝐯𝐨
+            - generic: 𝐒𝐮𝐦𝐦𝐞𝐫 𝐭_𝐜𝐡𝐢𝐫𝐭
+            - generic: 3,500 DZD →
+        - generic:
+          - generic:
+            - generic: FORMAL
+            - generic: Old money shes
+            - generic: Perfecto for series dates
+            - generic: 6,500 DZD →
+        - generic:
+          - generic:
+            - generic: SPORT
+            - generic: Sport shoe
+            - generic: best for all times
+            - generic: 4,700 DZD →
+        - generic:
+          - generic:
+            - generic: SPORT
+            - generic: Sport shoe
+            - generic: Shik for all times
+            - generic: 7,700 DZD →
+        - generic:
+          - generic:
+            - generic: SPORT
+            - generic: Sport shoe
+            - generic: Extra new Evaluation
+            - generic: 4,200 DZD →
+      - generic [ref=e101]:
+        - button [ref=e653] [cursor=pointer]
+        - button [ref=e654] [cursor=pointer]
+        - button [ref=e655] [cursor=pointer]
+        - button [ref=e656] [cursor=pointer]
+        - button [ref=e657] [cursor=pointer]
+        - button [ref=e658] [cursor=pointer]
+        - button [ref=e659] [cursor=pointer]
+        - button [ref=e660] [cursor=pointer]
+    - generic [ref=e111]:
+      - generic [ref=e661] [cursor=pointer]:
+        - img "MIXED Shoes" [ref=e662]
+        - generic [ref=e663]:
+          - generic [ref=e664]: MIXED Shoes
+          - generic [ref=e665]: 7,200 DZD
+      - generic [ref=e666] [cursor=pointer]:
+        - img "Sport Jacket" [ref=e667]
+        - generic [ref=e668]:
+          - generic [ref=e669]: Sport Jacket
+          - generic [ref=e670]: 5,500 DZD
+      - generic [ref=e671] [cursor=pointer]:
+        - img "Casual Shirt" [ref=e672]
+        - generic [ref=e673]:
+          - generic [ref=e674]: Casual Shirt
+          - generic [ref=e675]: 3,500 DZD
+      - generic [ref=e676] [cursor=pointer]:
+        - img "Old money shes" [ref=e677]
+        - generic [ref=e678]:
+          - generic [ref=e679]: Old money shes
+          - generic [ref=e680]: 6,500 DZD
+      - generic [ref=e681] [cursor=pointer]:
+        - img "𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲" [ref=e682]
+        - generic [ref=e683]:
+          - generic [ref=e684]: 𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲
+          - generic [ref=e685]: 4,000 DZD
+      - generic [ref=e686] [cursor=pointer]:
+        - img "Sport shoe" [ref=e687]
+        - generic [ref=e688]:
+          - generic [ref=e689]: Sport shoe
+          - generic [ref=e690]: 4,700 DZD
+      - generic [ref=e691] [cursor=pointer]:
+        - img "Sport shoe" [ref=e692]
+        - generic [ref=e693]:
+          - generic [ref=e694]: Sport shoe
+          - generic [ref=e695]: 4,200 DZD
+      - generic [ref=e696] [cursor=pointer]:
+        - img "Sport shoe" [ref=e697]
+        - generic [ref=e698]:
+          - generic [ref=e699]: Sport shoe
+          - generic [ref=e700]: 7,700 DZD
+      - generic [ref=e701] [cursor=pointer]:
+        - img "Cream/triple white outfit" [ref=e702]
+        - generic [ref=e703]:
+          - generic [ref=e704]: Cream/triple white outfit
+          - generic [ref=e705]: 54,000 DZD
+      - generic [ref=e706] [cursor=pointer]:
+        - img "𝐕𝐢𝐯𝐨" [ref=e707]
+        - generic [ref=e708]:
+          - generic [ref=e709]: 𝐕𝐢𝐯𝐨
+          - generic [ref=e710]: 3,500 DZD
+    - generic [ref=e162]:
+      - generic [ref=e164]: Casual Collection
+      - generic [ref=e165]:
+        - generic [ref=e711] [cursor=pointer]:
+          - img "𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲" [ref=e712]
+          - generic [ref=e713]:
+            - generic [ref=e714]: 𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲
+            - generic [ref=e715]: 4,000 DZD
+        - generic [ref=e716] [cursor=pointer]:
+          - img "Casual Shirt" [ref=e717]
+          - generic [ref=e718]:
+            - generic [ref=e719]: Casual Shirt
+            - generic [ref=e720]: 3,500 DZD
+    - generic [ref=e176]:
+      - generic [ref=e178]: New This Week
+      - generic [ref=e179]:
+        - generic [ref=e721] [cursor=pointer]:
+          - img "Cream/triple white outfit" [ref=e722]
+          - generic [ref=e723]:
+            - generic [ref=e724]: Cream/triple white outfit
+            - generic [ref=e725]: 54,000 DZD
+        - generic [ref=e726] [cursor=pointer]:
+          - img "MIXED Shoes" [ref=e727]
+          - generic [ref=e728]:
+            - generic [ref=e729]: MIXED Shoes
+            - generic [ref=e730]: 7,200 DZD
+        - generic [ref=e731] [cursor=pointer]:
+          - img "𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲" [ref=e732]
+          - generic [ref=e733]:
+            - generic [ref=e734]: 𝐂𝐥𝐚𝐬𝐬𝐢𝐜 𝐨𝐥𝐝 𝐦𝐨𝐧𝐞𝐲
+            - generic [ref=e735]: 4,000 DZD
+        - generic [ref=e736] [cursor=pointer]:
+          - img "𝐕𝐢𝐯𝐨" [ref=e737]
+          - generic [ref=e738]:
+            - generic [ref=e739]: 𝐕𝐢𝐯𝐨
+            - generic [ref=e740]: 3,500 DZD
+        - generic [ref=e741] [cursor=pointer]:
+          - img "Old money shes" [ref=e742]
+          - generic [ref=e743]:
+            - generic [ref=e744]: Old money shes
+            - generic [ref=e745]: 6,500 DZD
+        - generic [ref=e746] [cursor=pointer]:
+          - img "Sport shoe" [ref=e747]
+          - generic [ref=e748]:
+            - generic [ref=e749]: Sport shoe
+            - generic [ref=e750]: 4,700 DZD
+    - generic [ref=e210]:
+      - generic [ref=e212]: Sport Collection
+      - generic [ref=e213]:
+        - generic [ref=e751] [cursor=pointer]:
+          - img "Sport shoe" [ref=e752]
+          - generic [ref=e753]:
+            - generic [ref=e754]: Sport shoe
+            - generic [ref=e755]: 4,700 DZD
+        - generic [ref=e756] [cursor=pointer]:
+          - img "Sport shoe" [ref=e757]
+          - generic [ref=e758]:
+            - generic [ref=e759]: Sport shoe
+            - generic [ref=e760]: 7,700 DZD
+        - generic [ref=e761] [cursor=pointer]:
+          - img "Sport shoe" [ref=e762]
+          - generic [ref=e763]:
+            - generic [ref=e764]: Sport shoe
+            - generic [ref=e765]: 4,200 DZD
+        - generic [ref=e766] [cursor=pointer]:
+          - img "Sport Jacket" [ref=e767]
+          - generic [ref=e768]:
+            - generic [ref=e769]: Sport Jacket
+            - generic [ref=e770]: 5,500 DZD
+    - generic [ref=e234]:
+      - generic [ref=e236]: Top Stores
+      - generic [ref=e237]:
+        - generic [ref=e771] [cursor=pointer]:
+          - generic [ref=e772]:
+            - generic: O
+          - generic [ref=e773]: Oval
+        - generic [ref=e774] [cursor=pointer]:
+          - generic [ref=e775]:
+            - generic: �
+          - generic [ref=e776]: 𝐏𝐥𝐮𝐬
+        - generic [ref=e779] [cursor=pointer]: Test Store
+    - generic [ref=e247]:
+      - generic [ref=e249]: Formal Collection
+      - generic [ref=e250]:
+        - generic [ref=e780] [cursor=pointer]:
+          - img "MIXED Shoes" [ref=e781]
+          - generic [ref=e782]:
+            - generic [ref=e783]: MIXED Shoes
+            - generic [ref=e784]: 7,200 DZD
+        - generic [ref=e785] [cursor=pointer]:
+          - img "Old money shes" [ref=e786]
+          - generic [ref=e787]:
+            - generic [ref=e788]: Old money shes
+            - generic [ref=e789]: 6,500 DZD
+    - generic [ref=e261]:
+      - generic [ref=e263]: ✦ اكتشف أكثر
+      - generic [ref=e264]: ولا قطعة جديدة دابا — رجع لاحقاً
+  - navigation [ref=e265]:
+    - button "Home" [ref=e266] [cursor=pointer]:
+      - img [ref=e267]
+      - generic [ref=e270]: Home
+    - button "Saved" [ref=e271] [cursor=pointer]:
+      - img [ref=e272]
+      - generic [ref=e274]: Saved
+    - button "Discover" [ref=e275] [cursor=pointer]:
+      - img [ref=e276]
+      - generic [ref=e279]: Discover
+    - button "Profile" [ref=e280] [cursor=pointer]:
+      - img [ref=e281]
+      - generic [ref=e284]: Profile

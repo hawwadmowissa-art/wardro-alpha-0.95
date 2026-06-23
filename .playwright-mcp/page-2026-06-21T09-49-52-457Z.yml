@@ -1,0 +1,110 @@
+- generic [ref=e320]:
+  - generic [ref=e321]:
+    - button [ref=e322] [cursor=pointer]:
+      - img [ref=e323]
+    - generic [ref=e325]: Oval
+  - generic [ref=e327]:
+    - generic [ref=e328]:
+      - generic [ref=e329]:
+        - generic: O
+      - generic [ref=e330]:
+        - generic [ref=e331]:
+          - generic [ref=e332]: Oval
+          - generic [ref=e333]: ✓
+        - generic [ref=e334]: Premium Men's Fashion
+        - generic [ref=e335]: ⭐ 5.0 · 0 متابع
+      - button "Follow" [ref=e336] [cursor=pointer]
+    - button "Share Store" [ref=e337] [cursor=pointer]:
+      - img [ref=e338]
+      - text: Share Store
+    - generic [ref=e344]:
+      - button "Home" [ref=e345] [cursor=pointer]
+      - button "All Products" [ref=e346] [cursor=pointer]
+      - button "Collections" [ref=e347] [cursor=pointer]
+      - button "About Store" [ref=e348] [cursor=pointer]
+    - generic [ref=e349]:
+      - generic [ref=e350]:
+        - generic [ref=e351]:
+          - generic:
+            - generic:
+              - generic: TRADITIONAL
+              - generic: Cream/triple white outfit
+              - generic: Baskets Star Voyager Premium
+              - generic: 54,000 DZD →
+          - generic [ref=e409]:
+            - generic [ref=e410]: FORMAL
+            - generic [ref=e411]: MIXED Shoes
+            - generic [ref=e412]: Yeezy 700 V2 Cream
+            - generic [ref=e413]: 7,200 DZD →
+          - generic:
+            - generic:
+              - generic: FORMAL
+              - generic: Old money shes
+              - generic: Perfecto for series dates
+              - generic: 6,500 DZD →
+          - generic:
+            - generic:
+              - generic: SPORT
+              - generic: Sport shoe
+              - generic: best for all times
+              - generic: 4,700 DZD →
+          - generic:
+            - generic:
+              - generic: SPORT
+              - generic: Sport shoe
+              - generic: Shik for all times
+              - generic: 7,700 DZD →
+          - generic:
+            - generic:
+              - generic: SPORT
+              - generic: Sport shoe
+              - generic: Extra new Evaluation
+              - generic: 4,200 DZD →
+        - generic [ref=e359]:
+          - button [ref=e360] [cursor=pointer]
+          - button [ref=e361] [cursor=pointer]
+          - button [ref=e362] [cursor=pointer]
+          - button [ref=e363] [cursor=pointer]
+          - button [ref=e364] [cursor=pointer]
+          - button [ref=e365] [cursor=pointer]
+      - generic [ref=e366]:
+        - generic [ref=e367]: Featured Products
+        - generic [ref=e368] [cursor=pointer]: View All →
+      - generic [ref=e369]:
+        - generic [ref=e370] [cursor=pointer]:
+          - img "Cream/triple white outfit" [ref=e371]
+          - generic [ref=e372]:
+            - generic [ref=e373]: Cream/triple white outfit
+            - generic [ref=e374]: 54,000 DZD
+            - generic [ref=e375]: traditional
+        - generic [ref=e376] [cursor=pointer]:
+          - img "MIXED Shoes" [ref=e377]
+          - generic [ref=e378]:
+            - generic [ref=e379]: MIXED Shoes
+            - generic [ref=e380]: 7,200 DZD
+            - generic [ref=e381]: formal
+        - generic [ref=e382] [cursor=pointer]:
+          - img "Old money shes" [ref=e383]
+          - generic [ref=e384]:
+            - generic [ref=e385]: Old money shes
+            - generic [ref=e386]: 6,500 DZD
+            - generic [ref=e387]: formal
+        - generic [ref=e388] [cursor=pointer]:
+          - img "Sport shoe" [ref=e389]
+          - generic [ref=e390]:
+            - generic [ref=e391]: Sport shoe
+            - generic [ref=e392]: 4,700 DZD
+            - generic [ref=e393]: sport
+    - generic [ref=e394]:
+      - generic [ref=e395]:
+        - generic [ref=e396]: 🚀
+        - generic [ref=e397]: Fast Delivery
+        - generic [ref=e398]: 1-2 Days
+      - generic [ref=e399]:
+        - generic [ref=e400]: 🔒
+        - generic [ref=e401]: Secure Payment
+        - generic [ref=e402]: 100% Safe
+      - generic [ref=e403]:
+        - generic [ref=e404]: ↩
+        - generic [ref=e405]: Easy Returns
+        - generic [ref=e406]: 1-7 Days

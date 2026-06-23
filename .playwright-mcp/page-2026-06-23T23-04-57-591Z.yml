@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: W
+          - generic [ref=e27]: The Wardrobe Dilemma
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]: "60"
+            - generic [ref=e31]: "%"
+          - generic [ref=e32]: 60% Of Wardrobes Are Forgotten.
+          - generic [ref=e33]:
+            - text: ملابس تُنسى في الخزانة بعد ارتدائها
+            - emphasis [ref=e34]: مرة واحدة
+      - generic:
+        - generic:
+          - generic: W
+          - generic: Deep Intelligence
+        - generic:
+          - generic:
+            - img
+            - generic:
+              - generic: Your Build
+              - generic: بنيتك
+            - generic:
+              - generic: Your Fit
+              - generic: طولك
+            - generic:
+              - generic: Your Shirt
+              - generic: قميصك
+            - generic:
+              - generic: Your Taste
+              - generic: ذوقك
+            - generic:
+              - generic: Your Budget
+              - generic: ميزانيتك
+          - generic: DEEP INTELLIGENCE
+          - generic: "ذكاء يفهم كل تفصيلة:"
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: 4200 DA
+                - generic: 91%
+            - generic:
+              - generic:
+                - generic: 6800 DA
+                - generic: 98%
+              - generic: ✓
+            - generic:
+              - generic:
+                - generic: 3900 DA
+                - generic: 94%
+          - generic: The Premium Match
+          - generic:
+            - text: تنسيقات كاملة
+            - emphasis: تناسب ذوقك بدقة
+          - generic: 98% تطابق. الزبون يختار بثقة — البائع يبيع أكثر.
+    - generic [ref=e40]:
+      - button "تخطي" [ref=e41] [cursor=pointer]
+      - button "Next →" [ref=e42] [cursor=pointer]
+  - generic [ref=e44]:
+    - generic [ref=e45]:
+      - generic [ref=e46]: ✦
+      - img [ref=e47]:
+        - generic [ref=e55]: WR
+      - generic [ref=e56]: WARDRO
+      - generic [ref=e57]: FASHION INTELLIGENCE
+    - generic [ref=e58]: Choose Your Journey
+    - generic [ref=e59]: تجربة مخصصة تلبي احتياجاتك
+    - generic [ref=e60]:
+      - generic [ref=e61] [cursor=pointer]:
+        - img [ref=e63]
+        - generic [ref=e66]: Customer
+        - generic [ref=e67]: اكتشف القطع التي تناسبك وأنشئ التنسيقات المثالية
+        - generic [ref=e68]: →
+      - generic [ref=e69] [cursor=pointer]:
+        - img [ref=e71]
+        - generic [ref=e76]: Seller
+        - generic [ref=e77]: أدر متجرك، اعرض منتجاتك وزيادة مبيعاتك
+        - generic [ref=e78]: →
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - img [ref=e82]
+        - generic [ref=e84]: بيانات آمنة
+      - generic [ref=e85]:
+        - img [ref=e87]
+        - generic [ref=e89]: ذكاء اصطناعي متطور
+      - generic [ref=e90]:
+        - img [ref=e92]
+        - generic [ref=e94]: تجربة فاخرة
+    - generic [ref=e95]: يمكنك تغيير دورك لاحقاً
+  - banner [ref=e97]:
+    - generic [ref=e98]: ثبّت تطبيق Wardro
+    - button "تثبيت" [ref=e99] [cursor=pointer]
+    - button "إغلاق" [ref=e100] [cursor=pointer]: ✕

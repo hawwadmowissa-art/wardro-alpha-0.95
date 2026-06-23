@@ -1,0 +1,33 @@
+- generic [ref=e808]:
+  - generic [ref=e810]: حسابي
+  - generic [ref=e811]:
+    - generic [ref=e812]:
+      - generic [ref=e814]: "?"
+      - generic [ref=e815]: —
+    - generic [ref=e816]:
+      - button "سياسة الخصوصية" [ref=e817] [cursor=pointer]:
+        - generic [ref=e818]: سياسة الخصوصية
+        - img [ref=e819]
+      - button "شروط الاستخدام" [ref=e821] [cursor=pointer]:
+        - generic [ref=e822]: شروط الاستخدام
+        - img [ref=e823]
+      - button "تسجيل الخروج" [ref=e825] [cursor=pointer]:
+        - generic [ref=e826]: تسجيل الخروج
+        - img [ref=e827]
+    - separator [ref=e829]
+    - button "حذف الحساب" [ref=e831] [cursor=pointer]:
+      - generic [ref=e832]: حذف الحساب
+      - img [ref=e833]
+  - navigation [ref=e835]:
+    - button "Home" [ref=e836] [cursor=pointer]:
+      - img [ref=e837]
+      - generic [ref=e840]: Home
+    - button "Saved" [ref=e841] [cursor=pointer]:
+      - img [ref=e842]
+      - generic [ref=e844]: Saved
+    - button "Discover" [ref=e845] [cursor=pointer]:
+      - img [ref=e846]
+      - generic [ref=e849]: Discover
+    - button "Profile" [ref=e850] [cursor=pointer]:
+      - img [ref=e851]
+      - generic [ref=e854]: Profile

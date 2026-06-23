@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e76]:
+    - generic [ref=e77]:
+      - generic:
+        - generic:
+          - generic: W
+          - generic: The Wardrobe Dilemma
+        - generic:
+          - generic:
+            - generic: "0"
+            - generic: "%"
+          - generic: 60% Of Wardrobes Are Forgotten.
+          - generic:
+            - text: ملابس تُنسى في الخزانة بعد ارتدائها
+            - emphasis: مرة واحدة
+      - generic:
+        - generic:
+          - generic: W
+          - generic: Deep Intelligence
+        - generic:
+          - generic:
+            - img
+            - generic:
+              - generic: Your Build
+              - generic: بنيتك
+            - generic:
+              - generic: Your Fit
+              - generic: طولك
+            - generic:
+              - generic: Your Shirt
+              - generic: قميصك
+            - generic:
+              - generic: Your Taste
+              - generic: ذوقك
+            - generic:
+              - generic: Your Budget
+              - generic: ميزانيتك
+          - generic: DEEP INTELLIGENCE
+          - generic: "ذكاء يفهم كل تفصيلة:"
+      - generic [ref=e79]:
+        - generic [ref=e80]:
+          - generic [ref=e85]:
+            - generic [ref=e86]: 4200 DA
+            - generic [ref=e87]: 91%
+          - generic [ref=e88]:
+            - generic [ref=e93]:
+              - generic [ref=e94]: 6800 DA
+              - generic [ref=e95]: 98%
+            - generic [ref=e96]: ✓
+          - generic [ref=e101]:
+            - generic [ref=e102]: 3900 DA
+            - generic [ref=e103]: 94%
+        - generic [ref=e104]: The Premium Match
+        - generic [ref=e105]:
+          - text: تنسيقات كاملة
+          - emphasis [ref=e106]: تناسب ذوقك بدقة
+        - generic [ref=e107]: 98% تطابق. الزبون يختار بثقة — البائع يبيع أكثر.
+    - generic [ref=e108]:
+      - paragraph [ref=e113]:
+        - text: بمتابعتك، توافق على
+        - button "شروط الاستخدام" [ref=e114] [cursor=pointer]
+        - text: و
+        - button "سياسة الخصوصية" [ref=e115] [cursor=pointer]
+      - generic [ref=e116]:
+        - button "تخطي" [ref=e117] [cursor=pointer]
+        - button "START EXPERIENCE →" [ref=e118] [cursor=pointer]
+  - generic [ref=e23]:
+    - generic [ref=e24]:
+      - generic [ref=e25]: ✦
+      - img [ref=e26]:
+        - generic [ref=e34]: WR
+      - generic [ref=e35]: WARDRO
+      - generic [ref=e36]: FASHION INTELLIGENCE
+    - generic [ref=e37]: Choose Your Journey
+    - generic [ref=e38]: تجربة مخصصة تلبي احتياجاتك
+    - generic [ref=e39]:
+      - generic [ref=e40] [cursor=pointer]:
+        - img [ref=e42]
+        - generic [ref=e45]: Customer
+        - generic [ref=e46]: اكتشف القطع التي تناسبك وأنشئ التنسيقات المثالية
+        - generic [ref=e47]: →
+      - generic [ref=e48] [cursor=pointer]:
+        - img [ref=e50]
+        - generic [ref=e55]: Seller
+        - generic [ref=e56]: أدر متجرك، اعرض منتجاتك وزيادة مبيعاتك
+        - generic [ref=e57]: →
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - img [ref=e61]
+        - generic [ref=e63]: بيانات آمنة
+      - generic [ref=e64]:
+        - img [ref=e66]
+        - generic [ref=e68]: ذكاء اصطناعي متطور
+      - generic [ref=e69]:
+        - img [ref=e71]
+        - generic [ref=e73]: تجربة فاخرة
+    - generic [ref=e74]: يمكنك تغيير دورك لاحقاً
+  - dialog "شروط الاستخدام" [ref=e119]:
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - generic [ref=e122]: شروط الاستخدام
+        - button "إغلاق" [ref=e123] [cursor=pointer]:
+          - img [ref=e124]
+      - generic [ref=e128]:
+        - paragraph [ref=e129]: تعذّر تحميل الوثيقة. حاول لاحقاً.
+        - button "إعادة المحاولة" [ref=e130] [cursor=pointer]
+      - button "قبول و متابعة" [disabled] [ref=e132]
