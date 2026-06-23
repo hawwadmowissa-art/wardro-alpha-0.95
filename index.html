@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wardro — Fashion Intelligence</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B0A08">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wardro">
 <link href="https://fonts.googleapis.com/css2?family=Cherish&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=20260620navfix">
 <!-- Supabase -->
@@ -1307,5 +1314,103 @@
 <div class="toast" id="toast"></div>
 
 <script src="app.js?v=20260621herostatus"></script>
+
+<!-- PWA: service worker + install prompt -->
+<script>
+(function () {
+  'use strict';
+
+  // ── Service Worker registration ──────────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+        .then(function (reg) {
+          console.log('[SW] registered', reg.scope);
+          // Tell a waiting SW to skip waiting immediately
+          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          reg.addEventListener('updatefound', function () {
+            var newSW = reg.installing;
+            if (newSW) {
+              newSW.addEventListener('statechange', function () {
+                if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                  newSW.postMessage({ type: 'SKIP_WAITING' });
+                }
+              });
+            }
+          });
+        })
+        .catch(function (err) { console.log('[SW] registration failed', err); });
+    });
+  }
+
+  // ── Install prompt helpers ───────────────────────────────────────────────
+  var DISMISSED_KEY = 'wardro_pwa_dismissed';
+
+  function createBanner(html, onAccept, onDismiss) {
+    if (localStorage.getItem(DISMISSED_KEY)) return;
+    var banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.setAttribute('role', 'banner');
+    banner.innerHTML =
+      '<span id="pwa-banner-text">' + html + '</span>' +
+      '<button id="pwa-banner-accept" aria-label="تثبيت"></button>' +
+      '<button id="pwa-banner-close" aria-label="إغلاق">✕</button>';
+
+    var style = document.createElement('style');
+    style.textContent =
+      '#pwa-banner{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);' +
+      'right:0;left:0;z-index:9999;display:flex;align-items:center;gap:10px;' +
+      'padding:12px 16px;background:#1C1915;border-top:1px solid rgba(210,175,105,.25);' +
+      'font-family:Tajawal,sans-serif;font-size:14px;color:#D8CFBA;direction:rtl;}' +
+      '#pwa-banner-text{flex:1;line-height:1.4;}' +
+      '#pwa-banner-accept{background:#D2AF69;color:#0B0A08;border:none;border-radius:8px;' +
+      'padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer;}' +
+      '#pwa-banner-close{background:transparent;border:none;color:#D8CFBA;font-size:16px;' +
+      'cursor:pointer;padding:4px 6px;opacity:.7;}' +
+      '#pwa-banner-close:hover{opacity:1;}';
+    document.head.appendChild(style);
+    document.body.appendChild(banner);
+
+    document.getElementById('pwa-banner-accept').addEventListener('click', function () {
+      banner.remove();
+      if (onAccept) onAccept();
+    });
+    document.getElementById('pwa-banner-close').addEventListener('click', function () {
+      banner.remove();
+      localStorage.setItem(DISMISSED_KEY, '1');
+      if (onDismiss) onDismiss();
+    });
+  }
+
+  // ── Android/Chrome install prompt ────────────────────────────────────────
+  var deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    createBanner(
+      'ثبّت تطبيق Wardro',
+      function () {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+        }
+      },
+      null
+    );
+  });
+
+  // ── iOS Safari hint ──────────────────────────────────────────────────────
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isStandalone = window.navigator.standalone === true;
+  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  if (isIOS && isSafari && !isStandalone) {
+    createBanner(
+      'أضف Wardro إلى الشاشة الرئيسية من زر المشاركة ⬆️',
+      null,
+      null
+    );
+  }
+}());
+</script>
 </body>
 </html>
