@@ -1,8 +1,0 @@
-[     227ms] [ERROR] Error: <animateTransform> attribute keySplines: Invalid value, "0.34 1.56 0.64 1". @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?_=fulltest2:39
-[     227ms] [ERROR] Error: <animateTransform> attribute keySplines: Invalid value, "0.34 1.56 0.64 1". @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?_=fulltest2:45
-[     269ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?_=fulltest2:0
-[     270ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?_=fulltest2:0
-[     270ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?_=fulltest2:0
-[     270ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?_=fulltest2:0
-[     689ms] [LOG] ✅ Supabase connected successfully @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/supabase-config.js:20
-[    8524ms] [LOG] browse loaded: 10 products @ https://hawwadmowissa-art.github.io/wardro-alpha-0.95/app.js?v=20260621herostatus:1009

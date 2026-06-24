@@ -1,8 +1,0 @@
-[    1126ms] [ERROR] Error: <animateTransform> attribute keySplines: Invalid value, "0.34 1.56 0.64 1". @ http://localhost:8787/:39
-[    1127ms] [ERROR] Error: <animateTransform> attribute keySplines: Invalid value, "0.34 1.56 0.64 1". @ http://localhost:8787/:45
-[    1787ms] [LOG] ✅ Supabase connected successfully @ http://localhost:8787/supabase-config.js:20
-[    1816ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8787/:0
-[    1817ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8787/:0
-[    1817ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8787/:0
-[    1817ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8787/:0
-[    8257ms] [LOG] browse loaded: 10 products @ http://localhost:8787/app.js?v=20260621herostatus:1028

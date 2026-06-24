@@ -1,2 +1,9 @@
 # Keys and secrets — never commit these files
 API KEY
+supabase-config.js
+
+# Dependencies
+node_modules/
+
+# Playwright audit artifacts
+.playwright-mcp/

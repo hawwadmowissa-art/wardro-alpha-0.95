@@ -1,9 +1,0 @@
-- generic [ref=e3]:
-  - generic [ref=e4]:
-    - generic [ref=e5]: WR
-    - generic [ref=e6]: Admin Access
-  - generic [ref=e7]:
-    - generic [ref=e8]: تسجيل دخول المشرف
-    - textbox "admin@email.com" [ref=e9]
-    - textbox "••••••••" [ref=e10]
-    - button "دخول" [ref=e12] [cursor=pointer]
