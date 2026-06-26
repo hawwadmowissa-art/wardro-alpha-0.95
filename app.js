@@ -240,7 +240,7 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true;
+let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true,_apExclusive=false;
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -337,11 +337,18 @@ function setAvailability(avail){
   document.getElementById('ap-avail-no')?.classList.toggle('active',!avail);
 }
 
+function toggleExclusive(){
+  _apExclusive=!_apExclusive;
+  document.getElementById('ap-excl-btn')?.classList.toggle('active',_apExclusive);
+  _apUpdateSubmitBtn();
+}
+
 function _apUpdateSubmitBtn(){
   const btn=document.getElementById('ap-submit');if(!btn)return;
   const name=(document.getElementById('ap-name')?.value||'').trim();
   const price=(document.getElementById('ap-price')?.value||'').trim();
-  const ok=!!(_apProductType&&_apCat&&name&&price&&!isNaN(price)&&parseFloat(price)>0);
+  const priceOk=_apExclusive||(!!price&&!isNaN(price)&&parseFloat(price)>0);
+  const ok=!!(_apProductType&&_apCat&&name&&priceOk);
   btn.disabled=!ok;btn.style.opacity=ok?'1':'0.45';
 }
 
@@ -401,7 +408,7 @@ async function saveProduct(){
   const desc=document.getElementById('ap-desc').value.trim();
   if(!_apProductType)return toast('اختر نوع القطعة أولاً');
   if(!name)return toast('أدخل اسم القطعة');
-  if(!price||isNaN(price))return toast('أدخل سعراً صحيحاً');
+  if(!_apExclusive&&(!price||isNaN(price)))return toast('أدخل سعراً صحيحاً');
   if(!_apCat)return toast('اختر الفئة');
   const sb=getSb();if(!sb)return;
   btn.textContent='جاري الحفظ...';btn.disabled=true;
@@ -417,7 +424,7 @@ async function saveProduct(){
     const allImages=[..._apExistingUrls,...newUrls].slice(0,5);
     const img_url=allImages[0]||null;
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable};
+    const payload={name,price:(_apExclusive&&!price)?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable,is_exclusive:_apExclusive};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -553,6 +560,8 @@ function _resetModalForm(){
   _apAvailable=true;
   document.getElementById('ap-avail-yes')?.classList.add('active');
   document.getElementById('ap-avail-no')?.classList.remove('active');
+  _apExclusive=false;
+  document.getElementById('ap-excl-btn')?.classList.remove('active');
 }
 
 function _showModal(){
@@ -603,6 +612,8 @@ function openEditProduct(id){
   _apAvailable=p.is_available!==false;
   document.getElementById('ap-avail-yes')?.classList.toggle('active',_apAvailable);
   document.getElementById('ap-avail-no')?.classList.toggle('active',!_apAvailable);
+  _apExclusive=p.is_exclusive===true;
+  document.getElementById('ap-excl-btn')?.classList.toggle('active',_apExclusive);
   _apUpdateSubmitBtn();
   _showModal();
 }

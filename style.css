@@ -949,6 +949,11 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .sv-avail{font-size:10px;font-weight:700;letter-spacing:.2px}
 .sv-avail--yes{color:var(--sageL)}
 .sv-avail--no{color:rgba(180,100,90,1)}
+.ap-excl-row{margin-top:8px}
+.ap-excl-btn{padding:6px 16px;background:var(--card);border:1px solid var(--brd);
+  border-radius:8px;color:var(--muted);font-family:'Fraunces',serif;font-size:13px;
+  letter-spacing:.4px;cursor:pointer;transition:all .25s var(--spring)}
+.ap-excl-btn.active{background:var(--gold);border-color:var(--gold);color:#0B0A08;font-weight:700}
 /* Availability toggle — editor */
 .avail-toggle{display:flex;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,105,.18);border-radius:22px;padding:3px;gap:3px}
 .avail-btn{flex:1;padding:7px 10px;border-radius:19px;border:none;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;background:none;color:var(--muted);transition:all .2s var(--spring)}
