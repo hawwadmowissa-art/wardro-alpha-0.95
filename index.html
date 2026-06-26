@@ -559,12 +559,10 @@
         <button class="ap-modal-close" onclick="closeAddProduct()">✕</button>
       </div>
       <div class="ap-modal-body">
-        <div class="ap-img-zone" id="ap-img-zone" onclick="document.getElementById('ap-img-input').click()">
-          <input type="file" id="ap-img-input" accept="image/*" onchange="previewProductImg(this)" hidden>
-          <div id="ap-img-preview" class="ap-img-ph">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            <span>اضغط لرفع صورة القطعة</span>
-          </div>
+        <div class="ap-imgs-section">
+          <input type="file" id="ap-img-input" accept="image/*" multiple hidden onchange="addProductImages(this)">
+          <div class="ap-imgs-strip" id="ap-imgs-strip"></div>
+          <div class="ap-imgs-hint" id="ap-imgs-hint">اضغط على + لإضافة صورة (1–5)</div>
         </div>
         <div class="ap-fields">
           <div class="form-group">

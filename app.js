@@ -240,7 +240,7 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFile=null,_apEditId=null,_apEditImg=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true;
+let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true;
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -345,19 +345,53 @@ function _apUpdateSubmitBtn(){
   btn.disabled=!ok;btn.style.opacity=ok?'1':'0.45';
 }
 
-function previewProductImg(input){
-  if(!input.files[0])return;
-  _apImgFile=input.files[0];
-  const r=new FileReader();
-  r.onload=ev=>{
-    const zone=document.getElementById('ap-img-zone');
-    const ph=document.getElementById('ap-img-preview');
-    zone.style.backgroundImage=`url(${ev.target.result})`;
-    zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';
-    zone.style.borderStyle='solid';
-    if(ph)ph.style.display='none';
-  };
-  r.readAsDataURL(_apImgFile);
+function _renderImgStrip(){
+  const strip=document.getElementById('ap-imgs-strip');if(!strip)return;
+  const total=_apExistingUrls.length+_apImgFiles.length;
+  let html='';
+  _apExistingUrls.forEach((url,i)=>{
+    html+=`<div class="ap-img-thumb${i===0?' ap-img-thumb--cover':''}">
+      <img src="${safeUrl(url)}" alt="">
+      ${i===0?'<div class="ap-img-thumb-cover-label">غلاف</div>':''}
+      <button type="button" class="ap-img-thumb-rm" onclick="removeProductImg('existing',${i})">✕</button>
+    </div>`;
+  });
+  _apImgFiles.forEach(({dataUrl},i)=>{
+    const isFirst=_apExistingUrls.length===0&&i===0;
+    html+=`<div class="ap-img-thumb${isFirst?' ap-img-thumb--cover':''}">
+      <img src="${dataUrl}" alt="">
+      ${isFirst?'<div class="ap-img-thumb-cover-label">غلاف</div>':''}
+      <button type="button" class="ap-img-thumb-rm" onclick="removeProductImg('new',${i})">✕</button>
+    </div>`;
+  });
+  if(total<5){
+    html+=`<button type="button" class="ap-img-add" onclick="document.getElementById('ap-img-input').click()">+<span>إضافة صورة</span></button>`;
+  }
+  strip.innerHTML=html;
+  const hint=document.getElementById('ap-imgs-hint');
+  if(hint)hint.textContent=total>=5?'الحد الأقصى 5 صور':'اضغط على + لإضافة صورة (1–5)';
+}
+
+function addProductImages(input){
+  const files=Array.from(input.files||[]);
+  let pending=0;
+  for(const file of files){
+    const total=_apExistingUrls.length+_apImgFiles.length+pending;
+    if(total>=5){toast('الحد الأقصى 5 صور للقطعة الواحدة');break;}
+    if(!file.type.startsWith('image/')){toast('الرجاء اختيار صور فقط');continue;}
+    if(file.size>10*1024*1024){toast('حجم الصورة يجب ألا يتجاوز 10 ميغابايت');continue;}
+    pending++;
+    const reader=new FileReader();
+    reader.onload=ev=>{_apImgFiles.push({file,dataUrl:ev.target.result});_renderImgStrip();};
+    reader.readAsDataURL(file);
+  }
+  input.value='';
+}
+
+function removeProductImg(source,idx){
+  if(source==='existing')_apExistingUrls.splice(idx,1);
+  else _apImgFiles.splice(idx,1);
+  _renderImgStrip();
 }
 
 async function saveProduct(){
@@ -373,15 +407,17 @@ async function saveProduct(){
   btn.textContent='جاري الحفظ...';btn.disabled=true;
   try{
     const{data:{user}}=await sb.auth.getUser();
-    let img_url=_apEditId?(_apEditImg||null):null;
-    if(_apImgFile){
-      const ext=_apImgFile.name.split('.').pop();
-      const path=`products/${user.id}/${Date.now()}.${ext}`;
-      const{error:upErr}=await sb.storage.from('product-images').upload(path,_apImgFile,{upsert:true});
-      if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);img_url=pu.publicUrl}
+    const newUrls=[];
+    for(const {file} of _apImgFiles){
+      const ext=file.name.split('.').pop();
+      const path=`products/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+      const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
+      if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newUrls.push(pu.publicUrl);}
     }
+    const allImages=[..._apExistingUrls,...newUrls].slice(0,5);
+    const img_url=allImages[0]||null;
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
-    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable};
+    const payload={name,price:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -506,13 +542,11 @@ function _resetModalForm(){
   document.getElementById('ap-name').value='';
   document.getElementById('ap-price').value='';
   document.getElementById('ap-desc').value='';
-  _apSizes=[];_apCat=null;_apImgFile=null;_apProductType=null;_apColorTags=[];
+  _apSizes=[];_apCat=null;_apImgFiles=[];_apExistingUrls=[];_apProductType=null;_apColorTags=[];
   document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
   const sizeBtns=document.getElementById('size-btns');
   if(sizeBtns)sizeBtns.innerHTML='<span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>';
-  const zone=document.getElementById('ap-img-zone');
-  if(zone){zone.style.backgroundImage='';zone.style.backgroundSize='';zone.style.backgroundPosition='';zone.style.borderStyle='';}
-  const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display='';
+  _renderImgStrip();
   const legacyNotice=document.getElementById('ap-color-legacy-notice');if(legacyNotice)legacyNotice.style.display='none';
   const tradNotice=document.getElementById('ap-trad-notice');if(tradNotice)tradNotice.style.display='none';
   const btn=document.getElementById('ap-submit');if(btn){btn.disabled=true;btn.style.opacity='0.45';}
@@ -528,7 +562,7 @@ function _showModal(){
 }
 
 function openAddProduct(sliderType){
-  _apEditId=null;_apEditImg=null;_apSliderType=sliderType||'none';
+  _apEditId=null;_apSliderType=sliderType||'none';
   _resetModalForm();
   const stGroup=document.getElementById('slidertype-group');if(stGroup)stGroup.style.display='none';
   const del=document.getElementById('ap-delete');if(del)del.style.display='none';
@@ -538,7 +572,7 @@ function openAddProduct(sliderType){
 
 function openEditProduct(id){
   const p=_editorProds[id];if(!p)return;
-  _apEditId=p.id;_apEditImg=p.image||null;_apImgFile=null;
+  _apEditId=p.id;
   _resetModalForm();
   document.getElementById('ap-name').value=p.name||'';
   document.getElementById('ap-price').value=p.price||'';
@@ -562,9 +596,8 @@ function openEditProduct(id){
   document.querySelectorAll('#color-tag-btns .sel-btn').forEach(b=>b.classList.toggle('active',_apColorTags.includes(b.dataset.val)));
   const legacyNotice=document.getElementById('ap-color-legacy-notice');
   if(legacyNotice)legacyNotice.style.display=(p.color||p.color_name)?'block':'none';
-  const zone=document.getElementById('ap-img-zone');
-  if(zone&&p.image){zone.style.backgroundImage=`url(${p.image})`;zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';zone.style.borderStyle='solid';}
-  const ph=document.getElementById('ap-img-preview');if(ph)ph.style.display=p.image?'none':'';
+  _apExistingUrls=(p.images&&p.images.length)?[...p.images]:(p.image?[p.image]:[]);
+  _renderImgStrip();
   const del=document.getElementById('ap-delete');if(del)del.style.display='';
   const title=document.querySelector('.ap-modal-title');if(title)title.textContent='Edit Product';
   _apAvailable=p.is_available!==false;
@@ -589,8 +622,10 @@ async function deleteProduct(){
   if(!confirm('حذف هذه القطعة نهائياً؟'))return;
   const sb=getSb();if(!sb)return;
   try{
-    if(_apEditImg){
-      const m=_apEditImg.match(/\/product-images\/(.+)$/);
+    const prod=_editorProds[_apEditId]||{};
+    const allImgUrls=[...(prod.images||[]),...(prod.image?[prod.image]:[])];
+    for(const url of [...new Set(allImgUrls)]){
+      const m=url.match(/\/product-images\/(.+)$/);
       if(m&&m[1])await sb.storage.from('product-images').remove([decodeURIComponent(m[1])]);
     }
     const{error}=await sb.from('products').delete().eq('id',_apEditId);
