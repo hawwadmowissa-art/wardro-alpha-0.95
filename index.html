@@ -977,32 +977,30 @@
 <div id="pd-overlay" class="pd-overlay" onclick="closeProdDetail()">
   <div class="pd-sheet" onclick="event.stopPropagation()">
     <div class="pd-handle"></div>
-    <div class="pd-inner">
-      <div class="pd-img-col">
-        <img id="pd-img" src="" alt="" style="display:none">
-        <div id="pd-img-ph" class="pd-img-ph">👔</div>
+    <div class="pd-carousel" id="pd-carousel">
+      <div class="pd-carousel-track" id="pd-carousel-track"></div>
+      <div class="pd-dots" id="pd-dots"></div>
+      <button class="pd-close-btn" onclick="closeProdDetail()" aria-label="إغلاق">✕</button>
+      <button class="pd-heart-btn" id="pd-heart-btn" onclick="pdToggleHeart()" aria-label="احفظ">♡</button>
+    </div>
+    <div class="pd-info">
+      <div class="pd-name" id="pd-name"></div>
+      <div class="pd-price" id="pd-price"></div>
+      <div class="pd-store-name" id="pd-store-name"></div>
+      <div class="pd-field-block">
+        <div class="pd-field-label">COLOR</div>
+        <div id="pd-colors-wrap" class="pd-colors-wrap"></div>
       </div>
-      <div class="pd-info-col">
-        <div>
-          <div class="pd-name" id="pd-name"></div>
-          <div class="pd-price" id="pd-price"></div>
-        </div>
-        <div class="pd-store-name" id="pd-store-name"></div>
-        <div class="pd-field-block">
-          <div class="pd-field-label">Color</div>
-          <div id="pd-colors-wrap" class="pd-colors-wrap"></div>
-        </div>
-        <div class="pd-field-block">
-          <div class="pd-field-label">Size</div>
-          <div class="pd-size-pills" id="pd-size-pills"></div>
-        </div>
-        <div class="pd-desc" id="pd-desc"></div>
-        <div class="pd-stock-row">
-          <span class="pd-stock-dot" id="pd-stock-dot"></span>
-          <span class="pd-stock-lbl" id="pd-stock-lbl"></span>
-        </div>
-        <button class="pd-save-btn" id="pd-save-btn" onclick="saveItem()">Save</button>
+      <div class="pd-field-block">
+        <div class="pd-field-label">SIZE</div>
+        <div class="pd-size-pills" id="pd-size-pills"></div>
       </div>
+      <div class="pd-desc" id="pd-desc"></div>
+      <div class="pd-stock-row">
+        <span class="pd-stock-dot" id="pd-stock-dot"></span>
+        <span class="pd-stock-lbl" id="pd-stock-lbl"></span>
+      </div>
+      <button class="pd-save-btn" id="pd-save-btn" onclick="saveItem()">Save</button>
     </div>
   </div>
 </div>

@@ -927,6 +927,7 @@ function skipOnboard(){
 let _brHeroIdx=0,_brHeroTimer=null;
 let _brProds=[];
 let _pdCurrentId=null;
+let _pdImages=[],_pdCarouselIdx=0;
 let _svItemMap={};
 let _explorePool=[],_exploreOffset=0,_exploreObserver=null,_explorePending=false;
 
@@ -1165,12 +1166,24 @@ function brNavSwitch(tab,btn){
 function openProdDetail(id){
   const p=_brProds.find(x=>x.id===id);if(!p)return;
   _pdCurrentId=id;
-  const img=document.getElementById('pd-img');
-  const ph=document.getElementById('pd-img-ph');
-  if(p.image){img.src=p.image;img.style.display='block';if(ph)ph.style.display='none';}
-  else{img.style.display='none';if(ph)ph.style.display='flex';}
-  document.getElementById('pd-name').textContent=p.name;
-  document.getElementById('pd-price').textContent=Number(p.price).toLocaleString()+' DZD';
+  _pdImages=(Array.isArray(p.images)&&p.images.length)?p.images:(p.image?[p.image]:[]);
+  _pdCarouselIdx=0;
+  const track=document.getElementById('pd-carousel-track');
+  const dotsEl=document.getElementById('pd-dots');
+  if(track){
+    if(_pdImages.length){
+      track.innerHTML=_pdImages.map(src=>`<img class="pd-carousel-img" src="${safeUrl(src)}" alt="${esc(p.name||'')}" draggable="false">`).join('');
+    }else{
+      track.innerHTML=`<div class="pd-carousel-ph">👔</div>`;
+    }
+    track.style.transform='translateX(0)';
+  }
+  if(dotsEl){
+    dotsEl.style.display=_pdImages.length>1?'flex':'none';
+    dotsEl.innerHTML=_pdImages.map((_,i)=>`<span class="pd-dot${i===0?' pd-dot--active':''}" onclick="pdGoSlide(${i})"></span>`).join('');
+  }
+  document.getElementById('pd-name').textContent=p.name||'';
+  document.getElementById('pd-price').textContent=Number(p.price||0).toLocaleString()+' DZD';
   const _sn=document.getElementById('pd-store-name');
   if(_sn){const _nm=p.seller?.store_name;if(_nm){_sn.textContent='من متجر '+_nm;_sn.style.display='';_sn.onclick=()=>{closeProdDetail();openStoreView(p.seller_id,_nm,p.seller?.profile_image||null);};}else{_sn.textContent='';_sn.style.display='none';_sn.onclick=null;}}
   document.getElementById('pd-desc').textContent=p.description||'';
@@ -1185,15 +1198,51 @@ function openProdDetail(id){
   sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
+  const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   const ov=document.getElementById('pd-overlay');
   ov.style.display='flex';
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
+  _pdCarouselTouch();
 }
 
 function closeProdDetail(){
   const ov=document.getElementById('pd-overlay');
   ov.classList.remove('pd-overlay--open');
   setTimeout(()=>{ov.style.display='none';},380);
+}
+
+function pdGoSlide(idx){
+  if(idx<0||idx>=_pdImages.length)return;
+  _pdCarouselIdx=idx;
+  const carousel=document.getElementById('pd-carousel');
+  const track=document.getElementById('pd-carousel-track');
+  if(track&&carousel)track.style.transform=`translateX(${-idx*carousel.offsetWidth}px)`;
+  document.querySelectorAll('.pd-dot').forEach((d,i)=>d.classList.toggle('pd-dot--active',i===idx));
+}
+
+function _pdCarouselTouch(){
+  const carousel=document.getElementById('pd-carousel');
+  if(!carousel||carousel._pdTouchBound)return;
+  carousel._pdTouchBound=true;
+  let sx=0,sy=0,axisLocked=null,tracking=false;
+  carousel.addEventListener('touchstart',e=>{
+    const t=e.touches[0];sx=t.clientX;sy=t.clientY;axisLocked=null;tracking=true;
+  },{passive:true});
+  carousel.addEventListener('touchmove',e=>{
+    if(!tracking)return;
+    const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
+    if(!axisLocked){
+      if(Math.abs(dx)>Math.abs(dy)+3)axisLocked='h';
+      else if(Math.abs(dy)>Math.abs(dx)+3)axisLocked='v';
+    }
+    if(axisLocked==='h')e.preventDefault();
+  },{passive:false});
+  carousel.addEventListener('touchend',e=>{
+    if(!tracking||axisLocked!=='h'){tracking=false;return;}
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)>40){dx<0?pdGoSlide(_pdCarouselIdx+1):pdGoSlide(_pdCarouselIdx-1);}
+    tracking=false;
+  },{passive:true});
 }
 
 function pdToggleHeart(){
