@@ -434,7 +434,7 @@
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
         const { data, error } = await sb.from('products')
-          .select('id,name,price,image,type,description,created_at,seller:sellers(store_name)')
+          .select('id,name,price,is_exclusive,image,type,description,created_at,seller:sellers(store_name)')
           .eq('slider_type', 'main_hero')
           .eq('hero_status', 'pending')
           .order('created_at', { ascending: true });
@@ -453,13 +453,13 @@
                 <div class="adm-hero-lbl">${esc((p.type||'FEATURED').toUpperCase())}</div>
                 <div class="adm-hero-ttl">${esc(p.name||'—')}</div>
                 <div class="adm-hero-sub">${esc(p.description||'Premium quality clothing')}</div>
-                <div class="adm-hero-cta">${Number(p.price||0).toLocaleString()} DZD →</div>
+                <div class="adm-hero-cta">${p.is_exclusive ? 'Exclusive →' : `${Number(p.price||0).toLocaleString()} DZD →`}</div>
               </div>
             </div>
             <div class="adm-card-info">
               <div class="adm-card-name">${esc(p.name || '—')}</div>
               <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
-              <div class="adm-card-price">${Number(p.price || 0).toLocaleString()} DZD</div>
+              <div class="adm-card-price">${p.is_exclusive ? 'Exclusive' : `${Number(p.price || 0).toLocaleString()} DZD`}</div>
               <div class="adm-card-date">${fmtDate(p.created_at)}</div>
             </div>
             <div class="adm-actions">
