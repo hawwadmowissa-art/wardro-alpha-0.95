@@ -341,6 +341,8 @@ function setAvailability(avail){
 function toggleExclusive(){
   _apExclusive=!_apExclusive;
   document.getElementById('ap-excl-btn')?.classList.toggle('active',_apExclusive);
+  const pf=document.getElementById('ap-price');
+  if(pf){pf.disabled=_apExclusive;if(_apExclusive)pf.value='';}
   _apUpdateSubmitBtn();
 }
 
@@ -425,7 +427,7 @@ async function saveProduct(){
     const allImages=[..._apExistingUrls,...newUrls].slice(0,5);
     const img_url=allImages[0]||null;
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
-    const payload={name,price:(_apExclusive&&!price)?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable,is_exclusive:_apExclusive};
+    const payload={name,price:_apExclusive?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable,is_exclusive:_apExclusive};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -563,6 +565,7 @@ function _resetModalForm(){
   document.getElementById('ap-avail-no')?.classList.remove('active');
   _apExclusive=false;
   document.getElementById('ap-excl-btn')?.classList.remove('active');
+  const _rpf=document.getElementById('ap-price');if(_rpf)_rpf.disabled=false;
 }
 
 function _showModal(){
@@ -615,6 +618,8 @@ function openEditProduct(id){
   document.getElementById('ap-avail-no')?.classList.toggle('active',!_apAvailable);
   _apExclusive=p.is_exclusive===true;
   document.getElementById('ap-excl-btn')?.classList.toggle('active',_apExclusive);
+  const _epf=document.getElementById('ap-price');
+  if(_epf){_epf.disabled=_apExclusive;if(_apExclusive)_epf.value='';}
   _apUpdateSubmitBtn();
   _showModal();
 }
@@ -1361,7 +1366,7 @@ async function loadSaved(){
     if(!session){openCustAuth();return;}
     const{data,error}=await sb
       .from('saved_items')
-      .select('id, products(id, name, price, image, sizes, stock, is_available, seller_id, product_type, color_tags, type, seller:sellers(store_name))')
+      .select('id, products(id, name, price, is_exclusive, image, sizes, stock, is_available, seller_id, product_type, color_tags, type, seller:sellers(store_name))')
       .eq('customer_id',session.user.id)
       .order('created_at',{ascending:false});
     if(error)throw error;
