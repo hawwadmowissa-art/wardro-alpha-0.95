@@ -1168,11 +1168,16 @@ function openProdDetail(id){
   _pdCurrentId=id;
   _pdImages=(Array.isArray(p.images)&&p.images.length)?p.images:(p.image?[p.image]:[]);
   _pdCarouselIdx=0;
+  const ov=document.getElementById('pd-overlay');
+  const carousel=document.getElementById('pd-carousel');
   const track=document.getElementById('pd-carousel-track');
   const dotsEl=document.getElementById('pd-dots');
+  // Show overlay first (still opacity:0) so carousel has real layout width
+  ov.style.display='flex';
+  const w=carousel?carousel.offsetWidth:0;
   if(track){
     if(_pdImages.length){
-      track.innerHTML=_pdImages.map(src=>`<img class="pd-carousel-img" src="${safeUrl(src)}" alt="${esc(p.name||'')}" draggable="false">`).join('');
+      track.innerHTML=_pdImages.map(src=>`<img class="pd-carousel-img"${w?` style="width:${w}px"`:''} src="${safeUrl(src)}" alt="${esc(p.name||'')}" draggable="false">`).join('');
     }else{
       track.innerHTML=`<div class="pd-carousel-ph">👔</div>`;
     }
@@ -1199,8 +1204,6 @@ function openProdDetail(id){
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
-  const ov=document.getElementById('pd-overlay');
-  ov.style.display='flex';
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
 }
