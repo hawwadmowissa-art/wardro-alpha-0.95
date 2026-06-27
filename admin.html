@@ -231,9 +231,9 @@
 
     /* ── ADMIN INLINE GALLERY ── */
     .adm-gal-track{
-      display:flex;width:100%;height:100%;
+      display:flex;flex-direction:row;direction:ltr;
+      width:100%;height:100%;
       transition:transform .3s ease;
-      /* NO will-change:transform — causes black slides 2+ */
     }
     .adm-gal-slide{
       flex-shrink:0;width:100%;height:100%;
