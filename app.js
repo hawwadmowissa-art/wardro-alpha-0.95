@@ -812,9 +812,10 @@ async function loadGuestStoreProducts(sellerId){
     const aboutDesc=document.getElementById('show-about-desc');
     if(aboutDesc)aboutDesc.textContent=seller?.bio||'';
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',sellerId).order('created_at',{ascending:false});
-    renderShowProducts(prods||[]);
+    const visProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+    renderShowProducts(visProds);
     // Merge into _brProds so openProdDetail works
-    (prods||[]).forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+    visProds.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
   }catch(e){}
 }
 
@@ -855,7 +856,7 @@ function buildHeroSlider(prods){
   const dotsEl=document.getElementById('show-hero-dots');
   if(!track||!dotsEl)return;
   clearInterval(_heroTimer);_heroIdx=0;
-  let heroProds=prods.filter(p=>(p.slider_type==='hero'||p.slider_type==='main_hero')&&p.image);
+  let heroProds=prods.filter(p=>p.image&&(p.slider_type==='hero'||(p.slider_type==='main_hero'&&p.hero_status==='approved')));
   if(!heroProds.length)heroProds=prods.filter(p=>p.image).slice(0,20);
   else heroProds=heroProds.slice(0,20);
   let slides;
@@ -1078,7 +1079,7 @@ async function loadBrowse(){
     const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
-    _brProds=prods||[];
+    _brProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
     buildBrowseHero(_brProds);
     _renderBrowseSections(_brProds);
   }catch(e){toast('❌ browse: '+e.message);console.error('browse load:',e)}

@@ -507,7 +507,7 @@
         } else {
           updateData = status === 'approved'
             ? { hero_status: 'approved' }
-            : { hero_status: 'rejected', slider_type: 'none' };
+            : { hero_status: 'rejected' };
         }
         const { error } = await sb.from(table).update(updateData).eq('id', id);
         if (error) throw error;
