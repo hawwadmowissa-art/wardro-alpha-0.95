@@ -228,6 +228,29 @@
       pointer-events:none;white-space:nowrap;z-index:99;
     }
     #adm-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* ── ADMIN INLINE GALLERY ── */
+    .adm-gal-track{
+      display:flex;width:100%;height:100%;
+      transition:transform .3s ease;
+      /* NO will-change:transform — causes black slides 2+ */
+    }
+    .adm-gal-slide{
+      flex-shrink:0;width:100%;height:100%;
+      background-size:cover;background-position:center;
+    }
+    .adm-gal-dots{
+      position:absolute;top:10px;left:50%;
+      transform:translateX(-50%);
+      display:flex;gap:5px;z-index:2;
+      pointer-events:none;
+    }
+    .adm-gal-dot{
+      width:5px;height:5px;border-radius:50%;
+      background:rgba(255,255,255,.35);
+      transition:background .2s;
+    }
+    .adm-gal-dot.active{background:var(--gold)}
   </style>
 </head>
 <body>
@@ -305,6 +328,11 @@
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function safeUrl(u) {
+      if (!u || typeof u !== 'string') return '';
+      const t = u.trim();
+      return /^https?:\/\//i.test(t) ? t : '';
     }
     function fmtDate(iso) {
       if (!iso) return '';
@@ -434,7 +462,7 @@
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
         const { data, error } = await sb.from('products')
-          .select('id,name,price,is_exclusive,image,type,description,created_at,seller:sellers(store_name)')
+          .select('id,name,price,is_exclusive,image,images,type,description,created_at,seller:sellers(store_name)')
           .eq('slider_type', 'main_hero')
           .eq('hero_status', 'pending')
           .order('created_at', { ascending: true });
@@ -447,15 +475,7 @@
         }
         el.innerHTML = data.map(p => `
           <div class="adm-card" id="pc-${p.id}">
-            <div class="adm-hero-preview"${p.image?` style="background-image:url('${esc(p.image)}')"`:''}>
-              <div class="adm-hero-ovl"></div>
-              <div class="adm-hero-cnt">
-                <div class="adm-hero-lbl">${esc((p.type||'FEATURED').toUpperCase())}</div>
-                <div class="adm-hero-ttl">${esc(p.name||'—')}</div>
-                <div class="adm-hero-sub">${esc(p.description||'Premium quality clothing')}</div>
-                <div class="adm-hero-cta">${p.is_exclusive ? 'Exclusive →' : `${Number(p.price||0).toLocaleString()} DZD →`}</div>
-              </div>
-            </div>
+            ${buildAdmGallery(p)}
             <div class="adm-card-info">
               <div class="adm-card-name">${esc(p.name || '—')}</div>
               <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
@@ -467,6 +487,7 @@
               <button class="adm-reject"  onclick="doAction('product','${p.id}','rejected')">✕ رفض</button>
             </div>
           </div>`).join('');
+        initAdmGalleries();
       } catch (e) {
         el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
       }
@@ -491,11 +512,69 @@
         const { error } = await sb.from(table).update(updateData).eq('id', id);
         if (error) throw error;
         toast(status === 'approved' ? '✓ تمت الموافقة' : '✓ تم الرفض');
-        if (type === 'seller') loadSellers(); else loadProds();
+        if (type === 'seller') { loadSellers(); } else { loadProds(); }
       } catch (e) {
         toast('خطأ: ' + e.message);
         if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
       }
+    }
+
+    // ── ADMIN INLINE GALLERY ──
+    function buildAdmGallery(p) {
+      const imgs = (Array.isArray(p.images) && p.images.length > 0)
+        ? p.images
+        : (p.image ? [p.image] : []);
+      const slides = imgs.length
+        ? imgs.map(u => `<div class="adm-gal-slide" style="background-image:url('${safeUrl(u)}')"></div>`).join('')
+        : '<div class="adm-gal-slide"></div>';
+      const dots = imgs.length > 1
+        ? `<div class="adm-gal-dots">${imgs.map((_,i)=>`<span class="adm-gal-dot${i===0?' active':''}"></span>`).join('')}</div>`
+        : '';
+      return `<div class="adm-hero-preview adm-gal-wrap" id="gal-${esc(p.id)}">
+        <div class="adm-gal-track">${slides}</div>
+        <div class="adm-hero-ovl"></div>
+        <div class="adm-hero-cnt">
+          <div class="adm-hero-lbl">${esc((p.type||'FEATURED').toUpperCase())}</div>
+          <div class="adm-hero-ttl">${esc(p.name||'—')}</div>
+          <div class="adm-hero-sub">${esc(p.description||'Premium quality clothing')}</div>
+          <div class="adm-hero-cta">${p.is_exclusive?'Exclusive →':Number(p.price||0).toLocaleString()+' DZD →'}</div>
+        </div>
+        ${dots}</div>`;
+    }
+
+    function initAdmGalleries() {
+      document.querySelectorAll('.adm-gal-wrap').forEach(wrap => {
+        const track  = wrap.querySelector('.adm-gal-track');
+        const slides = wrap.querySelectorAll('.adm-gal-slide');
+        const dots   = wrap.querySelectorAll('.adm-gal-dot');
+        const count  = slides.length;
+        if (count <= 1) return;
+        let cur = 0, startX = 0, dragging = false;
+        function goTo(idx) {
+          cur = Math.max(0, Math.min(count - 1, idx));
+          track.style.transform = `translateX(${cur * -100}%)`;
+          dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+        }
+        wrap.addEventListener('touchstart', e => {
+          startX = e.touches[0].clientX; dragging = true;
+        }, { passive: true });
+        wrap.addEventListener('touchend', e => {
+          if (!dragging) return;
+          const dx = e.changedTouches[0].clientX - startX;
+          if (Math.abs(dx) > 40) goTo(cur + (dx < 0 ? 1 : -1));
+          dragging = false;
+        }, { passive: true });
+        wrap.addEventListener('mousedown', e => {
+          startX = e.clientX; dragging = true; e.preventDefault();
+        });
+        wrap.addEventListener('mouseup', e => {
+          if (!dragging) return;
+          const dx = e.clientX - startX;
+          if (Math.abs(dx) > 40) goTo(cur + (dx < 0 ? 1 : -1));
+          dragging = false;
+        });
+        wrap.addEventListener('mouseleave', () => { dragging = false; });
+      });
     }
 
     // ── SESSION RESTORE ──
