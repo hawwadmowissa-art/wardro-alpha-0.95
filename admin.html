@@ -411,6 +411,8 @@
       document.querySelectorAll('.adm-panel-tab').forEach(p => p.classList.remove('active'));
       document.getElementById('stab-' + tab).classList.add('active');
       document.getElementById('ptab-' + tab).classList.add('active');
+      // Re-measure gallery widths now that the prods tab is visible
+      if (tab === 'prods') initAdmGalleries();
     }
 
     // ── COPY EMAIL ──
@@ -550,13 +552,23 @@
         const count  = slides.length;
         if (count <= 1) return;
 
-        // Concrete px width — proven fix for black slides (same as customer carousel)
+        // Always re-measure — first call may run while tab is display:none (offsetWidth=0).
+        // switchTab('prods') calls us again once the tab is visible so we get real px.
         const w = wrap.offsetWidth || 0;
-        if (w) slides.forEach(s => { s.style.width = w + 'px'; });
+        if (w) {
+          slides.forEach(s => { s.style.width = w + 'px'; });
+          // Reset track to current slide with correct px
+          const cur = wrap._admCur || 0;
+          track.style.transform = `translateX(${-cur * w}px)`;
+        }
+
+        if (wrap._admBound) return; // event listeners already attached
+        wrap._admBound = true;
 
         let cur = 0;
         function goTo(idx) {
-          cur = ((idx % count) + count) % count; // loops both directions
+          cur = ((idx % count) + count) % count;
+          wrap._admCur = cur;
           track.style.transform = `translateX(${-cur * (wrap.offsetWidth || w)}px)`;
           dots.forEach((d, i) => d.classList.toggle('active', i === cur));
         }

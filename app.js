@@ -1602,7 +1602,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
 
     if(loading)loading.style.display='none';
 
-    const results=prods||[];
+    const results=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
 
     if(!results.length){if(empty)empty.style.display='flex';return;}
 
@@ -1625,10 +1625,11 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
       .in('type',otherTypes)
       .limit(8);
     if(compProds&&compProds.length){
-      compProds.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+      const visComp=compProds.filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+      visComp.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
       const row=document.getElementById('rs-comp-row');
       if(row){
-        row.innerHTML=compProds.map(p=>`
+        row.innerHTML=visComp.map(p=>`
           <div class="rs-comp-card" onclick="openProdDetail('${p.id}')">
             ${p.image?`<img class="rs-comp-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="rs-comp-img-ph">👔</div>`}
             <div class="rs-comp-info">
@@ -1637,7 +1638,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
             </div>
           </div>`).join('');
       }
-      if(comp)comp.style.display='block';
+      if(comp&&visComp.length)comp.style.display='block';
     }
   }catch(e){
     if(loading)loading.style.display='none';
