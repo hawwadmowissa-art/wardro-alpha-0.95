@@ -241,6 +241,7 @@ async function doSellerSignIn(){
 
 // ══ PRODUCTS ══
 let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true,_apExclusive=false;
+function _priceLabel(p){return p.is_exclusive?'Exclusive':Number(p.price||0).toLocaleString()+' DZD';}
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('size-btns')?.addEventListener('click',e=>{
@@ -478,7 +479,7 @@ function _edProdCardHtml(p){
       ${p.image?`<img class="ed-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
       <div class="ed-prod-info">
         <div class="ed-prod-name">${esc(p.name)}</div>
-        <div class="ed-prod-price">${Number(p.price).toLocaleString()} DZD</div>
+        <div class="ed-prod-price">${_priceLabel(p)}</div>
         <div class="ed-prod-info-row">
           <div class="ed-prod-badge">In Stock</div>
         </div>
@@ -524,7 +525,7 @@ function renderShowProducts(prods){
   const cardHtml=p=>`
     <div class="show-prod-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="show-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
-      <div class="show-prod-info"><div class="show-prod-name">${esc(p.name)}</div><div class="show-prod-price">${Number(p.price).toLocaleString()} DZD</div><div class="show-prod-cat">${esc(p.type||'')}</div></div>
+      <div class="show-prod-info"><div class="show-prod-name">${esc(p.name)}</div><div class="show-prod-price">${_priceLabel(p)}</div><div class="show-prod-cat">${esc(p.type||'')}</div></div>
     </div>`;
   // Featured grid (Home tab — first 4)
   const grid=document.getElementById('show-prod-grid');
@@ -856,7 +857,7 @@ function buildHeroSlider(prods){
   if(!heroProds.length){
     slides=[{bg:null,id:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
   }else{
-    slides=heroProds.map(p=>({bg:p.image,id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:`${Number(p.price).toLocaleString()} DZD`,approval_status:p.approval_status}));
+    slides=heroProds.map(p=>({bg:p.image,id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:_priceLabel(p),approval_status:p.approval_status}));
   }
   _heroLen=slides.length;
   track.innerHTML=slides.map((s,i)=>`
@@ -952,7 +953,7 @@ function _renderVGrid(gridId,secId,prods){
   el.innerHTML=prods.map(p=>`
     <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
-      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${Number(p.price||0).toLocaleString()} DZD</div></div>
+      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${_priceLabel(p)}</div></div>
     </div>`).join('');
 }
 
@@ -965,7 +966,7 @@ function _renderHStrip(stripId,secId,prods){
   el.innerHTML=prods.map(p=>`
     <div class="br-strip-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="br-strip-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-strip-img br-strip-img--ph"></div>`}
-      <div class="br-strip-info"><div class="br-strip-name">${esc(p.name||'')}</div><div class="br-strip-price">${Number(p.price||0).toLocaleString()} DZD</div></div>
+      <div class="br-strip-info"><div class="br-strip-name">${esc(p.name||'')}</div><div class="br-strip-price">${_priceLabel(p)}</div></div>
     </div>`).join('');
 }
 
@@ -1039,7 +1040,7 @@ function _exploreRenderBatch(){
   grid.insertAdjacentHTML('beforeend',batch.map(p=>`
     <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
-      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${Number(p.price||0).toLocaleString()} DZD</div></div>
+      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${_priceLabel(p)}</div></div>
     </div>`).join(''));
 }
 
@@ -1088,7 +1089,7 @@ function renderBrGrid(id,prods){
   el.innerHTML=prods.map(p=>`
     <div class="br-prod-card${p._demo?' br-prod-card--demo':''}"${p._demo?'':` onclick="openProdDetail('${p.id}')"`}>
       ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
-      ${!p._demo?`<div class="br-prod-info"><div class="br-prod-name">${esc(p.name)}</div><div class="br-prod-price">${Number(p.price).toLocaleString()} DZD</div></div>`:''}
+      ${!p._demo?`<div class="br-prod-info"><div class="br-prod-name">${esc(p.name)}</div><div class="br-prod-price">${_priceLabel(p)}</div></div>`:''}
     </div>`).join('');
 }
 
@@ -1123,7 +1124,7 @@ function buildBrowseHero(prods){
         label:(p.type||'FEATURED').toUpperCase(),
         title:p.name,
         sub:p.description||'Premium quality clothing',
-        cta:`${Number(p.price||0).toLocaleString()} DZD`
+        cta:_priceLabel(p)
       }));
     }
   }
@@ -1188,7 +1189,7 @@ function openProdDetail(id){
     dotsEl.innerHTML=_pdImages.map((_,i)=>`<span class="pd-dot${i===0?' pd-dot--active':''}" onclick="pdGoSlide(${i})"></span>`).join('');
   }
   document.getElementById('pd-name').textContent=p.name||'';
-  document.getElementById('pd-price').textContent=Number(p.price||0).toLocaleString()+' DZD';
+  document.getElementById('pd-price').textContent=_priceLabel(p);
   const _sn=document.getElementById('pd-store-name');
   if(_sn){const _nm=p.seller?.store_name;if(_nm){_sn.textContent='من متجر '+_nm;_sn.style.display='';_sn.onclick=()=>{closeProdDetail();openStoreView(p.seller_id,_nm,p.seller?.profile_image||null);};}else{_sn.textContent='';_sn.style.display='none';_sn.onclick=null;}}
   document.getElementById('pd-desc').textContent=p.description||'';
@@ -1403,7 +1404,7 @@ function renderSaved(items){
           <div class="sv-prod-name">${esc(p.name)}</div>
           <div class="sv-size">المقاس: ${esc(size)}</div>
           ${availHtml}
-          <div class="sv-price">${Number(p.price||0).toLocaleString()} DZD</div>
+          <div class="sv-price">${_priceLabel(p)}</div>
         </div>
       </div>`;
   }).join('');
@@ -1607,7 +1608,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
         ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
         <div class="br-prod-info">
           <div class="br-prod-name">${esc(p.name||'')}</div>
-          <div class="br-prod-price">${Number(p.price||0).toLocaleString()} DZD</div>
+          <div class="br-prod-price">${_priceLabel(p)}</div>
         </div>
       </div>`).join('');
 
@@ -1626,7 +1627,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
             ${p.image?`<img class="rs-comp-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="rs-comp-img-ph">👔</div>`}
             <div class="rs-comp-info">
               <div class="rs-comp-name">${esc(p.name||'')}</div>
-              <div class="rs-comp-price">${Number(p.price||0).toLocaleString()} DZD</div>
+              <div class="rs-comp-price">${_priceLabel(p)}</div>
             </div>
           </div>`).join('');
       }
