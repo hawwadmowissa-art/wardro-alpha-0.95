@@ -216,6 +216,22 @@
     .adm-reject:hover{background:rgba(180,60,40,.2)}
     .adm-reject:active{transform:scale(.97)}
     .adm-reject:disabled{opacity:.4;cursor:not-allowed}
+    .adm-toggle-btn{
+      flex:1;padding:9px;
+      background:rgba(210,175,105,.11);border:1px solid rgba(210,175,105,.22);
+      border-radius:9px;color:var(--gold);
+      font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;
+      transition:background .2s,transform .1s;
+    }
+    .adm-toggle-btn:hover{background:rgba(210,175,105,.2)}
+    .adm-toggle-btn:active{transform:scale(.97)}
+    .adm-toggle-btn:disabled{opacity:.4;cursor:not-allowed}
+    .adm-hidden-tag{
+      display:inline-block;font-size:10px;color:#d47060;
+      background:rgba(180,60,40,.12);border:1px solid rgba(180,60,40,.22);
+      border-radius:6px;padding:2px 8px;margin-top:5px;
+    }
+    .adm-search{width:100%;margin-bottom:12px}
 
     /* ── TOAST ── */
     #adm-toast{
@@ -292,6 +308,10 @@
         منتجات Main Hero
         <span class="adm-tab-n" id="cnt-prods"></span>
       </button>
+      <button class="adm-tab" id="stab-allprods" onclick="switchTab('allprods')">
+        كل المنتجات
+        <span class="adm-tab-n" id="cnt-allprods"></span>
+      </button>
     </div>
     <div class="adm-content">
       <div class="adm-panel-tab active" id="ptab-sellers">
@@ -299,6 +319,11 @@
       </div>
       <div class="adm-panel-tab" id="ptab-prods">
         <div class="adm-loading">جاري التحميل...</div>
+      </div>
+      <div class="adm-panel-tab" id="ptab-allprods">
+        <input id="ap-search" class="adm-inp adm-search" type="text"
+               placeholder="بحث بالاسم أو المتجر..." oninput="filterAllProducts()">
+        <div id="ap-list"><div class="adm-loading">جاري التحميل...</div></div>
       </div>
     </div>
   </div>
@@ -388,6 +413,7 @@
       document.getElementById('adm-panel').classList.add('visible');
       loadSellers();
       loadProds();
+      loadAllProducts();
     }
     function concealPanel() {
       document.getElementById('adm-panel').classList.remove('visible');
@@ -492,6 +518,106 @@
         initAdmGalleries();
       } catch (e) {
         el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // ── ALL PRODUCTS (moderation) ──
+    let _admAllProds = [];
+
+    async function loadAllProducts() {
+      const el = document.getElementById('ap-list');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const { data, error } = await sb.from('products')
+          .select('id,name,price,is_exclusive,image,images,is_hidden,seller:sellers(store_name)')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        _admAllProds = data || [];
+        document.getElementById('cnt-allprods').textContent = _admAllProds.length ? _admAllProds.length : '';
+        renderAllProducts(_admAllProds);
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    function filterAllProducts() {
+      const q = (document.getElementById('ap-search')?.value || '').trim().toLowerCase();
+      if (!q) { renderAllProducts(_admAllProds); return; }
+      const filtered = _admAllProds.filter(p =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.seller?.store_name || '').toLowerCase().includes(q)
+      );
+      renderAllProducts(filtered);
+    }
+
+    function renderAllProducts(list) {
+      const el = document.getElementById('ap-list');
+      if (!list.length) {
+        el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">🔍</div>ما لقيناش منتجات</div>';
+        return;
+      }
+      el.innerHTML = list.map(p => {
+        const imgUrl = p.image || (Array.isArray(p.images) && p.images[0]) || '';
+        const thumb = imgUrl
+          ? `<img class="adm-thumb" src="${safeUrl(imgUrl)}" alt="${esc(p.name || '')}">`
+          : `<div class="adm-thumb-ph">👔</div>`;
+        return `
+        <div class="adm-card" id="apc-${esc(p.id)}">
+          <div class="adm-card-row">
+            ${thumb}
+            <div class="adm-card-info">
+              <div class="adm-card-name">${esc(p.name || '—')}</div>
+              <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
+              <div class="adm-card-price">${p.is_exclusive ? 'Exclusive' : Number(p.price || 0).toLocaleString() + ' DZD'}</div>
+              ${p.is_hidden ? '<span class="adm-hidden-tag">مخفي</span>' : ''}
+            </div>
+          </div>
+          <div class="adm-actions">
+            <button class="adm-toggle-btn" onclick="toggleHidden('${esc(p.id)}')">${p.is_hidden ? '👁 إظهار' : '🙈 إخفاء'}</button>
+            <button class="adm-reject" onclick="deleteProductAdmin('${esc(p.id)}')">🗑 حذف</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function toggleHidden(id) {
+      const card = document.getElementById('apc-' + id);
+      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const prod = _admAllProds.find(p => p.id === id);
+        if (!prod) return;
+        const newVal = !prod.is_hidden;
+        const { error } = await sb.from('products').update({ is_hidden: newVal }).eq('id', id);
+        if (error) throw error;
+        prod.is_hidden = newVal;
+        toast(newVal ? '✓ تم الإخفاء' : '✓ تم الإظهار');
+        filterAllProducts();
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    }
+
+    async function deleteProductAdmin(id) {
+      if (!confirm('حذف هذا المنتج نهائياً؟ لا يمكن التراجع.')) return;
+      const card = document.getElementById('apc-' + id);
+      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const prod = _admAllProds.find(p => p.id === id) || {};
+        const allUrls = [...(prod.images || []), ...(prod.image ? [prod.image] : [])];
+        for (const url of [...new Set(allUrls)]) {
+          const m = url.match(/\/product-images\/(.+)$/);
+          if (m && m[1]) await sb.storage.from('product-images').remove([decodeURIComponent(m[1])]);
+        }
+        const { error } = await sb.from('products').delete().eq('id', id);
+        if (error) throw error;
+        _admAllProds = _admAllProds.filter(p => p.id !== id);
+        document.getElementById('cnt-allprods').textContent = _admAllProds.length ? _admAllProds.length : '';
+        toast('✓ تم الحذف');
+        filterAllProducts();
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
       }
     }
 

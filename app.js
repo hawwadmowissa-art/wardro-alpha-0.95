@@ -811,7 +811,7 @@ async function loadGuestStoreProducts(sellerId){
     }
     const aboutDesc=document.getElementById('show-about-desc');
     if(aboutDesc)aboutDesc.textContent=seller?.bio||'';
-    const{data:prods}=await sb.from('products').select('*').eq('seller_id',sellerId).order('created_at',{ascending:false});
+    const{data:prods}=await sb.from('products').select('*').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
     const visProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
     renderShowProducts(visProds);
     // Merge into _brProds so openProdDetail works
@@ -1076,7 +1076,7 @@ function _exploreLoadMore(){
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image)').order('created_at',{ascending:false});
+    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image)').eq('is_hidden',false).order('created_at',{ascending:false});
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
@@ -1593,6 +1593,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     let q=sb.from('products')
       .select('*, seller:sellers(store_name)')
       .eq('type',typeToQuery)
+      .eq('is_hidden',false)
       .gte('price',minPrice)
       .lte('price',maxPrice);
     if(_dcSizes.length){q=q.overlaps('sizes',_dcSizes);}
@@ -1623,6 +1624,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     const{data:compProds}=await sb.from('products')
       .select('*, seller:sellers(store_name)')
       .in('type',otherTypes)
+      .eq('is_hidden',false)
       .limit(8);
     if(compProds&&compProds.length){
       const visComp=compProds.filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
