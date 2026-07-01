@@ -768,6 +768,7 @@ function loadShowMode(){
 // Customer taps a Top Store → read-only store view
 function openStoreView(sellerId,storeName,storeImg){
   _guestSellerId=sellerId;
+  _logEvent('store_visit',{sellerId});
   // Mark #s-show as guest mode (CSS hides sidebar/topbar, shows back bar)
   const ss=document.getElementById('s-show');
   if(ss)ss.classList.add('s-show--guest');
@@ -1173,6 +1174,7 @@ function brNavSwitch(tab,btn){
 function openProdDetail(id){
   const p=_brProds.find(x=>x.id===id);if(!p)return;
   _pdCurrentId=id;
+  _logEvent('view',{productId:p.id,sellerId:p.seller_id});
   _pdImages=(Array.isArray(p.images)&&p.images.length)?p.images:(p.image?[p.image]:[]);
   _pdCarouselIdx=0;
   const ov=document.getElementById('pd-overlay');
@@ -1283,6 +1285,20 @@ function _logBehavior(action,product){
   }).catch(()=>{});
 }
 
+// Fire-and-forget event stream (view/save/store_visit) — works for anonymous visitors too.
+// Never blocks the UI action it's attached to and never surfaces errors to the user.
+function _logEvent(eventType,{productId,sellerId}={}){
+  const sb=window.db;if(!sb)return;
+  try{
+    sb.from('user_behavior_log').insert({
+      action:eventType,
+      event_type:eventType,
+      product_id:productId||null,
+      seller_id:sellerId||null
+    }).then(({error})=>{if(error)console.error('event log:',error);}).catch(()=>{});
+  }catch(_){}
+}
+
 async function saveItem(){
   const sb=getSb();if(!sb)return;
   try{
@@ -1297,7 +1313,7 @@ async function saveItem(){
     else{
       btn.textContent='Added to Saved ✓';btn.classList.add('pd-save-btn--saved');
       const p=_brProds.find(x=>x.id===_pdCurrentId);
-      if(p)_logBehavior('save',p);
+      if(p){_logBehavior('save',p);_logEvent('save',{productId:p.id,sellerId:p.seller_id});}
     }
   }catch(e){toast(e.message||'خطأ في الحفظ');const btn=document.getElementById('pd-save-btn');if(btn){btn.textContent='Save';btn.disabled=false;}}
 }
