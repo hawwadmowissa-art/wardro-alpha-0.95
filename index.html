@@ -594,11 +594,12 @@
           </div>
           <div class="form-group">
             <label>الفئة</label>
-            <div id="ap-trad-notice" style="display:none;font-size:11px;color:var(--gold);opacity:.85;margin-bottom:6px">نوع 'تقليدي' لم يعد مدعوماً مؤقتاً — اختر نوع جديد</div>
             <div class="sel-btns" id="cat-btns">
-              <button class="sel-btn" data-val="formal">Formal</button>
               <button class="sel-btn" data-val="casual">Casual</button>
               <button class="sel-btn" data-val="sport">Sport</button>
+              <button class="sel-btn" data-val="streetwear">Streetwear</button>
+              <button class="sel-btn" data-val="classic">Classic</button>
+              <button class="sel-btn" data-val="old_money">Old Money</button>
             </div>
           </div>
           <div class="form-group" id="slidertype-group" style="display:none">
@@ -884,10 +885,10 @@
       <div class="br-prod-grid" id="br-vgrid-5"></div>
     </div>
 
-    <!-- §11 Formal strip -->
-    <div class="br-section" id="br-sec-formal">
-      <div class="br-sec-head"><span class="br-sec-title">Formal Collection</span></div>
-      <div class="br-strip-scroll" id="br-strip-formal"></div>
+    <!-- §11 Classic strip -->
+    <div class="br-section" id="br-sec-classic">
+      <div class="br-sec-head"><span class="br-sec-title">Classic Collection</span></div>
+      <div class="br-strip-scroll" id="br-strip-classic"></div>
     </div>
 
     <!-- §12 اكتشف أكثر — infinite scroll -->
@@ -1061,10 +1062,11 @@
           <svg class="dc-chevron" id="dc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="dc-type-menu" id="dc-type-menu" style="display:none">
-          <button class="dc-type-opt" data-val="formal" onclick="event.stopPropagation();dcSelectType(this)">🤵 رسمي</button>
-          <button class="dc-type-opt" data-val="casual" onclick="event.stopPropagation();dcSelectType(this)">👕 كاجوال</button>
-          <button class="dc-type-opt" data-val="sport" onclick="event.stopPropagation();dcSelectType(this)">🏃 رياضي</button>
-          <button class="dc-type-opt" data-val="traditional" onclick="event.stopPropagation();dcSelectType(this)">🌟 تقليدي</button>
+          <button class="dc-type-opt" data-val="casual" onclick="event.stopPropagation();dcSelectType(this)">👕 Casual</button>
+          <button class="dc-type-opt" data-val="sport" onclick="event.stopPropagation();dcSelectType(this)">🏃 Sport</button>
+          <button class="dc-type-opt" data-val="streetwear" onclick="event.stopPropagation();dcSelectType(this)">🧢 Streetwear</button>
+          <button class="dc-type-opt" data-val="classic" onclick="event.stopPropagation();dcSelectType(this)">🤵 Classic</button>
+          <button class="dc-type-opt" data-val="old_money" onclick="event.stopPropagation();dcSelectType(this)">🎩 Old Money</button>
         </div>
       </div>
     </div>

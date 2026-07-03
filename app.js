@@ -558,7 +558,6 @@ function _resetModalForm(){
   if(sizeBtns)sizeBtns.innerHTML='<span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>';
   _renderImgStrip();
   const legacyNotice=document.getElementById('ap-color-legacy-notice');if(legacyNotice)legacyNotice.style.display='none';
-  const tradNotice=document.getElementById('ap-trad-notice');if(tradNotice)tradNotice.style.display='none';
   const btn=document.getElementById('ap-submit');if(btn){btn.disabled=true;btn.style.opacity='0.45';}
   _apAvailable=true;
   document.getElementById('ap-avail-yes')?.classList.add('active');
@@ -598,10 +597,8 @@ function openEditProduct(id){
     _apSizes=(p.sizes||[]).filter(s=>validSizes.includes(s));
     document.querySelectorAll('#size-btns .sel-btn').forEach(b=>b.classList.toggle('active',_apSizes.includes(b.dataset.val)));
   }
-  _apCat=p.type==='traditional'?null:(p.type||null);
+  _apCat=p.type||null;
   document.querySelectorAll('#cat-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apCat));
-  const tradNotice=document.getElementById('ap-trad-notice');
-  if(tradNotice)tradNotice.style.display=p.type==='traditional'?'block':'none';
   _apSliderType=p.slider_type||'none';
   document.querySelectorAll('#slidertype-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apSliderType));
   const stGroup=document.getElementById('slidertype-group');if(stGroup)stGroup.style.display='';
@@ -985,7 +982,7 @@ function _renderBrowseSections(prods){
   const casualStrip=prods.filter(p=>p.type==='casual').slice(0,8);
   const newStrip=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo).slice(0,8);
   const sportStrip=prods.filter(p=>p.type==='sport').slice(0,8);
-  const formalStrip=prods.filter(p=>p.type==='formal').slice(0,8);
+  const classicStrip=prods.filter(p=>p.type==='classic').slice(0,8);
 
   // Vertical grids — ALL approved products, shuffled per session
   // Caps: 18 / 12 / 9 / 9 / 9 products (positions §2/§4/§6/§8/§10)
@@ -1009,7 +1006,7 @@ function _renderBrowseSections(prods){
   else{if(storesSec)storesSec.style.display='none';}
 
   _renderVGrid('br-vgrid-5','br-sec-vgrid-5',grids[4]);
-  _renderHStrip('br-strip-formal','br-sec-formal',formalStrip);
+  _renderHStrip('br-strip-classic','br-sec-classic',classicStrip);
 
   // §12 — pool is products not consumed by upper grids, freshly shuffled
   const usedIds=new Set(grids.flat().map(p=>p.id));
@@ -1485,8 +1482,8 @@ function dcToggleTypeMenu(){
   if(chevron)chevron.classList.toggle('dc-chevron--open',!open);
 }
 
-const _dcTypeLabels={formal:'رسمي',casual:'كاجوال',sport:'رياضي',traditional:'تقليدي'};
-const _dcTypeIcons={formal:'🤵',casual:'👕',sport:'🏃',traditional:'🌟'};
+const _dcTypeLabels={casual:'Casual',sport:'Sport',streetwear:'Streetwear',classic:'Classic',old_money:'Old Money'};
+const _dcTypeIcons={casual:'👕',sport:'🏃',streetwear:'🧢',classic:'🤵',old_money:'🎩'};
 
 function dcSelectType(btn){
   _dcType=btn.dataset.val;
@@ -1636,7 +1633,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
       </div>`).join('');
 
     // Complementary — different types, structural only (AI not wired)
-    const otherTypes=['casual','formal','sport','traditional'].filter(t=>t!==typeToQuery);
+    const otherTypes=['casual','sport','streetwear','classic','old_money'].filter(t=>t!==typeToQuery);
     const{data:compProds}=await sb.from('products')
       .select('*, seller:sellers(store_name)')
       .in('type',otherTypes)
