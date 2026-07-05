@@ -1011,6 +1011,8 @@ function _renderBrowseSections(prods){
   const newStrip=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo).slice(0,8);
   const sportStrip=prods.filter(p=>p.type==='sport').slice(0,8);
   const classicStrip=prods.filter(p=>p.type==='classic').slice(0,8);
+  const streetwearStrip=prods.filter(p=>p.type==='streetwear').slice(0,8);
+  const oldMoneyStrip=prods.filter(p=>p.type==='old_money').slice(0,8);
 
   // Vertical grids — ALL approved products, shuffled per session
   // Caps: 18 / 12 / 9 / 9 / 9 products (positions §2/§4/§6/§8/§10)
@@ -1025,6 +1027,7 @@ function _renderBrowseSections(prods){
   _renderVGrid('br-vgrid-3','br-sec-vgrid-3',grids[2]);
   _renderHStrip('br-strip-sport','br-sec-sport',sportStrip);
   _renderVGrid('br-vgrid-4','br-sec-vgrid-4',grids[3]);
+  _renderHStrip('br-strip-streetwear','br-sec-streetwear',streetwearStrip);
 
   // Top Stores — R2: always show if 1+ sellers, hide only when 0 sellers
   const stores=[],seen=new Set();
@@ -1035,6 +1038,7 @@ function _renderBrowseSections(prods){
 
   _renderVGrid('br-vgrid-5','br-sec-vgrid-5',grids[4]);
   _renderHStrip('br-strip-classic','br-sec-classic',classicStrip);
+  _renderHStrip('br-strip-oldmoney','br-sec-oldmoney',oldMoneyStrip);
 
   // §12 — pool is products not consumed by upper grids, freshly shuffled
   const usedIds=new Set(grids.flat().map(p=>p.id));
