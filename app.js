@@ -1011,7 +1011,7 @@ const _CAT_SLOT_STRIP={casual:'br-strip-casual',sport:'br-strip-sport',streetwea
 const _CAT_SLOT_ORDER=['casual','sport','streetwear','classic','old_money'];
 
 function _vgridSizePattern(total){
-  if(total<40)return[6];
+  if(total<40)return[8,6,4,6,4];
   if(total<=100)return[12,9,6];
   return[18,12,9];
 }
