@@ -1002,32 +1002,72 @@ function _renderHStrip(stripId,secId,prods){
     </div>`).join('');
 }
 
-function _renderBrowseSections(prods){
-  const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
+const _CAT_LIST=['casual','sport','streetwear','classic','old_money'];
+const _CAT_TITLES={casual:'Casual Collection',sport:'Sport Collection',streetwear:'Streetwear',classic:'Classic Collection',old_money:'Old Money'};
+// Physical DOM slot order for the 5 category-strip positions (fixed — never reordered).
+// Which CATEGORY renders into which slot is decided at runtime by anchor/fallback + count sort below.
+const _CAT_SLOT_SEC={casual:'br-sec-casual',sport:'br-sec-sport',streetwear:'br-sec-streetwear',classic:'br-sec-classic',old_money:'br-sec-oldmoney'};
+const _CAT_SLOT_STRIP={casual:'br-strip-casual',sport:'br-strip-sport',streetwear:'br-strip-streetwear',classic:'br-strip-classic',old_money:'br-strip-oldmoney'};
+const _CAT_SLOT_ORDER=['casual','sport','streetwear','classic','old_money'];
 
-  // Horizontal strips — independent category subsets, max 8, sorted DESC
-  // Overlap with vertical grids is natural and expected
-  const casualStrip=prods.filter(p=>p.type==='casual').slice(0,8);
+function _vgridSizePattern(total){
+  if(total<40)return[6];
+  if(total<=100)return[12,9,6];
+  return[18,12,9];
+}
+
+// Dormant until a category count grows past 8 — see rule 4 in the task spec.
+function _repeatAppearances(count){
+  if(count<8)return 1;
+  if(count<=15)return 2;
+  return Math.ceil(count/6);
+}
+
+function _renderBrowseSections(prods){
+  const MIN_ANCHOR_COUNT=4;
+  const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
   const newStrip=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo).slice(0,8);
-  const sportStrip=prods.filter(p=>p.type==='sport').slice(0,8);
-  const classicStrip=prods.filter(p=>p.type==='classic').slice(0,8);
-  const streetwearStrip=prods.filter(p=>p.type==='streetwear').slice(0,8);
-  const oldMoneyStrip=prods.filter(p=>p.type==='old_money').slice(0,8);
+
+  const catProds={};
+  _CAT_LIST.forEach(c=>{catProds[c]=prods.filter(p=>p.type===c);});
+
+  // Premium anchor — fallback chain: old_money → classic → streetwear → richest remaining category
+  let anchorCat;
+  if(catProds.old_money.length>=MIN_ANCHOR_COUNT)anchorCat='old_money';
+  else if(catProds.classic.length>=MIN_ANCHOR_COUNT)anchorCat='classic';
+  else if(catProds.streetwear.length>=MIN_ANCHOR_COUNT)anchorCat='streetwear';
+  else anchorCat=_CAT_LIST.reduce((best,c)=>catProds[c].length>catProds[best].length?c:best,_CAT_LIST[0]);
+
+  // Mid-order: the 4 non-anchor categories, richest first, filling the remaining slots in physical order
+  const midCats=_CAT_LIST.filter(c=>c!==anchorCat).sort((a,b)=>catProds[b].length-catProds[a].length);
+  const slotAssignment={};
+  slotAssignment[_CAT_SLOT_ORDER[0]]=anchorCat;
+  midCats.forEach((c,i)=>{slotAssignment[_CAT_SLOT_ORDER[i+1]]=c;});
 
   // Vertical grids — ALL approved products, shuffled per session
-  // Caps: 18 / 12 / 9 / 9 / 9 products (positions §2/§4/§6/§8/§10)
+  // Sizes adapt to catalog size (see _vgridSizePattern); repeats the last value past the pattern length
   const pool=_fyshuffle([...prods]);
   let pos=0;
-  const grids=[18,12,9,9,9].map(n=>{const s=pool.slice(pos,pos+n);pos+=n;return s;});
+  const numGrids=5;
+  const pattern=_vgridSizePattern(prods.length);
+  const gridSizes=Array.from({length:numGrids},(_,i)=>pattern[Math.min(i,pattern.length-1)]);
+  const grids=gridSizes.map(n=>{const s=pool.slice(pos,pos+n);pos+=n;return s;});
+
+  function _renderCatSlot(slotId){
+    const assignedCat=slotAssignment[slotId];
+    const secEl=document.getElementById(_CAT_SLOT_SEC[slotId]);
+    if(secEl){const t=secEl.querySelector('.br-sec-title');if(t)t.textContent=_CAT_TITLES[assignedCat];}
+    _renderHStrip(_CAT_SLOT_STRIP[slotId],_CAT_SLOT_SEC[slotId],catProds[assignedCat].slice(0,8));
+  }
 
   _renderVGrid('br-vgrid-1','br-sec-vgrid-1',grids[0]);
-  _renderHStrip('br-strip-casual','br-sec-casual',casualStrip);
+  _renderCatSlot('casual'); // slot 1 — always the anchor
   _renderVGrid('br-vgrid-2','br-sec-vgrid-2',grids[1]);
   _renderHStrip('br-strip-new','br-sec-new',newStrip);
   _renderVGrid('br-vgrid-3','br-sec-vgrid-3',grids[2]);
-  _renderHStrip('br-strip-sport','br-sec-sport',sportStrip);
+  _renderCatSlot('sport'); // slot 2
   _renderVGrid('br-vgrid-4','br-sec-vgrid-4',grids[3]);
-  _renderHStrip('br-strip-streetwear','br-sec-streetwear',streetwearStrip);
+  _renderCatSlot('streetwear'); // slot 3
 
   // Top Stores — R2: always show if 1+ sellers, hide only when 0 sellers
   const stores=[],seen=new Set();
@@ -1037,11 +1077,45 @@ function _renderBrowseSections(prods){
   else{if(storesSec)storesSec.style.display='none';}
 
   _renderVGrid('br-vgrid-5','br-sec-vgrid-5',grids[4]);
-  _renderHStrip('br-strip-classic','br-sec-classic',classicStrip);
-  _renderHStrip('br-strip-oldmoney','br-sec-oldmoney',oldMoneyStrip);
+  _renderCatSlot('classic'); // slot 4
+  _renderCatSlot('old_money'); // slot 5
 
-  // §12 — pool is products not consumed by upper grids, freshly shuffled
-  const usedIds=new Set(grids.flat().map(p=>p.id));
+  // Repeat appearances (dormant today — no category reaches the 8-item threshold yet).
+  // Auto-activates: extra chunks render into #br-sec-repeats, right before Explore.
+  const repeatSec=document.getElementById('br-sec-repeats');
+  const repeatUsedIds=[];
+  if(repeatSec){
+    const extraChunks=[];
+    _CAT_LIST.forEach(c=>{
+      const list=catProds[c];
+      const reps=_repeatAppearances(list.length);
+      if(reps>1){
+        const perChunk=Math.ceil(list.length/reps);
+        for(let i=1;i<reps;i++)extraChunks.push({cat:c,items:list.slice(i*perChunk,(i+1)*perChunk)});
+      }
+    });
+    if(extraChunks.length){
+      repeatSec.style.display='';
+      repeatSec.innerHTML=extraChunks.map((_,i)=>`
+        <div class="br-section" id="br-repeat-sec-${i}">
+          <div class="br-prod-grid" id="br-repeat-vgrid-${i}"></div>
+          <div class="br-sec-head"><span class="br-sec-title"></span></div>
+          <div class="br-strip-scroll" id="br-repeat-strip-${i}"></div>
+        </div>`).join('');
+      extraChunks.forEach((chunk,i)=>{
+        const filler=pool.slice(pos,pos+6);pos+=6;
+        const titleEl=document.getElementById(`br-repeat-sec-${i}`)?.querySelector('.br-sec-title');
+        if(titleEl)titleEl.textContent=_CAT_TITLES[chunk.cat];
+        _renderVGrid(`br-repeat-vgrid-${i}`,`br-repeat-sec-${i}`,filler);
+        _renderHStrip(`br-repeat-strip-${i}`,`br-repeat-sec-${i}`,chunk.items);
+        repeatUsedIds.push(...filler.map(p=>p.id),...chunk.items.map(p=>p.id));
+      });
+    }else{repeatSec.style.display='none';repeatSec.innerHTML='';}
+  }
+
+  // §12 — pool is products not consumed by upper grids or the anchor strip, freshly shuffled
+  const anchorIds=catProds[anchorCat].slice(0,8).map(p=>p.id);
+  const usedIds=new Set([...grids.flat().map(p=>p.id),...anchorIds,...repeatUsedIds]);
   _initExplore(_fyshuffle(prods.filter(p=>!usedIds.has(p.id))));
 }
 
