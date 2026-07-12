@@ -1,0 +1,88 @@
+<div style="padding: 1rem 0; font-family: var(--font-sans); direction: rtl;">
+<h2 class="sr-only">لوحة تحليلات البائع في Wardro</h2>
+
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+<span style="font-size:18px; font-weight:500; color:#D2AF69;">متجر Oval</span>
+<span style="font-size:12px; color:var(--text-muted);">· آخر 7 أيام</span>
+</div>
+<p style="font-size:13px; color:var(--text-secondary); margin:0 0 16px;">نظرة على تفاعل الزبائن مع متجرك</p>
+
+<div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:14px;">
+<div style="background:var(--surface-1); border-radius:12px; padding:14px;">
+<div style="display:flex; align-items:center; gap:6px; color:var(--text-secondary); font-size:12px; margin-bottom:6px;"><i class="ti ti-eye" style="font-size:15px;"></i> ظهور</div>
+<div style="font-size:24px; font-weight:500;">3,240</div>
+<div style="font-size:11px; color:#1D9E75;">↑ 18% عن الأسبوع الفائت</div>
+</div>
+<div style="background:var(--surface-1); border-radius:12px; padding:14px;">
+<div style="display:flex; align-items:center; gap:6px; color:var(--text-secondary); font-size:12px; margin-bottom:6px;"><i class="ti ti-click" style="font-size:15px;"></i> مشاهدات</div>
+<div style="font-size:24px; font-weight:500;">412</div>
+<div style="font-size:11px; color:#1D9E75;">↑ 9%</div>
+</div>
+<div style="background:var(--surface-1); border-radius:12px; padding:14px;">
+<div style="display:flex; align-items:center; gap:6px; color:var(--text-secondary); font-size:12px; margin-bottom:6px;"><i class="ti ti-heart" style="font-size:15px;"></i> حفظ</div>
+<div style="font-size:24px; font-weight:500;">87</div>
+<div style="font-size:11px; color:#1D9E75;">↑ 24%</div>
+</div>
+<div style="background:var(--surface-1); border-radius:12px; padding:14px;">
+<div style="display:flex; align-items:center; gap:6px; color:var(--text-secondary); font-size:12px; margin-bottom:6px;"><i class="ti ti-store" style="font-size:15px;"></i> زيارات المتجر</div>
+<div style="font-size:24px; font-weight:500;">156</div>
+<div style="font-size:11px; color:#888;">→ ثابت</div>
+</div>
+</div>
+
+<div style="background:var(--surface-1); border-radius:12px; padding:14px; margin-bottom:14px;">
+<div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px;">المشاهدات عبر الأيام</div>
+<div style="position:relative; width:100%; height:150px;">
+<canvas id="vchart" role="img" aria-label="مخطط مشاهدات المتجر عبر سبعة أيام">المشاهدات: 38, 45, 52, 41, 67, 89, 80</canvas>
+</div>
+</div>
+
+<div style="background:var(--surface-1); border-radius:12px; padding:14px; margin-bottom:14px;">
+<div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px;">القطع الأكثر تفاعلاً</div>
+<div style="display:flex; flex-direction:column; gap:10px;">
+<div style="display:flex; align-items:center; gap:10px;">
+<div style="width:38px; height:38px; border-radius:8px; background:#2C2C2A; flex-shrink:0;"></div>
+<div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500;">قميص كلاسيكي بيج</div><div style="font-size:11px; color:var(--text-muted);">142 مشاهدة · 31 حفظ</div></div>
+<span style="font-size:11px; color:#0F6E56; background:#E1F5EE; padding:3px 8px; border-radius:6px;">الأعلى</span>
+</div>
+<div style="display:flex; align-items:center; gap:10px;">
+<div style="width:38px; height:38px; border-radius:8px; background:#2C2C2A; flex-shrink:0;"></div>
+<div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500;">جاكيت شتوي أسود</div><div style="font-size:11px; color:var(--text-muted);">98 مشاهدة · 22 حفظ</div></div>
+</div>
+<div style="display:flex; align-items:center; gap:10px;">
+<div style="width:38px; height:38px; border-radius:8px; background:#2C2C2A; flex-shrink:0;"></div>
+<div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500;">حذاء رياضي أبيض</div><div style="font-size:11px; color:var(--text-muted);">76 مشاهدة · 18 حفظ</div></div>
+</div>
+</div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;">
+<div style="background:var(--surface-1); border-radius:12px; padding:14px;">
+<div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">معدّل التحويل (CTR)</div>
+<div style="font-size:22px; font-weight:500;">12.7%</div>
+<div style="font-size:11px; color:var(--text-muted);">مشاهدة لكل ظهور</div>
+</div>
+<div style="background:var(--surface-1); border-radius:12px; padding:14px;">
+<div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">ساعة الذروة</div>
+<div style="font-size:22px; font-weight:500;">21:00</div>
+<div style="font-size:11px; color:var(--text-muted);">أكثر وقت تصفّح</div>
+</div>
+</div>
+
+<div style="margin-top:14px; padding:12px 14px; background:#1C1915; border:0.5px solid #D2AF69; border-radius:12px;">
+<div style="display:flex; align-items:center; gap:8px;">
+<i class="ti ti-lock" style="font-size:16px; color:#D2AF69;"></i>
+<span style="font-size:12px; color:#EDE3CC;">تحليلات أعمق (الفئات، مقارنة المنافسين، توقّعات) — متاحة في الباقة المميّزة</span>
+</div>
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+new Chart(document.getElementById('vchart'),{
+type:'line',
+data:{labels:['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'],
+datasets:[{data:[38,45,52,41,67,89,80],borderColor:'#D2AF69',backgroundColor:'rgba(210,175,105,0.1)',borderWidth:2,fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#D2AF69'}]},
+options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(150,150,150,0.1)'},ticks:{color:'#898781',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#898781',font:{size:10}}}}}
+});
+</script>

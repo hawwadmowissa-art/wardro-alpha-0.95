@@ -1339,7 +1339,7 @@
   // ── Service Worker registration ──────────────────────────────────────────
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+      navigator.serviceWorker.register('service-worker.js')
         .then(function (reg) {
           console.log('[SW] registered', reg.scope);
           // Tell a waiting SW to skip waiting immediately

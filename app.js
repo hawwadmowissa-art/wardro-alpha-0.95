@@ -805,7 +805,7 @@ function openStoreView(sellerId,storeName,storeImg){
   if(nameEl)nameEl.textContent=storeName;
   const av=document.getElementById('show-avatar');
   if(av){
-    if(storeImg){av.style.backgroundImage=`url(${storeImg})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
+    if(storeImg){av.style.backgroundImage=`url(${safeUrl(storeImg)})`;av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.innerHTML='';}
     else{av.style.backgroundImage='';av.innerHTML=`<span class="store-av-letter">${esc((storeName||'?')[0].toUpperCase())}</span>`;}
   }
   switchShowTab('home',document.querySelector('.show-tab[data-tab="home"]'));
