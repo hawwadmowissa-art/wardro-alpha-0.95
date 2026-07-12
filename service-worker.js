@@ -2,13 +2,13 @@ const CACHE_VERSION = 'wardro-v1';
 
 // Core app shell — paths only (no query params); icons rarely change
 const SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/apple-touch-icon.png',
-  '/icons/icon-512-maskable.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
+  './icons/icon-512-maskable.png'
 ];
 
 // Never cache these origins/paths
@@ -69,7 +69,7 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(c => c.put(req, clone));
           return res;
         })
-        .catch(() => caches.match('/').then(r => r || caches.match('/index.html')))
+        .catch(() => caches.match('./').then(r => r || caches.match('./index.html')))
     );
     return;
   }
