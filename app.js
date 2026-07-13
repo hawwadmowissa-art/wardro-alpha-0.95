@@ -476,7 +476,7 @@ async function loadEditorProducts(){
   try{
     const{data:{user}}=await sb.auth.getUser();
     if(!user)return;
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio').eq('id',user.id).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city').eq('id',user.id).single();
     const circle=document.getElementById('sp-img-circle');
     const spLetter=document.getElementById('sp-img-letter');
     if(seller?.profile_image){
@@ -492,6 +492,8 @@ async function loadEditorProducts(){
       const bioEl=document.getElementById('ed-bio');if(bioEl&&!bioEl.dataset.dirty)bioEl.value=seller.bio;
       const desc=document.getElementById('show-about-desc');if(desc)desc.textContent=seller.bio||'';
     }
+    _setStoreCity(seller?.city);
+    _computeSellerNumber(user.id).then(_setSellerNumber);
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
     renderEditorProducts(prods||[]);
     renderShowProducts(prods||[]);
@@ -762,6 +764,24 @@ async function _resizeStoreImage(file){
 let _heroIdx=0,_heroTimer=null,_heroLen=1;
 let _guestSellerId=null; // set when a customer taps Top Store
 
+async function _computeSellerNumber(sellerId){
+  const sb=getSb();if(!sb)return null;
+  try{
+    const{data,error}=await sb.from('sellers').select('id,created_at').order('created_at',{ascending:true});
+    if(error||!data)return null;
+    const idx=data.findIndex(s=>s.id===sellerId);
+    return idx===-1?null:'#'+String(idx+1).padStart(3,'0');
+  }catch(_){return null;}
+}
+function _setSellerNumber(num){
+  const el=document.getElementById('show-seller-number');
+  if(el)el.textContent=num||'—';
+}
+function _setStoreCity(city){
+  const el=document.getElementById('show-trust-city');
+  if(el)el.textContent=city||'Ouargla';
+}
+
 function loadShowMode(){
   if(_guestSellerId)return; // guest view already populated by openStoreView
   // Ensure seller's own show mode has no guest class
@@ -823,7 +843,7 @@ function leaveGuestStore(){
 async function loadGuestStoreProducts(sellerId){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio').eq('id',sellerId).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city').eq('id',sellerId).single();
     const guestName=document.getElementById('show-store-name')?.textContent||'?';
     const av=document.getElementById('show-avatar');
     const avAbout=document.getElementById('show-about-avatar');
@@ -837,6 +857,8 @@ async function loadGuestStoreProducts(sellerId){
     }
     const aboutDesc=document.getElementById('show-about-desc');
     if(aboutDesc)aboutDesc.textContent=seller?.bio||'';
+    _setStoreCity(seller?.city);
+    _computeSellerNumber(sellerId).then(_setSellerNumber);
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
     const visProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
     renderShowProducts(visProds);
