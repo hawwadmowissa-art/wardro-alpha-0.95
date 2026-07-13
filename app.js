@@ -767,7 +767,7 @@ let _guestSellerId=null; // set when a customer taps Top Store
 async function _computeSellerNumber(sellerId){
   const sb=getSb();if(!sb)return null;
   try{
-    const{data,error}=await sb.from('sellers').select('id,created_at').order('created_at',{ascending:true});
+    const{data,error}=await sb.from('sellers').select('id,created_at').eq('is_founding_seller',true).order('created_at',{ascending:true});
     if(error||!data)return null;
     const idx=data.findIndex(s=>s.id===sellerId);
     return idx===-1?null:'#'+String(idx+1).padStart(3,'0');
