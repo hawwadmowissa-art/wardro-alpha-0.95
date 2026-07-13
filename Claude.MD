@@ -56,12 +56,7 @@ wardro/
 | Phase 2A — Product Type + Dynamic Sizes | Editor: حقل "Product Type" مطلوب (Shirt/Pants/Shoes/Jacket/Accessory) قبل size selector؛ sizes ديناميكية حسب النوع (S-XXL للملابس، 39-46 للأحذية، One Size للاكسسوار)؛ زر الحفظ disabled حتى يُختار النوع + الاسم + السعر؛ Edit mode يعبئ مسبقاً + يفلتر sizes غير المتوافقة؛ product_type يُحفظ في DB | يونيو 2026 |
 | Phase 2B — Color Chips + Hide Traditional | Editor: استبدال حقل اللون النصي بـ 12 chip ملونة (black→rust) مع سواتش + تسميات عربية؛ multi-select اختياري؛ color_tags يُحفظ في DB؛ إشعار "اختر من اللوحة الجديدة" للمنتجات القديمة؛ حذف Traditional من cat-btns + إشعار للمنتجات التقليدية يجبر إعادة الاختيار؛ زر الحفظ يتطلب الآن product_type + type + name + price | يونيو 2026 |
 | Phase 2C — Save Event Logger | Customer: _logBehavior(action, product) fire-and-forget يُدرج في user_behavior_log عند save/unsave؛ يتخطى صامتاً إذا anonymous أو seller؛ console.error عند الفشل فقط؛ _svItemMap يُحفظ في renderSaved() لتوفير بيانات المنتج لـ removeSavedItem؛ query loadSaved مُوسَّع بـ seller_id/product_type/color_tags/type | يونيو 2026 |
-| Phase 3A — Home 11-Section Redesign | Customer Home: 11 قسم ثابت متبادل (عمودي/أفقي)؛ 5 grids عشوائية (Fisher-Yates per session)؛ 4 strips أفقية (Casual/New This Week/Sport/Formal)؛ Top Stores دائم؛ R1: strip تختفي إذا < 2 منتجات؛ R2: Top Stores دائمة إذا 1+ seller؛ 15-20% تكرار مضبوط؛ توزيع 18/12/9/9/9 للـ grids | يونيو 2026 |
-| Phase 3B — Section 12 "اكتشف أكثر" | قسم ثاني عشر ونهائي في الـ Home: lazy-load infinite scroll للمنتجات خارج الـ 57 الأولى في الـ upper grids؛ IntersectionObserver (200px rootMargin)؛ 30 منتج per batch؛ shuffle مستقل per session؛ empty state "ولا قطعة جديدة دابا" عند catalogs ≤ 57 منتج؛ "✓ شفت كلش" عند استنفاد البضاعة؛ gold spinner أثناء التحميل | يونيو 2026 |
-| Phase 4 — Discover Color Panel | استبدال حقل اللون النصي في Discover بـ 12 swatch دائري يستخدم _AP_COLORS كـ single source of truth؛ multi-select مع gold ring للمحدد؛ بادج عداد على الـ chip (اللون (N))؛ زر "مسح الكل" يظهر عند الاختيار؛ _discoverSelectedColors[] يُمرَّر لـ runDiscover → Supabase .overlaps('color_tags', ...) بدل client-side filter؛ color اختياري لا يؤثر على enablement logic | يونيو 2026 |
-| Profile MVP | شاشة #s-profile: avatar دائري (الحرف الأول من الإيميل، Fraunces gold)؛ إيميل كامل؛ 3 صفوف (سياسة الخصوصية/شروط الاستخدام → openLegalModal، تسجيل الخروج → signOut+navigate)؛ صف خطر "حذف الحساب" (نبيذي)؛ مودال تأكيد الحذف مع countdown 3 ثوانٍ قبل تفعيل "نعم، احذف حسابي"؛ الحذف يمسح saved_items + user_behavior_log ثم signOut؛ brNavSwitch/svNavSwitch/dcNavSwitch تدعم الآن 'profile' | يونيو 2026 |
-| Sleeper B — Availability Toggle | `products.is_available` (boolean NOT NULL DEFAULT true) أُضيف؛ كل الصفوف الموجودة = true تلقائياً؛ Editor: toggle pill "متوفر / غير متوفر" يُحفظ عند Save ويُعبَّأ عند Edit؛ Product Detail: pill "متوفر" (أخضر) / "غير متوفر" (نبيذي) يحلّ محلّ "Quantity Available" الإنجليزي؛ Saved list: منطق مُصلَح — يقرأ is_available بدل stock؛ "نفدت الكمية" غيّرنا لـ "غير متوفر"؛ products.stock يبقى كما هو | يونيو 2026 |
-| Phase 5 — Legal Docs Integration | window.openLegalModal(docType, callback) reusable modal: fetch .md من Legal Docs/ بـ URL encoding، parser بسيط (عناوين/bullets/intro)، scroll-to-enable accept؛ .legal-line فوق CTA الأونبوردينغ (slide 3 فقط، informational)؛ .legal-check checkbox يحجب "Create Store" في Seller Reg حتى الموافقة؛ Accept في الـ modal يُفعّل الـ callback (auto-check box)؛ Backdrop/ESC/X يُغلق دون callback | يونيو 2026 |
+| Phase 3A — Home 11-Section Redesign | Customer Home: 11 قسم ثابت متبادل (عمودي/أفقي)؛ 5 grids عشوائية (Fisher-Yates per session)؛ 4 strips أفقية (Casual/New This Week/Sport/Formal)؛ Top Stores دائم؛ R1: strip تختفي إذا < 2 منتجات؛ R2: Top Stores دائمة إذا 1+ seller؛ 15-20% تكرار مضبوط؛ توزيع 12/8/6/6/4 للـ grids؛ Section 12 مؤجلة لـ Phase 3B | يونيو 2026 |
 
 ---
 
@@ -76,7 +71,7 @@ wardro/
 
 **Restructure (موازي) — Editor Mode + DB foundation**
 - ✅ Phase 1: DB migration (`slider_type`) + فصل Editor لـ 3 أقسام — منتهي
-- ✅ Phase 2: ربط جهة الزبون — تم (تأكيد يونيو 2026): `buildHeroSlider` (س726) و`buildBrowseHero` (س989) يقرأان `slider_type` بشكل صحيح؛ لا أثر لـ `p.hero` في app.js
+- 🔜 Phase 2: ربط جهة الزبون (buildHeroSlider/buildBrowseHero تقرأ `slider_type` بدل `hero` القديم) + إصلاح bug الضغط على الـ hero
 - 🔜 Phase 3: تلميع بصري (ارتفاع الـ hero 480px، إلخ)
 
 ---
@@ -88,7 +83,7 @@ wardro/
 - **AI via Edge Functions** — لا مفاتيح API في الـ frontend؛ كل نداء لـ Claude يمر عبر Supabase Edge Function
 - **supabase-config.js** — لا تلمسه، لا ترفعه
 - **XSS — esc() + safeUrl()** — كل string من DB يُحقن في `innerHTML` يمر عبر `esc()`؛ كل URL يُستخدم في `src` أو `style background-image` يمر عبر `safeUrl()`؛ استخدم `textContent` حيثما أمكن
-- **products.slider_type** (`none`/`hero`/`main_hero`) هو المرجع الوحيد لمكان ظهور القطعة — عمود `hero` (bool) القديم محذوف نهائياً. ✅ تم التحقق (يونيو 2026): `buildHeroSlider` و`buildBrowseHero` يقرأان `slider_type` بشكل صحيح — لا أثر لـ `p.hero` في app.js، والـ hero sliders تعمل على الـ live site
+- **products.slider_type** (`none`/`hero`/`main_hero`) هو المرجع الوحيد لمكان ظهور القطعة — عمود `hero` (bool) القديم محذوف نهائياً. ⚠️ `buildHeroSlider`/`buildBrowseHero` بـ app.js لسا يقرأو `p.hero` القديم (دائماً undefined الآن) — لازم تحديثهم لـ `p.slider_type==='hero'`/`'main_hero'` في Restructure Phase 2 وإلا الـ hero slider عند الزبون يبقى فاضي
 
 ---
 
@@ -126,4 +121,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Profile MVP*
+*آخر تحديث: يونيو 2026 | Claude Code — Phase 3A: Home 11-Section Redesign*
