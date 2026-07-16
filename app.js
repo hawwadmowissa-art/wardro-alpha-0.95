@@ -79,6 +79,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
             navigateTo('s-pending','z-axis');
           }
           _handleStoreDeepLink();
+          _handleProductDeepLink();
           return;
         }
       }catch(_){}
@@ -86,11 +87,12 @@ window.addEventListener('DOMContentLoaded',async()=>{
     if(window.db&&localStorage.getItem('wardro_role')==='customer'){
       try{
         const{data:{session}}=await window.db.auth.getSession();
-        if(session){navigateTo('s-browse','z-axis');_handleStoreDeepLink();return;}
+        if(session){navigateTo('s-browse','z-axis');_handleStoreDeepLink();_handleProductDeepLink();return;}
       }catch(_){}
     }
     document.querySelectorAll('.rs-card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),200+i*150));
     _handleStoreDeepLink();
+    _handleProductDeepLink();
   },3800);
 });
 
@@ -116,6 +118,32 @@ function _handleStoreDeepLink(){
     }else{
       navigateTo('s-browse','z-axis');
       _waitIdle(()=>_openDeepLinkStore(storeId));
+    }
+  });
+}
+
+// ══ DEEP LINK: ?product=<product UUID> ══
+async function _openDeepLinkProduct(prodId){
+  if(!window.db)return;
+  try{
+    const{data:p,error}=await window.db.from('products').select('*,seller:sellers(store_name,profile_image,phone)').eq('id',prodId).eq('is_hidden',false).single();
+    if(error||!p)return;
+    if(p.slider_type==='main_hero'&&p.hero_status!=='approved')return;
+    if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);
+    openProdDetail(p.id);
+  }catch(_){}
+}
+function _handleProductDeepLink(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('store'))return;
+  const prodId=params.get('product');
+  if(!prodId||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(prodId))return;
+  _waitIdle(()=>{
+    if(document.getElementById('s-browse')?.classList.contains('active')){
+      _openDeepLinkProduct(prodId);
+    }else{
+      navigateTo('s-browse','z-axis');
+      _waitIdle(()=>_openDeepLinkProduct(prodId));
     }
   });
 }
@@ -174,12 +202,14 @@ async function doSellerReg(){
   clearRegErrors();
   const btn=document.getElementById('reg-submit');
   const storeName=document.getElementById('reg-store').value.trim();
+  const phone=document.getElementById('reg-phone').value.trim();
   const email=document.getElementById('reg-email').value.trim();
   const pass=document.getElementById('reg-pass').value;
   const pass2=document.getElementById('reg-pass2').value;
 
   let ok=true;
   if(!storeName){setRegErr('err-store','أدخل اسم المتجر');ok=false}
+  if(!/^\+\d{8,15}$/.test(phone)){setRegErr('err-phone','الرقم غير صحيح، استعمل الصيغة الدولية');ok=false}
   if(!email||!email.includes('@')){setRegErr('err-email','أدخل بريداً إلكترونياً صحيحاً');ok=false}
   if(pass.length<8){setRegErr('err-pass','كلمة المرور: 8 أحرف على الأقل');ok=false}
   else if(pass!==pass2){setRegErr('err-pass2','كلمتا المرور غير متطابقتين');ok=false}
@@ -192,7 +222,7 @@ async function doSellerReg(){
   try{
     const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{store_name:storeName,role:'seller'}}});
     if(error)throw error;
-    await sb.from('sellers').upsert({id:data.user.id,store_name:storeName},{onConflict:'id'});
+    await sb.from('sellers').upsert({id:data.user.id,store_name:storeName,phone},{onConflict:'id'});
     localStorage.setItem('wardro_store_name',storeName);
     localStorage.setItem('wardro_role','seller');
     document.getElementById('wel-name').textContent=storeName;
@@ -702,7 +732,7 @@ async function logOut(){
     clearInterval(_heroTimer);
     clearInterval(_brHeroTimer);
     // Reset registration form
-    ['reg-store','reg-email','reg-pass','reg-pass2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['reg-store','reg-phone','reg-email','reg-pass','reg-pass2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     clearRegErrors();
     const regBtn=document.getElementById('reg-submit');
     if(regBtn){regBtn.innerHTML='Create Store →';regBtn.style.background='';}
@@ -859,7 +889,7 @@ async function loadGuestStoreProducts(sellerId){
     if(aboutDesc)aboutDesc.textContent=seller?.bio||'';
     _setStoreCity(seller?.city);
     _computeSellerNumber(sellerId).then(_setSellerNumber);
-    const{data:prods}=await sb.from('products').select('*').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
+    const{data:prods}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone)').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
     const visProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
     renderShowProducts(visProds);
     // Merge into _brProds so openProdDetail works
@@ -1202,7 +1232,7 @@ function _exploreLoadMore(){
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image)').eq('is_hidden',false).order('created_at',{ascending:false});
+    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone)').eq('is_hidden',false).order('created_at',{ascending:false});
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
@@ -1337,6 +1367,8 @@ function openProdDetail(id){
   sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
+  const wa=document.getElementById('pd-wa-btn');
+  if(wa)wa.style.display=(p.seller&&p.seller.phone)?'flex':'none';
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
@@ -1391,6 +1423,16 @@ function pdToggleHeart(){
 function pdSelectSize(btn){
   document.querySelectorAll('.pd-size-pill').forEach(b=>b.classList.remove('pd-size-pill--active'));
   btn.classList.add('pd-size-pill--active');
+}
+
+function pdOrderWhatsApp(){
+  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  const phone=String(p.seller?.phone||'').replace(/\D/g,'');
+  if(!phone)return;
+  const link=location.origin+location.pathname+'?product='+p.id;
+  const priceLine=p.is_exclusive?'السعر: (حصري)':Number(p.price||0).toLocaleString()+' DZD';
+  const msg='السلام عليكم 🙏\n\nمهتم بهذي القطعة من متجرك على Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: (..)\n🎨 اللون: (..)\n\n'+link+'\n\n(استفسار أكثر...)';
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
 }
 
 function _logBehavior(action,product){
@@ -1732,7 +1774,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     // Primary query — type + price (Supabase, no AI)
     const typeToQuery=_dcOccasion||_dcType;
     let q=sb.from('products')
-      .select('*, seller:sellers(store_name)')
+      .select('*, seller:sellers(store_name,phone)')
       .eq('type',typeToQuery)
       .eq('is_hidden',false)
       .gte('price',minPrice)
@@ -1763,7 +1805,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     // Complementary — different types, structural only (AI not wired)
     const otherTypes=['casual','sport','streetwear','classic','old_money'].filter(t=>t!==typeToQuery);
     const{data:compProds}=await sb.from('products')
-      .select('*, seller:sellers(store_name)')
+      .select('*, seller:sellers(store_name,phone)')
       .in('type',otherTypes)
       .eq('is_hidden',false)
       .limit(8);
