@@ -1431,7 +1431,7 @@ function pdOrderWhatsApp(){
   if(!phone)return;
   const link=location.origin+location.pathname+'?product='+p.id;
   const priceLine=p.is_exclusive?'السعر: (حصري)':Number(p.price||0).toLocaleString()+' DZD';
-  const msg='السلام عليكم 🙏\n\nمهتم بهذي القطعة من متجرك على Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: (..)\n🎨 اللون: (..)\n\n'+link+'\n\n(استفسار أكثر...)';
+  const msg='السلام عليكم\n\nمهتم بهذي القطعة من متجرك على Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: (..)\n🎨 اللون: (..)\n\n'+link+'\n\n(استفسار أكثر...)';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
 }
 
