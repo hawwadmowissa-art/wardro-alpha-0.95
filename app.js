@@ -641,15 +641,25 @@ function setAllProdMode(mode){
     if(grid)grid.style.display=_showProds.length?'grid':'none';
   }
 }
+const _showCatSvg=(inner)=>`<svg class="show-ap-cat-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const _showCatIcons={
+  casual:_showCatSvg('<path d="M16 4l4.5 3-2.5 3.5L16.5 9V20h-9V9l-1.5 1.5L3.5 7 8 4c0 2.2 8 2.2 8 0z"/>'),
+  sport:_showCatSvg('<path d="M3 17.5h18V16c-2.5-1-5.5-1.2-7.5-3.2l-2-2c-1.2 2.4-3.5 4.7-8.5 4.7z"/><path d="M13 12.5l1.5-1.5M15.5 14.5l1.5-1.5"/>'),
+  streetwear:_showCatSvg('<path d="M6 13a6 6 0 0 1 12 0v1.5H6z"/><path d="M18 14.5h2.5a1.5 1.5 0 0 1-1.5 2H6"/><path d="M12 7v-1"/>'),
+  classic:_showCatSvg('<path d="M3.5 7.5l6.5 4-6.5 4z"/><path d="M20.5 7.5l-6.5 4 6.5 4z"/><rect x="10" y="9.5" width="4" height="4.5" rx="1"/>'),
+  old_money:_showCatSvg('<path d="M12 5l6.5 9.5h-13z"/><path d="M12 5v9.5"/><path d="M5 17.5h14"/>')
+};
+const _showCatIconOther=_showCatSvg('<path d="M4 4.5h6.5l9 9-6.5 6.5-9-9z"/><circle cx="8.2" cy="8.7" r="1.3"/>');
+
 function _buildAllProdCats(){
   const groups={};
   _showProds.forEach(p=>{const t=p.type||'other';(groups[t]=groups[t]||[]).push(p);});
   const order=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length);
   return order.map(t=>{
     const label=_dcTypeLabels[t]||(t.charAt(0).toUpperCase()+t.slice(1));
-    const icon=_dcTypeIcons[t]||'';
+    const icon=_showCatIcons[t]||_showCatIconOther;
     return `<div class="show-ap-cat">
-      <div class="show-section-hd"><span class="show-section-title">${icon?icon+' ':''}${esc(label)}</span></div>
+      <div class="show-section-hd"><span class="show-section-title">${icon} ${esc(label)}</span></div>
       <div class="show-ap-strip">${groups[t].map(_showProdCardHtml).join('')}</div>
     </div>`;
   }).join('');

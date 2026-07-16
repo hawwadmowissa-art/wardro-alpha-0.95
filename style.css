@@ -655,6 +655,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .show-ap-mode--active{background:#0B0A08;border-color:rgba(210,175,105,.3);color:var(--gold)}
 .show-ap-mode--active svg{display:block}
 .show-ap-cat{margin-bottom:18px}
+.show-ap-cat-ic{vertical-align:-2.5px;margin-inline-end:2px}
 .show-ap-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;
   -ms-overflow-style:none;scrollbar-width:none}
 .show-ap-strip::-webkit-scrollbar{display:none}
