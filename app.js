@@ -590,12 +590,14 @@ function renderShowProducts(prods){
       ${p.image?`<img class="show-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
       <div class="show-prod-info"><div class="show-prod-name">${esc(p.name)}</div><div class="show-prod-price">${_priceLabel(p)}</div><div class="show-prod-cat">${esc(p.type||'')}</div></div>
     </div>`;
-  // Featured grid (Home tab — first 4)
+  // Featured grid (Home tab — seller-elevated pieces: main_hero first, then hero; temporary fallback to recents when none are tagged)
   const grid=document.getElementById('show-prod-grid');
   const empty=document.getElementById('show-empty');
   if(grid&&empty){
+    const featured=[...prods.filter(p=>p.slider_type==='main_hero'),...prods.filter(p=>p.slider_type==='hero')];
+    const list=featured.length?featured:prods.slice(0,4);
     if(!prods.length){grid.style.display='none';empty.style.display='block';}
-    else{empty.style.display='none';grid.style.display='grid';grid.innerHTML=prods.slice(0,4).map(cardHtml).join('');}
+    else{empty.style.display='none';grid.style.display='grid';grid.innerHTML=list.map(cardHtml).join('');}
   }
   // All-products grid (Products tab)
   const allGrid=document.getElementById('show-all-prod-grid');
