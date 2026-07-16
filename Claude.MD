@@ -57,7 +57,6 @@ wardro/
 | Phase 2B — Color Chips + Hide Traditional | Editor: استبدال حقل اللون النصي بـ 12 chip ملونة (black→rust) مع سواتش + تسميات عربية؛ multi-select اختياري؛ color_tags يُحفظ في DB؛ إشعار "اختر من اللوحة الجديدة" للمنتجات القديمة؛ حذف Traditional من cat-btns + إشعار للمنتجات التقليدية يجبر إعادة الاختيار؛ زر الحفظ يتطلب الآن product_type + type + name + price | يونيو 2026 |
 | Phase 2C — Save Event Logger | Customer: _logBehavior(action, product) fire-and-forget يُدرج في user_behavior_log عند save/unsave؛ يتخطى صامتاً إذا anonymous أو seller؛ console.error عند الفشل فقط؛ _svItemMap يُحفظ في renderSaved() لتوفير بيانات المنتج لـ removeSavedItem؛ query loadSaved مُوسَّع بـ seller_id/product_type/color_tags/type | يونيو 2026 |
 | Phase 3A — Home 11-Section Redesign | Customer Home: 11 قسم ثابت متبادل (عمودي/أفقي)؛ 5 grids عشوائية (Fisher-Yates per session)؛ 4 strips أفقية (Casual/New This Week/Sport/Formal)؛ Top Stores دائم؛ R1: strip تختفي إذا < 2 منتجات؛ R2: Top Stores دائمة إذا 1+ seller؛ 15-20% تكرار مضبوط؛ توزيع 12/8/6/6/4 للـ grids؛ Section 12 مؤجلة لـ Phase 3B | يونيو 2026 |
-| WhatsApp Contact (F-1+F-3) | Deep link `?product=UUID` (يعكس نمط `?store=`، fallback صامت)؛ حقل هاتف واتساب مطلوب في تسجيل البائع (`+` + 8-15 رقم → `sellers.phone`)؛ زر ذهبي "اطلب عبر واتساب" بجانب Save في Product Detail (Save صار داكن بحد ذهبي)؛ رسالة wa.me مسبقة الملء (اسم + سعر/حصري + deep link، مقاس/لون placeholders `(..)`)؛ الزر يختفي كلياً إذا لا phone للبائع وSave يتمدد؛ `seller.phone` أُضيف لكل queries التصفح/المتجر/النتائج | يوليو 2026 |
 
 ---
 
