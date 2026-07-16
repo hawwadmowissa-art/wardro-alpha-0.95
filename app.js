@@ -523,6 +523,7 @@ async function loadEditorProducts(){
       const desc=document.getElementById('show-about-desc');if(desc)desc.textContent=seller.bio||'';
     }
     _setStoreCity(seller?.city);
+    _storeShare={id:user.id,name:localStorage.getItem('wardro_store_name')||'',city:seller?.city||'',phone:null};
     _computeSellerNumber(user.id).then(_setSellerNumber);
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
     renderEditorProducts(prods||[]);
@@ -793,6 +794,31 @@ async function _resizeStoreImage(file){
 // ══ SHOW MODE ══
 let _heroIdx=0,_heroTimer=null,_heroLen=1;
 let _guestSellerId=null; // set when a customer taps Top Store
+let _storeShare={id:null,name:'',city:'',phone:null}; // current store shown in #s-show
+
+function shareStore(){
+  if(!_storeShare.id)return;
+  const url=location.origin+location.pathname+'?store='+_storeShare.id;
+  if(navigator.share){
+    navigator.share({title:_storeShare.name||'Wardro',text:'اكتشف متجر '+(_storeShare.name||'')+' على Wardro',url}).catch(()=>{});
+  }else if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>toast('تم نسخ الرابط')).catch(()=>{});
+  }
+}
+
+function storeWhatsApp(){
+  if(!_storeShare.id)return;
+  const phone=String(_storeShare.phone||'').replace(/\D/g,'');
+  if(!phone)return;
+  const url=location.origin+location.pathname+'?store='+_storeShare.id;
+  const msg='السلام عليكم\n\nمهتم بمتجرك على Wardro:\n\n🏪 '+(_storeShare.name||'')+'\n📍 '+(_storeShare.city||'ورقلة')+', الجزائر\n\n'+url+'\n\n(استفسار أكثر...)';
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+}
+
+function _setStoreWaBtn(show){
+  const b=document.getElementById('show-wa-btn');
+  if(b)b.style.display=show?'flex':'none';
+}
 
 async function _computeSellerNumber(sellerId){
   const sb=getSb();if(!sb)return null;
@@ -836,6 +862,8 @@ function loadShowMode(){
   if(aboutName)aboutName.textContent=name;
   // Reset to Home tab
   switchShowTab('home',document.querySelector('.show-tab[data-tab="home"]'));
+  // Own store preview: never show the WhatsApp button
+  _setStoreWaBtn(false);
   // Load fresh data
   loadEditorProducts();
 }
@@ -843,6 +871,8 @@ function loadShowMode(){
 // Customer taps a Top Store → read-only store view
 function openStoreView(sellerId,storeName,storeImg){
   _guestSellerId=sellerId;
+  _storeShare={id:sellerId,name:storeName||'',city:'',phone:null};
+  _setStoreWaBtn(false); // hidden until this store's phone is known
   _logEvent('store_visit',{sellerId});
   // Mark #s-show as guest mode (CSS hides sidebar/topbar, shows back bar)
   const ss=document.getElementById('s-show');
@@ -873,8 +903,10 @@ function leaveGuestStore(){
 async function loadGuestStoreProducts(sellerId){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city').eq('id',sellerId).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone').eq('id',sellerId).single();
     const guestName=document.getElementById('show-store-name')?.textContent||'?';
+    _storeShare={id:sellerId,name:guestName,city:seller?.city||'',phone:seller?.phone||null};
+    _setStoreWaBtn(!!(seller&&seller.phone));
     const av=document.getElementById('show-avatar');
     const avAbout=document.getElementById('show-about-avatar');
     if(seller?.profile_image){
