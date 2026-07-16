@@ -767,8 +767,19 @@
 
       <!-- TAB: All Products -->
       <div class="show-tab-panel" id="show-tab-products" style="display:none">
+        <div class="show-ap-toggle" id="show-ap-toggle" style="display:none">
+          <button class="show-ap-mode show-ap-mode--active" id="ap-mode-all" onclick="setAllProdMode('all')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            All
+          </button>
+          <button class="show-ap-mode" id="ap-mode-filter" onclick="setAllProdMode('filter')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            Filter
+          </button>
+        </div>
         <div class="show-empty" id="show-empty-all">لا توجد قطع بعد</div>
         <div class="show-prod-grid" id="show-all-prod-grid" style="display:none"></div>
+        <div id="show-all-prod-cats" style="display:none"></div>
       </div>
 
       <!-- TAB: Collections (placeholder) -->

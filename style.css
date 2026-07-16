@@ -646,6 +646,20 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .show-section-all{font-size:11px;color:var(--gold);cursor:pointer;transition:opacity .3s}
 .show-section-all:hover{opacity:.7}
 
+/* All Products tab — All / Filter toggle */
+.show-ap-toggle{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.show-ap-mode{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;
+  background:transparent;border:1px solid rgba(210,175,105,.3);color:rgba(210,175,105,.6);
+  font-size:13px;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all .3s}
+.show-ap-mode svg{display:none}
+.show-ap-mode--active{background:#0B0A08;border-color:rgba(210,175,105,.3);color:var(--gold)}
+.show-ap-mode--active svg{display:block}
+.show-ap-cat{margin-bottom:18px}
+.show-ap-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;
+  -ms-overflow-style:none;scrollbar-width:none}
+.show-ap-strip::-webkit-scrollbar{display:none}
+.show-ap-strip .show-prod-card{flex:0 0 140px}
+
 /* Product cards */
 .show-empty{text-align:center;font-size:13px;color:var(--muted);padding:52px 20px}
 .show-prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:8px}

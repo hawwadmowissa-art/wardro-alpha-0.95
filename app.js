@@ -582,14 +582,16 @@ function renderEditorProducts(prods){
   grid.innerHTML=none.map(_edProdCardHtml).join('');
 }
 
-function renderShowProducts(prods){
-  buildHeroSlider(prods);
-  prods.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
-  const cardHtml=p=>`
+const _showProdCardHtml=p=>`
     <div class="show-prod-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="show-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
       <div class="show-prod-info"><div class="show-prod-name">${esc(p.name)}</div><div class="show-prod-price">${_priceLabel(p)}</div><div class="show-prod-cat">${esc(p.type||'')}</div></div>
     </div>`;
+
+function renderShowProducts(prods){
+  buildHeroSlider(prods);
+  prods.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+  const cardHtml=_showProdCardHtml;
   // Featured grid (Home tab — seller-elevated pieces: main_hero first, then hero; temporary fallback to recents when none are tagged)
   const grid=document.getElementById('show-prod-grid');
   const empty=document.getElementById('show-empty');
@@ -606,9 +608,51 @@ function renderShowProducts(prods){
     if(!prods.length){allGrid.style.display='none';allEmpty.style.display='block';}
     else{allEmpty.style.display='none';allGrid.style.display='grid';allGrid.innerHTML=prods.map(cardHtml).join('');}
   }
+  _showProds=prods;
+  _updateAllProdToggle();
   // About tab stats
   const cnt=document.getElementById('show-prod-count');
   if(cnt)cnt.textContent=prods.length;
+}
+
+// ── All Products tab: All / Filter modes ──
+let _showProds=[];
+function _updateAllProdToggle(){
+  const wrap=document.getElementById('show-ap-toggle');
+  if(!wrap)return;
+  const counts={};
+  _showProds.forEach(p=>{const t=p.type||'other';counts[t]=(counts[t]||0)+1;});
+  const canFilter=Object.values(counts).some(n=>n>=3);
+  wrap.style.display=canFilter?'flex':'none';
+  setAllProdMode('all');
+}
+function setAllProdMode(mode){
+  const bAll=document.getElementById('ap-mode-all');
+  const bFilter=document.getElementById('ap-mode-filter');
+  if(bAll)bAll.classList.toggle('show-ap-mode--active',mode==='all');
+  if(bFilter)bFilter.classList.toggle('show-ap-mode--active',mode==='filter');
+  const grid=document.getElementById('show-all-prod-grid');
+  const cats=document.getElementById('show-all-prod-cats');
+  if(mode==='filter'){
+    if(grid)grid.style.display='none';
+    if(cats){cats.innerHTML=_buildAllProdCats();cats.style.display='block';}
+  }else{
+    if(cats){cats.style.display='none';cats.innerHTML='';}
+    if(grid)grid.style.display=_showProds.length?'grid':'none';
+  }
+}
+function _buildAllProdCats(){
+  const groups={};
+  _showProds.forEach(p=>{const t=p.type||'other';(groups[t]=groups[t]||[]).push(p);});
+  const order=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length);
+  return order.map(t=>{
+    const label=_dcTypeLabels[t]||(t.charAt(0).toUpperCase()+t.slice(1));
+    const icon=_dcTypeIcons[t]||'';
+    return `<div class="show-ap-cat">
+      <div class="show-section-hd"><span class="show-section-title">${icon?icon+' ':''}${esc(label)}</span></div>
+      <div class="show-ap-strip">${groups[t].map(_showProdCardHtml).join('')}</div>
+    </div>`;
+  }).join('');
 }
 
 function _resetModalForm(){
