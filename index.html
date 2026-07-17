@@ -480,8 +480,20 @@
       </button>
     </div>
 
+    <!-- Editor Tabs: Catalog | Outfits -->
+    <div class="ed-tabs">
+      <button class="ed-tab ed-tab--active" id="ed-tab-btn-catalog" onclick="edSwitchTab('catalog')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Catalog
+      </button>
+      <button class="ed-tab" id="ed-tab-btn-outfits" onclick="edSwitchTab('outfits')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.9V6a2 2 0 1 1 2-2"/><path d="M12 6.9L21 13.2a1.2 1.2 0 0 1-.7 2.2H3.7A1.2 1.2 0 0 1 3 13.2z"/></svg>
+        Outfits
+      </button>
+    </div>
+
     <!-- Scrollable body -->
-    <div class="editor-body">
+    <div class="editor-body" id="ed-catalog-body">
 
       <!-- Store Info Section -->
       <div class="ed-section">
@@ -551,6 +563,34 @@
         <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
       </div>
 
+    </div>
+
+    <!-- Outfits tab body -->
+    <div class="editor-body" id="ed-outfits-body" style="display:none">
+      <div class="of-subrow">
+        <div class="of-subtabs">
+          <button class="of-subtab of-subtab--active" id="of-sub-my" onclick="ofSwitchSub('my')">My Outfits</button>
+          <button class="of-subtab" id="of-sub-others" onclick="ofSwitchSub('others')">Other Sellers' Outfits</button>
+        </div>
+        <button class="ed-plus-btn" id="of-add-btn" onclick="openBuildCollection()">+</button>
+      </div>
+      <div id="of-panel-my">
+        <div class="of-empty" id="of-empty" style="display:none">
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 6.9V6a2 2 0 1 1 2-2"/>
+            <path d="M12 6.9L21 13.2a1.2 1.2 0 0 1-.7 2.2H3.7A1.2 1.2 0 0 1 3 13.2z"/>
+          </svg>
+          <div class="of-empty-text">لم تضف تنسيقات بعد</div>
+          <button class="of-create-btn" onclick="openBuildCollection()">➕ إنشاء تنسيقة</button>
+        </div>
+        <div class="of-grid" id="of-grid" style="display:none"></div>
+      </div>
+      <div id="of-panel-others" style="display:none">
+        <div class="of-empty">
+          <div class="ede-icon">✦</div>
+          <div class="of-empty-text">قريباً — Coming soon</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -647,6 +687,76 @@
         <button class="ap-delete" id="ap-delete" onclick="deleteProduct()" style="display:none">🗑</button>
         <button class="ap-cancel" onclick="closeAddProduct()">إلغاء</button>
         <button class="ap-done" id="ap-submit" onclick="saveProduct()">Done ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Build Collection Modal -->
+  <div id="bc-modal" class="bc-modal" style="display:none">
+    <div class="bc-sheet" dir="rtl">
+      <div class="bc-hd" dir="ltr">
+        <button class="ap-modal-close" onclick="closeBuildCollection()">✕</button>
+        <div class="bc-hd-titles">
+          <div class="bc-title">Build Collection</div>
+          <div class="bc-subtitle">أنشئ تنسيقاً خاصاً من قطعك</div>
+        </div>
+        <button type="button" class="bc-state-pill" id="bc-state-pill" onclick="bcToggleState()">
+          <span class="bc-state-label" id="bc-state-label">مفتوح</span>
+          <span class="bc-state-cap" id="bc-state-cap">قابل للإثراء</span>
+        </button>
+      </div>
+      <div class="bc-body">
+        <div class="bc-card">
+          <div class="form-group">
+            <label>اسم التنسيق</label>
+            <input type="text" id="bc-name" placeholder="Summer Escape">
+          </div>
+          <div class="form-group">
+            <label>صورة الغلاف (اختياري)</label>
+            <input type="file" id="bc-cover-input" accept="image/*" hidden onchange="bcCoverSelected(this)">
+            <div class="bc-cover-drop" id="bc-cover-drop" onclick="document.getElementById('bc-cover-input').click()">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.2 8.5 4.2 4.2 0 0 0 6.5 17"/><path d="M12 12v7M8.8 15.2L12 12l3.2 3.2"/></svg>
+              <span>رفع صورة</span>
+            </div>
+            <div class="bc-cover-preview" id="bc-cover-preview" style="display:none">
+              <img id="bc-cover-img" alt="">
+              <button type="button" class="ap-img-thumb-rm" onclick="bcRemoveCover()">✕</button>
+            </div>
+          </div>
+        </div>
+        <div class="bc-card">
+          <div class="bc-pieces-label">القطع</div>
+          <div class="bc-pieces-grid" id="bc-pieces-grid"></div>
+        </div>
+        <div class="bc-card">
+          <div class="form-group">
+            <label>السعر الإجمالي (DZD)</label>
+            <div class="bc-price-row">
+              <input type="text" id="bc-total" readonly value="0" dir="ltr">
+              <button type="button" class="ap-excl-btn" id="bc-excl-btn" onclick="bcToggleExclusive()">Exclusive</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ملاحظة (اختياري)</label>
+            <textarea id="bc-note" rows="3" placeholder="اكتب ملاحظات عن هذا التنسيق..."></textarea>
+          </div>
+        </div>
+        <div class="bc-info-bar" id="bc-info-bar"></div>
+      </div>
+      <div class="ap-modal-footer">
+        <button class="ap-delete" id="bc-delete" onclick="deleteOutfit()" style="display:none">🗑</button>
+        <button class="ap-cancel" onclick="closeBuildCollection()">إلغاء</button>
+        <button class="ap-done" id="bc-done" onclick="saveOutfit()">Done ✓</button>
+      </div>
+    </div>
+    <!-- Piece Picker -->
+    <div class="bc-picker" id="bc-picker" style="display:none" onclick="if(event.target===this)closeBcPicker()">
+      <div class="bc-picker-sheet" dir="rtl">
+        <div class="bc-picker-hd">
+          <span>اختر قطعة من الكتالوج</span>
+          <button class="ap-modal-close" onclick="closeBcPicker()">✕</button>
+        </div>
+        <div class="bc-picker-list" id="bc-picker-list"></div>
       </div>
     </div>
   </div>

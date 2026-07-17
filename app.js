@@ -2154,3 +2154,330 @@ function updateCreateStoreButtonState(){
 }
 
 
+
+// ══ OUTFITS — Editor tabs + My Outfits + Build Collection ══
+let _ofOutfits=[],_bcEditId=null,_bcItems=[],_bcCoverFile=null,_bcCoverUrl=null,_bcExclusive=false,_bcState='open';
+const _OF_TYPE_LABELS={shirt:'Shirt',pants:'Pants',jeans:'Jeans',shoes:'Shoes',jacket:'Jacket',accessory:'Accessory',ensemble:'Ensemble'};
+
+function edSwitchTab(tab){
+  const cat=document.getElementById('ed-catalog-body');
+  const out=document.getElementById('ed-outfits-body');
+  document.getElementById('ed-tab-btn-catalog')?.classList.toggle('ed-tab--active',tab==='catalog');
+  document.getElementById('ed-tab-btn-outfits')?.classList.toggle('ed-tab--active',tab==='outfits');
+  if(cat)cat.style.display=tab==='catalog'?'':'none';
+  if(out)out.style.display=tab==='outfits'?'':'none';
+  if(tab==='outfits')loadOutfits();
+}
+
+function ofSwitchSub(sub){
+  document.getElementById('of-sub-my')?.classList.toggle('of-subtab--active',sub==='my');
+  document.getElementById('of-sub-others')?.classList.toggle('of-subtab--active',sub==='others');
+  const my=document.getElementById('of-panel-my');
+  const others=document.getElementById('of-panel-others');
+  if(my)my.style.display=sub==='my'?'':'none';
+  if(others)others.style.display=sub==='others'?'':'none';
+  const add=document.getElementById('of-add-btn');
+  if(add)add.style.display=sub==='my'?'':'none';
+}
+
+async function loadOutfits(){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();if(!user)return;
+    const{data,error}=await sb.from('outfits')
+      .select('*, outfit_items(id,product_id,position,product:products(id,name,image,price,is_exclusive,product_type))')
+      .eq('seller_id',user.id)
+      .order('created_at',{ascending:false});
+    if(error)throw error;
+    _ofOutfits=(data||[]).map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+    renderOutfits();
+  }catch(e){console.error('loadOutfits:',e);}
+}
+
+function renderOutfits(){
+  const grid=document.getElementById('of-grid');
+  const empty=document.getElementById('of-empty');
+  if(!grid||!empty)return;
+  if(!_ofOutfits.length){
+    empty.style.display='flex';grid.style.display='none';grid.innerHTML='';return;
+  }
+  empty.style.display='none';grid.style.display='grid';
+  grid.innerHTML=_ofOutfits.map(o=>{
+    const inner=o.cover_image
+      ?`<img class="of-frame-img" src="${safeUrl(o.cover_image)}" alt="${esc(o.name)}" loading="lazy">`
+      :`<div class="of-mini-stack">${o.items.slice(0,3).map(it=>{
+          const p=it.product||{};
+          return `<div class="of-mini">
+            ${p.image?`<img class="of-mini-img" src="${safeUrl(p.image)}" alt="" loading="lazy">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
+            <span class="of-mini-type">${esc(_OF_TYPE_LABELS[p.product_type]||'Piece')}</span>
+          </div>`;
+        }).join('')}</div>`;
+    return `<div class="of-card" onclick="openBuildCollection('${o.id}')">
+      <div class="of-frame">
+        <span class="of-mode-badge">${o.cover_image?'Cover':'Cards'}</span>
+        ${inner}
+      </div>
+      <div class="of-name">${esc(o.name)}</div>
+      <div class="of-sub">${o.items.length} قطعة • ${o.match_pct}% Match</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Build Collection modal ──
+function openBuildCollection(id){
+  _bcEditId=id||null;
+  const o=id?_ofOutfits.find(x=>x.id===id):null;
+  _bcItems=o?o.items.map(it=>it.product).filter(Boolean):[];
+  _bcCoverFile=null;
+  _bcCoverUrl=o?o.cover_image||null:null;
+  _bcExclusive=o?o.is_exclusive===true:false;
+  _bcState=o&&o.state==='close'?'close':'open';
+  const nameEl=document.getElementById('bc-name');if(nameEl)nameEl.value=o?o.name||'':'';
+  const noteEl=document.getElementById('bc-note');if(noteEl)noteEl.value=o?o.note||'':'';
+  document.getElementById('bc-excl-btn')?.classList.toggle('active',_bcExclusive);
+  const del=document.getElementById('bc-delete');if(del)del.style.display=id?'':'none';
+  _bcRenderState();
+  _bcRenderCover();
+  _bcRender();
+  const m=document.getElementById('bc-modal');
+  if(m){m.style.display='flex';requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('bc-modal--open')));}
+}
+
+function closeBuildCollection(){
+  const m=document.getElementById('bc-modal');if(!m)return;
+  m.classList.remove('bc-modal--open');
+  setTimeout(()=>{m.style.display='none'},380);
+  closeBcPicker();
+}
+
+function bcToggleState(){
+  _bcState=_bcState==='open'?'close':'open';
+  _bcRenderState();
+  _bcRenderInfoBar();
+}
+
+function _bcRenderState(){
+  const pill=document.getElementById('bc-state-pill');
+  const lbl=document.getElementById('bc-state-label');
+  const cap=document.getElementById('bc-state-cap');
+  if(lbl)lbl.textContent=_bcState==='close'?'مقفل':'مفتوح';
+  if(cap)cap.textContent=_bcState==='close'?'تباع كوحدة واحدة':'قابل للإثراء';
+  pill?.classList.toggle('bc-state-pill--closed',_bcState==='close');
+}
+
+function bcToggleExclusive(){
+  _bcExclusive=!_bcExclusive;
+  document.getElementById('bc-excl-btn')?.classList.toggle('active',_bcExclusive);
+  _bcRenderTotals();
+}
+
+function bcCoverSelected(input){
+  const file=(input.files||[])[0];
+  input.value='';
+  if(!file)return;
+  if(!file.type.startsWith('image/'))return toast('الرجاء اختيار صورة');
+  if(file.size>10*1024*1024)return toast('حجم الصورة يجب ألا يتجاوز 10 ميغابايت');
+  const reader=new FileReader();
+  reader.onload=ev=>{_bcCoverFile={file,dataUrl:ev.target.result};_bcRenderCover();};
+  reader.readAsDataURL(file);
+}
+
+function bcRemoveCover(){
+  _bcCoverFile=null;_bcCoverUrl=null;
+  _bcRenderCover();
+}
+
+function _bcRenderCover(){
+  const drop=document.getElementById('bc-cover-drop');
+  const prev=document.getElementById('bc-cover-preview');
+  const img=document.getElementById('bc-cover-img');
+  const has=!!(_bcCoverFile||_bcCoverUrl);
+  if(drop)drop.style.display=has?'none':'flex';
+  if(prev)prev.style.display=has?'block':'none';
+  if(img&&has)img.src=_bcCoverFile?_bcCoverFile.dataUrl:safeUrl(_bcCoverUrl);
+}
+
+function _bcRender(){
+  const grid=document.getElementById('bc-pieces-grid');if(!grid)return;
+  const store=localStorage.getItem('wardro_store_name')||'—';
+  grid.innerHTML=_bcItems.map((p,i)=>`
+    <div class="bc-piece">
+      <span class="bc-piece-num">${i+1}</span>
+      <button type="button" class="bc-piece-dots" onclick="event.stopPropagation();bcToggleMenu(${i})">···</button>
+      <div class="bc-piece-menu" id="bc-menu-${i}" style="display:none">
+        <button type="button" onclick="bcRemovePiece(${i})">إزالة</button>
+        <button type="button" onclick="bcMovePiece(${i},-1)" ${i===0?'disabled':''}>تقديم ↑</button>
+        <button type="button" onclick="bcMovePiece(${i},1)" ${i===_bcItems.length-1?'disabled':''}>تأخير ↓</button>
+      </div>
+      ${p.image?`<img class="bc-piece-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="bc-piece-img bc-piece-img--ph"></div>`}
+      <div class="bc-piece-info">
+        <div class="bc-piece-name">${esc(p.name||'')}</div>
+        <div class="bc-piece-store">${esc(store)}</div>
+        <div class="bc-piece-price">${_priceLabel(p)}</div>
+      </div>
+    </div>`).join('')+`
+    <button type="button" class="bc-add-cell" onclick="openBcPicker()">
+      <span class="bc-add-plus">+</span>
+      <span class="bc-add-label">إضافة قطعة</span>
+      <span class="bc-add-hint">Shirt, Pants, Shoes, Accessories, Ensemble</span>
+    </button>`;
+  _bcRenderTotals();
+  _bcRenderInfoBar();
+  _bcUpdateDone();
+}
+
+function _bcTotal(){
+  return _bcItems.reduce((s,p)=>s+(p.is_exclusive?0:Number(p.price)||0),0);
+}
+
+function _bcRenderTotals(){
+  const t=document.getElementById('bc-total');
+  if(t)t.value=_bcExclusive?'حصري':Number(_bcTotal()).toLocaleString();
+  _bcRenderInfoBar();
+}
+
+const _bcInfoSvg=(inner)=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+
+function _bcRenderInfoBar(){
+  const bar=document.getElementById('bc-info-bar');if(!bar)return;
+  const store=localStorage.getItem('wardro_store_name')||'—';
+  const priceTxt=_bcExclusive?'حصري':Number(_bcTotal()).toLocaleString()+' DZD';
+  const stateTxt=_bcState==='close'?'مقفل':'مفتوح';
+  const cells=[
+    [_bcInfoSvg('<path d="M4 4.5h6.5l9 9-6.5 6.5-9-9z"/><circle cx="8.2" cy="8.7" r="1.3"/>'),'عدد القطع',String(_bcItems.length)],
+    [_bcInfoSvg('<path d="M6 7h12l1 13H5z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/>'),'متجر',store],
+    [_bcInfoSvg('<circle cx="12" cy="12" r="9"/><path d="M12 7v10M15 9.5c-.6-1-1.7-1.5-3-1.5-1.6 0-3 .9-3 2.2s1.2 1.8 3 2.1c1.8.3 3 .9 3 2.1s-1.4 2.1-3 2.1c-1.3 0-2.4-.5-3-1.5"/>'),'سعر تقديري',priceTxt],
+    [_bcInfoSvg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),'الحالة',stateTxt],
+  ];
+  bar.innerHTML=cells.map(([ic,lbl,val])=>`
+    <div class="bc-info-cell">${ic}<span class="bc-info-lbl">${esc(lbl)}</span><span class="bc-info-val">${esc(val)}</span></div>`).join('');
+}
+
+function _bcUpdateDone(){
+  const btn=document.getElementById('bc-done');if(!btn)return;
+  const name=(document.getElementById('bc-name')?.value||'').trim();
+  const ok=!!name&&_bcItems.length>=2;
+  btn.disabled=!ok;btn.style.opacity=ok?'1':'0.45';
+}
+
+function bcToggleMenu(idx){
+  document.querySelectorAll('.bc-piece-menu').forEach(m=>{
+    if(m.id!=='bc-menu-'+idx)m.style.display='none';
+  });
+  const m=document.getElementById('bc-menu-'+idx);
+  if(m)m.style.display=m.style.display==='none'?'flex':'none';
+}
+
+function bcRemovePiece(idx){
+  _bcItems.splice(idx,1);
+  _bcRender();
+}
+
+function bcMovePiece(idx,dir){
+  const j=idx+dir;
+  if(j<0||j>=_bcItems.length)return;
+  const tmp=_bcItems[idx];_bcItems[idx]=_bcItems[j];_bcItems[j]=tmp;
+  _bcRender();
+}
+
+// ── Piece picker ──
+function openBcPicker(){
+  const list=document.getElementById('bc-picker-list');
+  const overlay=document.getElementById('bc-picker');
+  if(!list||!overlay)return;
+  const chosen={};_bcItems.forEach(p=>{chosen[p.id]=true;});
+  const prods=Object.values(_editorProds).filter(p=>!chosen[p.id]);
+  list.innerHTML=prods.length?prods.map(p=>`
+    <div class="bc-picker-row" onclick="bcPickPiece('${p.id}')">
+      ${p.image?`<img class="bc-picker-img" src="${safeUrl(p.image)}" alt="" loading="lazy">`:`<div class="bc-picker-img bc-picker-img--ph"></div>`}
+      <div class="bc-picker-info">
+        <div class="bc-picker-name">${esc(p.name||'')}</div>
+        <div class="bc-picker-type">${esc(_OF_TYPE_LABELS[p.product_type]||'')}</div>
+      </div>
+      <div class="bc-picker-price">${_priceLabel(p)}</div>
+    </div>`).join('')
+    :'<div class="bc-picker-empty">كل قطع الكتالوج مضافة — أو الكتالوج فارغ</div>';
+  overlay.style.display='flex';
+}
+
+function closeBcPicker(){
+  const overlay=document.getElementById('bc-picker');
+  if(overlay)overlay.style.display='none';
+}
+
+function bcPickPiece(id){
+  const p=_editorProds[id];if(!p)return;
+  _bcItems.push(p);
+  closeBcPicker();
+  _bcRender();
+}
+
+// ── Save / delete ──
+async function saveOutfit(){
+  const btn=document.getElementById('bc-done');
+  const name=(document.getElementById('bc-name')?.value||'').trim();
+  const note=(document.getElementById('bc-note')?.value||'').trim();
+  if(!name)return toast('أدخل اسم التنسيق');
+  if(_bcItems.length<2)return toast('أضف قطعتين على الأقل');
+  const sb=getSb();if(!sb)return;
+  if(btn){btn.textContent='جاري الحفظ...';btn.disabled=true;}
+  try{
+    const{data:{user}}=await sb.auth.getUser();
+    if(!user)throw new Error('سجّل الدخول أولاً');
+    const match=_bcItems.length>=4?92:_bcItems.length===3?87:80;
+    const payload={name,state:_bcState,is_exclusive:_bcExclusive,note:note||null,total_price:_bcTotal(),match_pct:match};
+    let outfitId=_bcEditId;
+    if(outfitId){
+      const{error}=await sb.from('outfits').update(payload).eq('id',outfitId);
+      if(error)throw error;
+      const{error:delErr}=await sb.from('outfit_items').delete().eq('outfit_id',outfitId);
+      if(delErr)throw delErr;
+    }else{
+      const{data,error}=await sb.from('outfits').insert({seller_id:user.id,...payload}).select('id').single();
+      if(error)throw error;
+      outfitId=data.id;
+    }
+    const rows=_bcItems.map((p,i)=>({outfit_id:outfitId,product_id:p.id,position:i,added_by:user.id}));
+    const{error:itemsErr}=await sb.from('outfit_items').insert(rows);
+    if(itemsErr)throw itemsErr;
+    let coverUrl=_bcCoverUrl;
+    if(_bcCoverFile){
+      const path=`outfits/${user.id}/${outfitId}.jpg`;
+      const{error:upErr}=await sb.storage.from('product-images').upload(path,_bcCoverFile.file,{upsert:true,contentType:_bcCoverFile.file.type});
+      if(!upErr){
+        const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);
+        coverUrl=pu.publicUrl+'?v='+Date.now();
+      }
+    }
+    const{error:covErr}=await sb.from('outfits').update({cover_image:coverUrl||null}).eq('id',outfitId);
+    if(covErr)throw covErr;
+    toast(_bcEditId?'✓ تم تحديث التنسيقة':'✓ تم إنشاء التنسيقة');
+    closeBuildCollection();
+    await loadOutfits();
+  }catch(e){toast(e.message||'حدث خطأ');}
+  finally{if(btn){btn.textContent='Done ✓';btn.disabled=false;btn.style.opacity='1';}}
+}
+
+async function deleteOutfit(){
+  if(!_bcEditId)return;
+  if(!confirm('حذف هذه التنسيقة نهائياً؟'))return;
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();
+    const{error}=await sb.from('outfits').delete().eq('id',_bcEditId);
+    if(error)throw error;
+    if(user){try{await sb.storage.from('product-images').remove(['outfits/'+user.id+'/'+_bcEditId+'.jpg']);}catch(_e){}}
+    toast('✓ تم حذف التنسيقة');
+    closeBuildCollection();
+    await loadOutfits();
+  }catch(e){toast(e.message||'حدث خطأ');}
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('bc-name')?.addEventListener('input',_bcUpdateDone);
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.bc-piece-dots')&&!e.target.closest('.bc-piece-menu')){
+      document.querySelectorAll('.bc-piece-menu').forEach(m=>m.style.display='none');
+    }
+  });
+});
