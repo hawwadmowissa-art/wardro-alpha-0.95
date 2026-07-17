@@ -591,12 +591,20 @@
               <button class="sel-btn" data-val="jeans">Jeans</button>
               <button class="sel-btn" data-val="shoes">Shoes</button>
               <button class="sel-btn" data-val="accessory">Accessory</button>
+              <button class="sel-btn" data-val="ensemble">Ensemble</button>
             </div>
           </div>
           <div class="form-group">
             <label>الحجم <span style="color:var(--muted);font-weight:400;font-size:10px">(اختياري)</span></label>
             <div class="sel-btns" id="size-btns">
               <span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>
+            </div>
+          </div>
+          <div class="form-group" id="ensemble-state-group" style="display:none">
+            <label>الحالة</label>
+            <div class="sel-btns" id="ensemble-state-btns">
+              <button class="sel-btn active" data-val="open">🔓 Open</button>
+              <button class="sel-btn" data-val="close">🔒 Close</button>
             </div>
           </div>
           <div class="form-group">
@@ -1114,6 +1122,7 @@
           <button class="dc-type-opt" data-val="pants" onclick="event.stopPropagation();dcSelectType(this)">👖 Pants</button>
           <button class="dc-type-opt" data-val="shoes" onclick="event.stopPropagation();dcSelectType(this)">👟 Shoes</button>
           <button class="dc-type-opt" data-val="accessory" onclick="event.stopPropagation();dcSelectType(this)">🎒 Accessory</button>
+          <button class="dc-type-opt" data-val="ensemble" onclick="event.stopPropagation();dcSelectType(this)">🕴 Ensemble</button>
         </div>
       </div>
     </div>

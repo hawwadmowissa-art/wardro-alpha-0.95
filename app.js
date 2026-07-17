@@ -298,7 +298,17 @@ async function doSellerSignIn(){
 }
 
 // ══ PRODUCTS ══
-let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true,_apExclusive=false;
+let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true,_apExclusive=false,_apEnsembleState='open';
+
+function _setEnsembleState(state){
+  _apEnsembleState=state;
+  document.querySelectorAll('#ensemble-state-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===state));
+}
+
+function _toggleEnsembleStateGroup(){
+  const g=document.getElementById('ensemble-state-group');
+  if(g)g.style.display=_apProductType==='ensemble'?'':'none';
+}
 function _priceLabel(p){return p.is_exclusive?'Exclusive':Number(p.price||0).toLocaleString()+' DZD';}
 
 window.addEventListener('DOMContentLoaded',()=>{
@@ -318,7 +328,12 @@ window.addEventListener('DOMContentLoaded',()=>{
     b.classList.add('active');
     if(prev&&prev!==_apProductType&&_apSizes.length)toast('تم مسح الأحجام — اختر من جديد');
     _renderSizeBtns(_apProductType);
+    _toggleEnsembleStateGroup();
     _apUpdateSubmitBtn();
+  });
+  document.getElementById('ensemble-state-btns')?.addEventListener('click',e=>{
+    const b=e.target.closest('.sel-btn');if(!b)return;
+    _setEnsembleState(b.dataset.val);
   });
   document.getElementById('cat-btns')?.addEventListener('click',e=>{
     const b=e.target.closest('.sel-btn');if(!b)return;
@@ -376,7 +391,7 @@ const _AP_COLORS=[
   {key:'rust',ar:'طوباقي',hex:'#B4513A'},
 ];
 
-const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size']};
+const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size'],ensemble:['S','M','L','XL','XXL']};
 
 function _renderSizeBtns(type){
   const container=document.getElementById('size-btns');if(!container)return;
@@ -485,7 +500,7 @@ async function saveProduct(){
     const allImages=[..._apExistingUrls,...newUrls].slice(0,5);
     const img_url=allImages[0]||null;
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
-    const payload={name,price:_apExclusive?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,is_available:_apAvailable,is_exclusive:_apExclusive};
+    const payload={name,price:_apExclusive?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,ensemble_state:_apProductType==='ensemble'?_apEnsembleState:null,is_available:_apAvailable,is_exclusive:_apExclusive};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -535,6 +550,9 @@ function _edProdCardHtml(p){
   const apprBadge=p.hero_status==='pending'
     ?`<div class="ed-appr-badge ed-appr-badge--pending">قيد المراجعة</div>`
     :'';
+  const ensBadge=p.product_type==='ensemble'
+    ?`<span style="font-size:9px;color:var(--gold);opacity:.75;letter-spacing:.5px">ENSEMBLE ${p.ensemble_state==='close'?'🔒':'🔓'}</span>`
+    :'';
   return `
     <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
       <button class="ed-prod-dots" onclick="event.stopPropagation();openEditProduct('${p.id}')">···</button>
@@ -545,6 +563,7 @@ function _edProdCardHtml(p){
         <div class="ed-prod-price">${_priceLabel(p)}</div>
         <div class="ed-prod-info-row">
           <div class="ed-prod-badge">In Stock</div>
+          ${ensBadge}
         </div>
       </div>
     </div>`;
@@ -671,6 +690,7 @@ function _resetModalForm(){
   document.getElementById('ap-desc').value='';
   _apSizes=[];_apCat=null;_apImgFiles=[];_apExistingUrls=[];_apProductType=null;_apColorTags=[];
   document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
+  _setEnsembleState('open');_toggleEnsembleStateGroup();
   const sizeBtns=document.getElementById('size-btns');
   if(sizeBtns)sizeBtns.innerHTML='<span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>';
   _renderImgStrip();
@@ -709,6 +729,8 @@ function openEditProduct(id){
   _apProductType=p.product_type||'shirt';
   document.querySelectorAll('#product-type-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===_apProductType));
   _renderSizeBtns(_apProductType);
+  _setEnsembleState(p.ensemble_state==='close'?'close':'open');
+  _toggleEnsembleStateGroup();
   if(_apProductType!=='accessory'){
     const validSizes=_AP_TYPE_SIZES[_apProductType]||[];
     _apSizes=(p.sizes||[]).filter(s=>validSizes.includes(s));
@@ -1741,8 +1763,8 @@ function dcToggleTypeMenu(){
 }
 
 const _dcTypeLabels={casual:'Casual',sport:'Sport',streetwear:'Streetwear',classic:'Classic',old_money:'Old Money'};
-const _dcPieceLabels={shirt:'Shirt',pants:'Pants',shoes:'Shoes',accessory:'Accessory'};
-const _dcPieceIcons={shirt:'👕',pants:'👖',shoes:'👟',accessory:'🎒'};
+const _dcPieceLabels={shirt:'Shirt',pants:'Pants',shoes:'Shoes',accessory:'Accessory',ensemble:'Ensemble'};
+const _dcPieceIcons={shirt:'👕',pants:'👖',shoes:'👟',accessory:'🎒',ensemble:'🕴'};
 
 function dcSelectType(btn){
   _dcType=btn.dataset.val;
