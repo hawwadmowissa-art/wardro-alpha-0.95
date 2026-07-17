@@ -588,8 +588,8 @@
             <div class="sel-btns" id="product-type-btns">
               <button class="sel-btn" data-val="shirt">Shirt</button>
               <button class="sel-btn" data-val="pants">Pants</button>
+              <button class="sel-btn" data-val="jeans">Jeans</button>
               <button class="sel-btn" data-val="shoes">Shoes</button>
-              <button class="sel-btn" data-val="jacket">Jacket</button>
               <button class="sel-btn" data-val="accessory">Accessory</button>
             </div>
           </div>
@@ -1110,11 +1110,10 @@
           <svg class="dc-chevron" id="dc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="dc-type-menu" id="dc-type-menu" style="display:none">
-          <button class="dc-type-opt" data-val="casual" onclick="event.stopPropagation();dcSelectType(this)">👕 Casual</button>
-          <button class="dc-type-opt" data-val="sport" onclick="event.stopPropagation();dcSelectType(this)">🏃 Sport</button>
-          <button class="dc-type-opt" data-val="streetwear" onclick="event.stopPropagation();dcSelectType(this)">🧢 Streetwear</button>
-          <button class="dc-type-opt" data-val="classic" onclick="event.stopPropagation();dcSelectType(this)">🤵 Classic</button>
-          <button class="dc-type-opt" data-val="old_money" onclick="event.stopPropagation();dcSelectType(this)">🎩 Old Money</button>
+          <button class="dc-type-opt" data-val="shirt" onclick="event.stopPropagation();dcSelectType(this)">👕 Shirt</button>
+          <button class="dc-type-opt" data-val="pants" onclick="event.stopPropagation();dcSelectType(this)">👖 Pants</button>
+          <button class="dc-type-opt" data-val="shoes" onclick="event.stopPropagation();dcSelectType(this)">👟 Shoes</button>
+          <button class="dc-type-opt" data-val="accessory" onclick="event.stopPropagation();dcSelectType(this)">🎒 Accessory</button>
         </div>
       </div>
     </div>
@@ -1142,25 +1141,34 @@
     <!-- Optional Filters -->
     <div class="dc-optional-label">خيارات إضافية</div>
     <div class="dc-optional-row">
-      <button class="dc-opt-chip" id="chip-size" onclick="dcToggleOpt('size')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20l4-16M6 4h12M18 4l4 16M9 20h6"/><line x1="5" y1="10" x2="19" y2="10"/></svg>
-        <span>المقاس</span>
-      </button>
-      <button class="dc-opt-chip" id="chip-occasion" onclick="dcToggleOpt('occasion')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>المناسبة</span>
+      <button class="dc-opt-chip" id="chip-category" onclick="dcToggleOpt('category')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>الفئة</span>
       </button>
       <button class="dc-opt-chip" id="chip-color" onclick="dcToggleOpt('color')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="21"/><line x1="3" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="21" y2="12"/></svg>
         <span id="chip-color-label">اللون</span>
       </button>
-      <button class="dc-opt-chip" id="chip-category" onclick="dcToggleOpt('category')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>الفئة</span>
+      <button class="dc-opt-chip" id="chip-size" onclick="dcToggleOpt('size')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20l4-16M6 4h12M18 4l4 16M9 20h6"/><line x1="5" y1="10" x2="19" y2="10"/></svg>
+        <span>المقاس</span>
       </button>
     </div>
 
     <!-- Optional Panels -->
+    <div class="dc-opt-panel" id="panel-category" style="display:none">
+      <div class="dc-opt-btns">
+        <button class="dc-size-btn" data-val="casual" onclick="dcToggleCatOpt(this)">Casual</button>
+        <button class="dc-size-btn" data-val="sport" onclick="dcToggleCatOpt(this)">Sport</button>
+        <button class="dc-size-btn" data-val="streetwear" onclick="dcToggleCatOpt(this)">Streetwear</button>
+        <button class="dc-size-btn" data-val="classic" onclick="dcToggleCatOpt(this)">Classic</button>
+        <button class="dc-size-btn" data-val="old_money" onclick="dcToggleCatOpt(this)">Old Money</button>
+      </div>
+    </div>
+    <div class="dc-opt-panel" id="panel-color" style="display:none">
+      <button class="dc-color-clear-btn" id="dc-color-clear-btn" onclick="dcClearColors()" style="display:none">مسح الكل</button>
+      <div class="dc-color-swatches" id="dc-color-swatches"></div>
+    </div>
     <div class="dc-opt-panel" id="panel-size" style="display:none">
       <div class="dc-opt-btns">
         <button class="dc-size-btn" data-val="S" onclick="dcToggleSizeOpt(this)">S</button>
@@ -1168,26 +1176,6 @@
         <button class="dc-size-btn" data-val="L" onclick="dcToggleSizeOpt(this)">L</button>
         <button class="dc-size-btn" data-val="XL" onclick="dcToggleSizeOpt(this)">XL</button>
         <button class="dc-size-btn" data-val="XXL" onclick="dcToggleSizeOpt(this)">XXL</button>
-      </div>
-    </div>
-    <div class="dc-opt-panel" id="panel-occasion" style="display:none">
-      <div class="dc-opt-btns">
-        <button class="dc-size-btn" data-val="formal" onclick="dcSelectOccasion(this)">رسمي</button>
-        <button class="dc-size-btn" data-val="casual" onclick="dcSelectOccasion(this)">كاجوال</button>
-        <button class="dc-size-btn" data-val="sport" onclick="dcSelectOccasion(this)">رياضي</button>
-        <button class="dc-size-btn" data-val="traditional" onclick="dcSelectOccasion(this)">تقليدي</button>
-      </div>
-    </div>
-    <div class="dc-opt-panel" id="panel-color" style="display:none">
-      <button class="dc-color-clear-btn" id="dc-color-clear-btn" onclick="dcClearColors()" style="display:none">مسح الكل</button>
-      <div class="dc-color-swatches" id="dc-color-swatches"></div>
-    </div>
-    <div class="dc-opt-panel" id="panel-category" style="display:none">
-      <div class="dc-opt-btns">
-        <button class="dc-size-btn" data-val="قميص" onclick="dcToggleCatOpt(this)">قميص</button>
-        <button class="dc-size-btn" data-val="بنطلون" onclick="dcToggleCatOpt(this)">بنطلون</button>
-        <button class="dc-size-btn" data-val="جاكيت" onclick="dcToggleCatOpt(this)">جاكيت</button>
-        <button class="dc-size-btn" data-val="حذاء" onclick="dcToggleCatOpt(this)">حذاء</button>
       </div>
     </div>
 

@@ -376,7 +376,7 @@ const _AP_COLORS=[
   {key:'rust',ar:'طوباقي',hex:'#B4513A'},
 ];
 
-const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size']};
+const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size']};
 
 function _renderSizeBtns(type){
   const container=document.getElementById('size-btns');if(!container)return;
@@ -1688,7 +1688,7 @@ function renderSaved(items){
 }
 
 // ══ DISCOVER ══
-let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcOccasion=null,_discoverSelectedColors=[];
+let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcCategory=null,_discoverSelectedColors=[];
 
 function dcInitSlider(){
   // Do NOT reset type/sizes between visits so filters persist
@@ -1741,7 +1741,8 @@ function dcToggleTypeMenu(){
 }
 
 const _dcTypeLabels={casual:'Casual',sport:'Sport',streetwear:'Streetwear',classic:'Classic',old_money:'Old Money'};
-const _dcTypeIcons={casual:'👕',sport:'🏃',streetwear:'🧢',classic:'🤵',old_money:'🎩'};
+const _dcPieceLabels={shirt:'Shirt',pants:'Pants',shoes:'Shoes',accessory:'Accessory'};
+const _dcPieceIcons={shirt:'👕',pants:'👖',shoes:'👟',accessory:'🎒'};
 
 function dcSelectType(btn){
   _dcType=btn.dataset.val;
@@ -1749,8 +1750,8 @@ function dcSelectType(btn){
   btn.classList.add('dc-type-opt--active');
   const valEl=document.getElementById('dc-type-val');
   const icoEl=document.getElementById('dc-type-ico');
-  if(valEl){valEl.textContent=_dcTypeLabels[_dcType]||_dcType;valEl.classList.remove('dc-select-val--ph');}
-  if(icoEl)icoEl.textContent=_dcTypeIcons[_dcType]||'👔';
+  if(valEl){valEl.textContent=_dcPieceLabels[_dcType]||_dcType;valEl.classList.remove('dc-select-val--ph');}
+  if(icoEl)icoEl.textContent=_dcPieceIcons[_dcType]||'👔';
   const menu=document.getElementById('dc-type-menu');
   const chevron=document.getElementById('dc-chevron');
   if(menu)menu.style.display='none';
@@ -1758,7 +1759,7 @@ function dcSelectType(btn){
   dcCheckRequired();
 }
 
-const _DC_OPT_KEYS=['size','occasion','color','category'];
+const _DC_OPT_KEYS=['size','color','category'];
 
 function dcToggleOpt(key){
   const chip=document.getElementById('chip-'+key);
@@ -1775,9 +1776,9 @@ function dcToggleOpt(key){
   _DC_OPT_KEYS.forEach(k=>{
     const c=document.getElementById('chip-'+k);
     if(!c)return;
-    const hasSelection=(k==='size'&&_dcSizes.length)||(k==='occasion'&&_dcOccasion)||
+    const hasSelection=(k==='size'&&_dcSizes.length)||
       (k==='color'&&_discoverSelectedColors.length)||
-      (k==='category'&&document.querySelector('#panel-category .dc-size-btn--active'));
+      (k==='category'&&_dcCategory);
     const isOpen=document.getElementById('panel-'+k)?.style.display!=='none';
     c.classList.toggle('dc-opt-chip--active',isOpen||!!hasSelection);
   });
@@ -1793,16 +1794,11 @@ function dcToggleSizeOpt(btn){
   }
 }
 
-function dcSelectOccasion(btn){
-  document.querySelectorAll('#panel-occasion .dc-size-btn').forEach(b=>b.classList.remove('dc-size-btn--active'));
-  btn.classList.add('dc-size-btn--active');
-  _dcOccasion=btn.dataset.val;
-}
-
 function dcToggleCatOpt(btn){
   const wasActive=btn.classList.contains('dc-size-btn--active');
   document.querySelectorAll('#panel-category .dc-size-btn').forEach(b=>b.classList.remove('dc-size-btn--active'));
   if(!wasActive)btn.classList.add('dc-size-btn--active');
+  _dcCategory=wasActive?null:btn.dataset.val;
 }
 
 function _initDiscoverColorSwatches(){
@@ -1859,14 +1855,15 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
 
   const sb=getSb();if(!sb){if(loading)loading.style.display='none';return;}
   try{
-    // Primary query — type + price (Supabase, no AI)
-    const typeToQuery=_dcOccasion||_dcType;
+    // Primary query — product_type + price (Supabase, no AI); jeans is semantically pants
+    const pieceTypes=_dcType==='pants'?['pants','jeans']:[_dcType];
     let q=sb.from('products')
       .select('*, seller:sellers(store_name,phone)')
-      .eq('type',typeToQuery)
+      .in('product_type',pieceTypes)
       .eq('is_hidden',false)
       .gte('price',minPrice)
       .lte('price',maxPrice);
+    if(_dcCategory){q=q.eq('type',_dcCategory);}
     if(_dcSizes.length){q=q.overlaps('sizes',_dcSizes);}
     if(selectedColors&&selectedColors.length){q=q.overlaps('color_tags',selectedColors);}
     const{data:prods,error}=await q.order('price',{ascending:true});
@@ -1890,11 +1887,11 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
         </div>
       </div>`).join('');
 
-    // Complementary — different types, structural only (AI not wired)
-    const otherTypes=['casual','sport','streetwear','classic','old_money'].filter(t=>t!==typeToQuery);
+    // Complementary — different piece types, structural only (AI not wired)
+    const otherTypes=['shirt','pants','jeans','shoes','accessory'].filter(t=>!pieceTypes.includes(t));
     const{data:compProds}=await sb.from('products')
       .select('*, seller:sellers(store_name,phone)')
-      .in('type',otherTypes)
+      .in('product_type',otherTypes)
       .eq('is_hidden',false)
       .limit(8);
     if(compProds&&compProds.length){
