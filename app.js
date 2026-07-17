@@ -2481,3 +2481,16 @@ window.addEventListener('DOMContentLoaded',()=>{
     }
   });
 });
+
+// ══ EDITOR/SHOW SIDEBAR — slide-in drawer (shared component, scoped to active screen) ══
+function openEdSidebar(btn){
+  const screen=(btn&&btn.closest('.screen'))||document.querySelector('.screen.active');
+  screen?.querySelector('.ed-sidebar')?.classList.add('ed-sidebar--open');
+  screen?.querySelector('.ed-sidebar-backdrop')?.classList.add('ed-sidebar-backdrop--open');
+}
+
+function closeEdSidebar(btn){
+  const screen=(btn&&btn.closest('.screen'))||document.querySelector('.screen.active');
+  screen?.querySelector('.ed-sidebar')?.classList.remove('ed-sidebar--open');
+  screen?.querySelector('.ed-sidebar-backdrop')?.classList.remove('ed-sidebar-backdrop--open');
+}

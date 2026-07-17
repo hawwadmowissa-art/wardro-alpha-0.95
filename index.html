@@ -440,8 +440,11 @@
 <!-- EDITOR MODE -->
 <div id="s-editor" class="screen">
 
-  <!-- Left Sidebar: Mode switcher -->
-  <div class="ed-sidebar">
+  <!-- Sidebar backdrop (drawer mode) -->
+  <div class="ed-sidebar-backdrop" id="ed-sidebar-backdrop" onclick="closeEdSidebar(this)"></div>
+
+  <!-- Left Sidebar: Mode switcher (slide-in drawer) -->
+  <div class="ed-sidebar" id="ed-sidebar">
     <button class="ed-sidebar-icon ed-sidebar-icon--active" title="Editor Mode">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -472,12 +475,17 @@
         <div class="ed-topbar-main">EDITOR MODE</div>
         <div class="ed-topbar-sub">Manage your store content</div>
       </div>
-      <button class="ed-bell-btn" onclick="toast('Notifications — قريباً')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-      </button>
+      <div class="ed-topbar-actions">
+        <button class="ed-menu-btn" id="ed-menu-btn" onclick="openEdSidebar(this)" title="Menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <button class="ed-bell-btn" onclick="toast('Notifications — قريباً')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Editor Tabs: Catalog | Outfits -->
@@ -773,6 +781,9 @@
     <span class="show-guest-title" id="show-guest-store-title"></span>
   </div>
 
+  <!-- Sidebar backdrop (drawer mode) -->
+  <div class="ed-sidebar-backdrop" onclick="closeEdSidebar(this)"></div>
+
   <!-- Left Sidebar (seller-only; hidden in guest mode by CSS) -->
   <div class="ed-sidebar">
     <button class="ed-sidebar-icon" onclick="navigateTo('s-editor','slide')" title="Editor Mode">
@@ -806,6 +817,9 @@
         <div class="ed-topbar-sub">View your store as customers</div>
       </div>
       <div class="show-topbar-actions">
+        <button class="ed-menu-btn" onclick="openEdSidebar(this)" title="Menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <button class="show-exit-btn" onclick="navigateTo('s-editor','slide')">Exit Preview</button>
         <button class="ed-bell-btn" onclick="toast('Notifications — قريباً')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
