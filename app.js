@@ -1066,6 +1066,7 @@ function switchShowTab(tab,btn){
   if(btn)btn.classList.add('active');
   const panel=document.getElementById('show-tab-'+tab);
   if(panel)panel.style.display='block';
+  if(tab==='collections')renderCollectionsPublic();
 }
 
 // ══ ONBOARDING ══
@@ -1576,6 +1577,172 @@ async function saveItem(){
       if(p){_logBehavior('save',p);_logEvent('save',{productId:p.id,sellerId:p.seller_id});}
     }
   }catch(e){toast(e.message||'خطأ في الحفظ');const btn=document.getElementById('pd-save-btn');if(btn){btn.textContent='Save';btn.disabled=false;}}
+}
+
+// ══ COLLECTIONS — public outfit grid + detail sheet (Show Mode + Guest Store View) ══
+let _colOutfits=[],_odCurrentId=null;
+
+function _colPriceLabel(o){
+  if(o.is_exclusive)return 'حصري';
+  if(o.total_price==null||o.total_price==='')return '';
+  return Number(o.total_price).toLocaleString()+' دج';
+}
+
+async function renderCollectionsPublic(){
+  const sb=getSb();if(!sb)return;
+  const empty=document.getElementById('show-collections-empty');
+  const grid=document.getElementById('show-collections-grid');
+  if(!empty||!grid)return;
+  let sellerId=_guestSellerId;
+  if(!sellerId){
+    const{data:{user}}=await sb.auth.getUser();
+    sellerId=user?.id||null;
+  }
+  if(!sellerId){_colOutfits=[];_renderCollectionsGrid();return;}
+  try{
+    const{data,error}=await sb.from('outfits')
+      .select('*, outfit_items(id,product_id,position,product:products(id,name,image,price,is_exclusive,product_type))')
+      .eq('seller_id',sellerId)
+      .order('created_at',{ascending:false});
+    if(error)throw error;
+    _colOutfits=(data||[]).map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+    _colOutfits.forEach(o=>o.items.forEach(it=>{const p=it.product;if(p&&!_brProds.find(x=>x.id===p.id))_brProds.push(p);}));
+    _renderCollectionsGrid();
+  }catch(e){console.error('renderCollectionsPublic:',e);}
+}
+
+function _colCardHtml(o){
+  const inner=o.cover_image
+    ?`<img class="of-frame-img" src="${safeUrl(o.cover_image)}" alt="${esc(o.name)}" loading="lazy">`
+    :`<div class="of-mini-stack">${o.items.slice(0,3).map(it=>{
+        const p=it.product||{};
+        return `<div class="of-mini">
+          ${p.image?`<img class="of-mini-img" src="${safeUrl(p.image)}" alt="" loading="lazy">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
+          <span class="of-mini-type">${esc(_OF_TYPE_LABELS[p.product_type]||'Piece')}</span>
+        </div>`;
+      }).join('')}</div>`;
+  const priceTxt=_colPriceLabel(o);
+  return `<div class="of-card" onclick="openOutfitDetailPublic('${o.id}')">
+    <div class="of-frame">
+      ${inner}
+      <button type="button" class="col-heart" data-outfit-id="${o.id}" onclick="event.stopPropagation();colToggleHeart(this)" aria-label="احفظ">♡</button>
+    </div>
+    <div class="of-name">${esc(o.name)}</div>
+    ${priceTxt?`<div class="col-price">${esc(priceTxt)}</div>`:''}
+  </div>`;
+}
+
+function _renderCollectionsGrid(){
+  const empty=document.getElementById('show-collections-empty');
+  const grid=document.getElementById('show-collections-grid');
+  if(!empty||!grid)return;
+  if(!_colOutfits.length){empty.style.display='flex';grid.style.display='none';grid.innerHTML='';return;}
+  empty.style.display='none';grid.style.display='grid';
+  grid.innerHTML=_colOutfits.map(_colCardHtml).join('');
+}
+
+async function _colSaveOutfit(outfitId,saveOn){
+  const sb=getSb();if(!sb)return{ok:false};
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){openCustAuth();return{ok:false};}
+  if(saveOn){
+    const{error}=await sb.from('saved_outfits').insert({customer_id:session.user.id,outfit_id:outfitId});
+    if(error&&error.code!=='23505')throw error;
+  }else{
+    const{error}=await sb.from('saved_outfits').delete().eq('customer_id',session.user.id).eq('outfit_id',outfitId);
+    if(error)throw error;
+  }
+  return{ok:true};
+}
+
+async function colToggleHeart(btn){
+  const id=btn.dataset.outfitId;if(!id)return;
+  const willSave=!btn.classList.contains('active');
+  try{
+    const r=await _colSaveOutfit(id,willSave);
+    if(!r.ok)return;
+    btn.classList.toggle('active',willSave);
+    btn.textContent=willSave?'♥':'♡';
+  }catch(e){toast(e.message||'خطأ في الحفظ');}
+}
+
+function openOutfitDetailPublic(id){
+  const o=_colOutfits.find(x=>x.id===id);if(!o)return;
+  _odCurrentId=id;
+  const cover=document.getElementById('od-cover');
+  if(cover){
+    cover.innerHTML=o.cover_image
+      ?`<img class="of-frame-img" src="${safeUrl(o.cover_image)}" alt="${esc(o.name)}">`
+      :`<div class="of-mini-stack">${o.items.slice(0,3).map(it=>{
+          const p=it.product||{};
+          return `<div class="of-mini">
+            ${p.image?`<img class="of-mini-img" src="${safeUrl(p.image)}" alt="">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
+            <span class="of-mini-type">${esc(_OF_TYPE_LABELS[p.product_type]||'Piece')}</span>
+          </div>`;
+        }).join('')}</div>`;
+  }
+  document.getElementById('od-name').textContent=o.name||'';
+  const note=o.note||'';
+  document.getElementById('od-desc').textContent=note;
+  document.getElementById('od-about-text').textContent=note||'لا يوجد وصف لهذه التنسيقة.';
+  const priceTxt=_colPriceLabel(o);
+  const priceEl=document.getElementById('od-price');
+  if(priceEl){priceEl.textContent=priceTxt;priceEl.style.display=priceTxt?'':'none';}
+  const piecesEl=document.getElementById('od-pieces');
+  if(piecesEl){
+    piecesEl.innerHTML=o.items.map(it=>{
+      const p=it.product||{};
+      return `<div class="od-piece" onclick="closeOutfitDetailPublic();openProdDetail('${p.id}')">
+        ${p.image?`<img class="od-piece-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
+        <div class="od-piece-name">${esc(p.name||'')}</div>
+      </div>`;
+    }).join('');
+  }
+  const h=document.getElementById('od-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
+  const saveBtn=document.getElementById('od-save-btn');
+  if(saveBtn){saveBtn.textContent='حفظ';saveBtn.disabled=false;saveBtn.classList.remove('pd-save-btn--saved');}
+  const wa=document.getElementById('od-wa-btn');
+  const phone=String(_storeShare.phone||'').replace(/\D/g,'');
+  if(wa)wa.style.display=phone?'flex':'none';
+  const ov=document.getElementById('od-overlay');
+  if(ov){
+    ov.style.display='flex';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('od-overlay--open')));
+  }
+}
+
+function closeOutfitDetailPublic(){
+  const ov=document.getElementById('od-overlay');if(!ov)return;
+  ov.classList.remove('od-overlay--open');
+  setTimeout(()=>{ov.style.display='none';},380);
+}
+
+function odToggleHeart(){
+  const h=document.getElementById('od-heart-btn');if(!h)return;
+  const on=h.classList.toggle('active');
+  h.textContent=on?'♥':'♡';
+}
+
+async function odSaveOutfit(){
+  if(!_odCurrentId)return;
+  const btn=document.getElementById('od-save-btn');
+  try{
+    if(btn){btn.textContent='جاري الحفظ...';btn.disabled=true;}
+    const r=await _colSaveOutfit(_odCurrentId,true);
+    if(!r.ok){if(btn){btn.textContent='حفظ';btn.disabled=false;}return;}
+    if(btn){btn.textContent='تم الحفظ ✓';btn.classList.add('pd-save-btn--saved');}
+    const h=document.getElementById('od-heart-btn');if(h){h.textContent='♥';h.classList.add('active');}
+  }catch(e){toast(e.message||'خطأ في الحفظ');if(btn){btn.textContent='حفظ';btn.disabled=false;}}
+}
+
+function odOrderWhatsApp(){
+  const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
+  const phone=String(_storeShare.phone||'').replace(/\D/g,'');
+  if(!phone)return;
+  const link=location.origin+location.pathname+'?outfit='+o.id;
+  const priceLine=o.is_exclusive?'السعر: (حصري)':Number(o.total_price||0).toLocaleString()+' DZD';
+  const msg='السلام عليكم\n\nمهتم بهذي التنسيقة من متجرك على Wardro:\n\n📌 '+(o.name||'')+'\n💰 '+priceLine+'\n\n'+link+'\n\n(استفسار أكثر...)';
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
 }
 
 // ── Customer Auth ──
