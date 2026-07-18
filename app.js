@@ -1,12 +1,17 @@
 let isTransitioning=false;
 
 // ══ NAVIGATE ══
-function navigateTo(targetId,type='z-axis'){
+// Back-button history: every real transition pushes a state entry so Android's
+// system back navigates within the app instead of exiting it.
+history.pushState({screen:'s-splash'},'','');
+
+function navigateTo(targetId,type='z-axis',fromHistory){
   if(isTransitioning)return;
   isTransitioning=true;
   const cur=document.querySelector('.screen.active,.screen-center.active');
   const tgt=document.getElementById(targetId);
   if(!cur||!tgt){isTransitioning=false;return}
+  if(!fromHistory)history.pushState({screen:targetId},'','');
   tgt.style.display='flex';
   tgt.classList.add('active');
   cur.classList.remove('active');
@@ -23,6 +28,12 @@ function navigateTo(targetId,type='z-axis'){
     isTransitioning=false;
   },dur);
 }
+
+window.addEventListener('popstate',e=>{
+  const screen=e.state&&e.state.screen;
+  if(screen)navigateTo(screen,'z-axis',true);
+  else history.pushState({screen:'s-splash'},'','');
+});
 
 function goCustomer(){navigateTo('s-browse','slide')}
 
