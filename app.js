@@ -1683,7 +1683,6 @@ function openOutfitDetailPublic(id){
   }
   document.getElementById('od-name').textContent=o.name||'';
   const note=o.note||'';
-  document.getElementById('od-desc').textContent=note;
   document.getElementById('od-about-text').textContent=note||'لا يوجد وصف لهذه التنسيقة.';
   const priceTxt=_colPriceLabel(o);
   const priceEl=document.getElementById('od-price');
@@ -1699,8 +1698,6 @@ function openOutfitDetailPublic(id){
     }).join('');
   }
   const h=document.getElementById('od-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
-  const saveBtn=document.getElementById('od-save-btn');
-  if(saveBtn){saveBtn.textContent='حفظ';saveBtn.disabled=false;saveBtn.classList.remove('pd-save-btn--saved');}
   const wa=document.getElementById('od-wa-btn');
   const phone=String(_storeShare.phone||'').replace(/\D/g,'');
   if(wa)wa.style.display=phone?'flex':'none';
@@ -1717,22 +1714,15 @@ function closeOutfitDetailPublic(){
   setTimeout(()=>{ov.style.display='none';},380);
 }
 
-function odToggleHeart(){
-  const h=document.getElementById('od-heart-btn');if(!h)return;
-  const on=h.classList.toggle('active');
-  h.textContent=on?'♥':'♡';
-}
-
-async function odSaveOutfit(){
-  if(!_odCurrentId)return;
-  const btn=document.getElementById('od-save-btn');
+async function odToggleHeart(){
+  const h=document.getElementById('od-heart-btn');if(!h||!_odCurrentId)return;
+  const willSave=!h.classList.contains('active');
   try{
-    if(btn){btn.textContent='جاري الحفظ...';btn.disabled=true;}
-    const r=await _colSaveOutfit(_odCurrentId,true);
-    if(!r.ok){if(btn){btn.textContent='حفظ';btn.disabled=false;}return;}
-    if(btn){btn.textContent='تم الحفظ ✓';btn.classList.add('pd-save-btn--saved');}
-    const h=document.getElementById('od-heart-btn');if(h){h.textContent='♥';h.classList.add('active');}
-  }catch(e){toast(e.message||'خطأ في الحفظ');if(btn){btn.textContent='حفظ';btn.disabled=false;}}
+    const r=await _colSaveOutfit(_odCurrentId,willSave);
+    if(!r.ok)return;
+    h.classList.toggle('active',willSave);
+    h.textContent=willSave?'♥':'♡';
+  }catch(e){toast(e.message||'خطأ في الحفظ');}
 }
 
 function odOrderWhatsApp(){
