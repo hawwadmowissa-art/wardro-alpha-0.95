@@ -433,12 +433,12 @@ function _renderImgStrip(){
       <button type="button" class="ap-img-thumb-rm" onclick="removeProductImg('new',${i})">✕</button>
     </div>`;
   });
-  if(total<5){
+  if(total<10){
     html+=`<button type="button" class="ap-img-add" onclick="document.getElementById('ap-img-input').click()">+<span>إضافة صورة</span></button>`;
   }
   strip.innerHTML=html;
   const hint=document.getElementById('ap-imgs-hint');
-  if(hint)hint.textContent=total>=5?'الحد الأقصى 5 صور':'اضغط على + لإضافة صورة (1–5)';
+  if(hint)hint.textContent=total>=10?'الحد الأقصى 10 صور':'اضغط على + لإضافة صورة (1–10)';
 }
 
 function addProductImages(input){
@@ -446,7 +446,7 @@ function addProductImages(input){
   let pending=0;
   for(const file of files){
     const total=_apExistingUrls.length+_apImgFiles.length+pending;
-    if(total>=5){toast('الحد الأقصى 5 صور للقطعة الواحدة');break;}
+    if(total>=10){toast('الحد الأقصى 10 صور للقطعة الواحدة');break;}
     if(!file.type.startsWith('image/')){toast('الرجاء اختيار صور فقط');continue;}
     if(file.size>10*1024*1024){toast('حجم الصورة يجب ألا يتجاوز 10 ميغابايت');continue;}
     pending++;
@@ -483,7 +483,7 @@ async function saveProduct(){
       const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
       if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newUrls.push(pu.publicUrl);}
     }
-    const allImages=[..._apExistingUrls,...newUrls].slice(0,5);
+    const allImages=[..._apExistingUrls,...newUrls].slice(0,10);
     const img_url=allImages[0]||null;
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
     const payload={name,price:_apExclusive?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,ensemble_state:_apProductType==='ensemble'?'close':null,is_available:_apAvailable,is_exclusive:_apExclusive};
