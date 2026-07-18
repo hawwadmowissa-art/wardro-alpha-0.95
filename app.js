@@ -377,7 +377,7 @@ const _AP_COLORS=[
   {key:'rust',ar:'طوباقي',hex:'#B4513A'},
 ];
 
-const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size'],ensemble:['S','M','L','XL','XXL']};
+const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size'],ensemble:['S','M','L','XL','XXL'],sandals:['39','40','41','42','43','44','45','46']};
 
 function _renderSizeBtns(type){
   const container=document.getElementById('size-btns');if(!container)return;
@@ -1903,8 +1903,8 @@ function dcToggleTypeMenu(){
 }
 
 const _dcTypeLabels={casual:'Casual',sport:'Sport',streetwear:'Streetwear',classic:'Classic',old_money:'Old Money'};
-const _dcPieceLabels={shirt:'Shirt',pants:'Pants',shoes:'Shoes',accessory:'Accessory',ensemble:'Ensemble'};
-const _dcPieceIcons={shirt:'👕',pants:'👖',shoes:'👟',accessory:'🎒',ensemble:'🕴'};
+const _dcPieceLabels={shirt:'Shirt',pants:'Pants',shoes:'Shoes',accessory:'Accessory',ensemble:'Ensemble',sandals:'Sandals'};
+const _dcPieceIcons={shirt:'👕',pants:'👖',shoes:'👟',accessory:'🎒',ensemble:'🕴',sandals:'👡'};
 
 function dcSelectType(btn){
   _dcType=btn.dataset.val;
@@ -2050,7 +2050,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
       </div>`).join('');
 
     // Complementary — different piece types, structural only (AI not wired)
-    const otherTypes=['shirt','pants','jeans','shoes','accessory'].filter(t=>!pieceTypes.includes(t));
+    const otherTypes=['shirt','pants','jeans','shoes','accessory','sandals'].filter(t=>!pieceTypes.includes(t));
     const{data:compProds}=await sb.from('products')
       .select('*, seller:sellers(store_name,phone)')
       .in('product_type',otherTypes)
@@ -2297,7 +2297,7 @@ function updateCreateStoreButtonState(){
 
 // ══ OUTFITS — Editor tabs + My Outfits + Build Collection ══
 let _ofOutfits=[],_bcEditId=null,_bcItems=[],_bcCoverFile=null,_bcCoverUrl=null,_bcExclusive=false;
-const _OF_TYPE_LABELS={shirt:'Shirt',pants:'Pants',jeans:'Jeans',shoes:'Shoes',jacket:'Jacket',accessory:'Accessory',ensemble:'Ensemble'};
+const _OF_TYPE_LABELS={shirt:'Shirt',pants:'Pants',jeans:'Jeans',shoes:'Shoes',jacket:'Jacket',accessory:'Accessory',ensemble:'Ensemble',sandals:'Sandals'};
 
 function edSwitchTab(tab){
   const cat=document.getElementById('ed-catalog-body');
@@ -2435,7 +2435,7 @@ function _bcRender(){
     <button type="button" class="bc-add-cell" onclick="openBcPicker()">
       <span class="bc-add-plus">+</span>
       <span class="bc-add-label">إضافة قطعة</span>
-      <span class="bc-add-hint">Shirt, Pants, Shoes, Accessories, Ensemble</span>
+      <span class="bc-add-hint">Shirt, Pants, Shoes, Accessories, Ensemble, Sandals</span>
     </button>`;
   _bcRenderInfoBar();
   _bcUpdateDone();
