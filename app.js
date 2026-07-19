@@ -1652,6 +1652,12 @@ function _dzCommunesFor(wilayaName){
 }
 
 let _cfDelivery='home';
+let _cfQty=1;
+
+function cfChangeQty(delta){
+  _cfQty=Math.max(1,_cfQty+delta);
+  const el=document.getElementById('cf-qty-val');if(el)el.textContent=_cfQty;
+}
 
 function _cfPopulateWilayas(){
   const sel=document.getElementById('cf-wilaya');
@@ -1689,6 +1695,7 @@ function cfSetDelivery(mode){
 function openOrderForm(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
   _cfPopulateWilayas();
+  cfChangeQty(1-_cfQty);
   const img=document.getElementById('cf-prod-img');if(img)img.src=safeUrl(_pdImages[0]||p.image||'');
   const nameEl=document.getElementById('cf-prod-name');if(nameEl)nameEl.textContent=p.name||'';
   const priceEl=document.getElementById('cf-prod-price');if(priceEl)priceEl.textContent=_priceLabel(p);

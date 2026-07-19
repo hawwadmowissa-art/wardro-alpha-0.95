@@ -987,8 +987,15 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .cf-prod-name{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--cream);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cf-prod-price{font-family:'Tajawal',sans-serif;font-size:12px;color:var(--gold)}
-.cf-prod-qty{flex-shrink:0;background:var(--dim);border:1px solid var(--brd2);border-radius:20px;
-  padding:5px 12px;font-size:12px;color:var(--txt);font-family:'Tajawal',sans-serif}
+.cf-qty{flex-shrink:0;display:flex;align-items:center;gap:2px;background:var(--dim);
+  border:1px solid var(--brd2);border-radius:20px;padding:3px}
+.cf-qty-btn{width:24px;height:24px;border-radius:50%;border:none;background:transparent;
+  color:var(--gold);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .25s var(--spring)}
+.cf-qty-btn:hover{background:rgba(210,175,105,.15)}
+.cf-qty-btn:active{transform:scale(.9)}
+.cf-qty-val{min-width:20px;text-align:center;font-size:13px;font-weight:700;color:var(--txt);
+  font-family:'Tajawal',sans-serif}
 .cf-field-row{display:flex;gap:10px}
 .cf-field-half{flex:1;min-width:0}
 .cf-field-lbl{font-size:11px;color:var(--muted);font-family:'Tajawal',sans-serif;margin-bottom:4px}

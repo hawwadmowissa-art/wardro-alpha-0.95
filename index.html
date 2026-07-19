@@ -1227,7 +1227,11 @@
           <div class="cf-prod-name" id="cf-prod-name"></div>
           <div class="cf-prod-price" id="cf-prod-price"></div>
         </div>
-        <div class="cf-prod-qty">1×</div>
+        <div class="cf-qty">
+          <button type="button" class="cf-qty-btn" onclick="cfChangeQty(-1)" aria-label="إنقاص الكمية">−</button>
+          <span class="cf-qty-val" id="cf-qty-val">1</span>
+          <button type="button" class="cf-qty-btn" onclick="cfChangeQty(1)" aria-label="زيادة الكمية">+</button>
+        </div>
       </div>
 
       <div class="cf-field-row">
