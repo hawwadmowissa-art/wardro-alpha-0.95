@@ -795,7 +795,8 @@ async function saveBio(){
   }catch(e){toast(e.message||'خطأ في الحفظ')}
 }
 
-let _esContactMode='whatsapp';
+let _esWhatsappEnabled=true;
+let _esCartEnabled=false;
 
 async function openEdSettings(){
   document.getElementById('ed-settings-backdrop')?.classList.add('ed-settings-backdrop--open');
@@ -803,8 +804,9 @@ async function openEdSettings(){
   const sb=getSb();if(!sb)return;
   try{
     const{data:{user}}=await sb.auth.getUser();if(!user)return;
-    const{data:seller}=await sb.from('sellers').select('contact_mode,sheet_url').eq('id',user.id).single();
-    esSetContactMode(seller?.contact_mode||'whatsapp');
+    const{data:seller}=await sb.from('sellers').select('whatsapp_enabled,cart_enabled,sheet_url').eq('id',user.id).single();
+    esSetWhatsapp(seller?.whatsapp_enabled!==false);
+    esSetCart(!!seller?.cart_enabled);
     const urlEl=document.getElementById('es-sheet-url');if(urlEl)urlEl.value=seller?.sheet_url||'';
     esValidateSave();
   }catch(e){}
@@ -812,7 +814,7 @@ async function openEdSettings(){
 
 function esValidateSave(){
   const btn=document.getElementById('es-save-btn');if(!btn)return;
-  if(_esContactMode==='form'){
+  if(_esCartEnabled){
     const val=(document.getElementById('es-sheet-url')?.value||'').trim();
     btn.disabled=!val;
   }else{
@@ -825,21 +827,28 @@ function closeEdSettings(){
   document.getElementById('ed-settings-panel')?.classList.remove('ed-settings-panel--open');
 }
 
-function esSetContactMode(mode){
-  _esContactMode=mode;
-  const waSwitch=document.getElementById('es-switch-whatsapp');
-  const formSwitch=document.getElementById('es-switch-form');
-  const waRow=document.getElementById('es-row-whatsapp');
-  const formRow=document.getElementById('es-row-form');
-  const onWa=mode==='whatsapp';
-  waSwitch?.classList.toggle('es-switch--on',onWa);
-  waSwitch?.setAttribute('aria-checked',onWa);
-  formSwitch?.classList.toggle('es-switch--on',!onWa);
-  formSwitch?.setAttribute('aria-checked',!onWa);
-  waRow?.classList.toggle('es-opt-row--off',!onWa);
-  formRow?.classList.toggle('es-opt-row--off',onWa);
-  const grp=document.getElementById('es-sheet-url-group');if(grp)grp.style.display=onWa?'none':'';
+function esSetWhatsapp(on){
+  _esWhatsappEnabled=on;
+  const sw=document.getElementById('es-switch-whatsapp');
+  sw?.classList.toggle('es-switch--on',on);
+  sw?.setAttribute('aria-checked',on);
+}
+
+function esToggleWhatsapp(){
+  esSetWhatsapp(!_esWhatsappEnabled);
+}
+
+function esSetCart(on){
+  _esCartEnabled=on;
+  const sw=document.getElementById('es-switch-form');
+  sw?.classList.toggle('es-switch--on',on);
+  sw?.setAttribute('aria-checked',on);
+  const grp=document.getElementById('es-sheet-url-group');if(grp)grp.style.display=on?'':'none';
   esValidateSave();
+}
+
+function esToggleCart(){
+  esSetCart(!_esCartEnabled);
 }
 
 async function saveEdSettings(){
@@ -849,7 +858,7 @@ async function saveEdSettings(){
   try{
     const{data:{user}}=await sb.auth.getUser();if(!user)return;
     if(btn){btn.disabled=true;btn.textContent='...';}
-    await sb.from('sellers').update({contact_mode:_esContactMode,sheet_url:sheetUrl||null}).eq('id',user.id);
+    await sb.from('sellers').update({whatsapp_enabled:_esWhatsappEnabled,cart_enabled:_esCartEnabled,sheet_url:sheetUrl||null}).eq('id',user.id);
     toast('✓ تم حفظ الإعدادات');
     closeEdSettings();
   }catch(e){toast(e.message||'خطأ في الحفظ')}
