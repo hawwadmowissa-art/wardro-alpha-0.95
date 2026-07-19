@@ -1543,10 +1543,13 @@ function openProdDetail(id){
   sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
+  const canWa=!!(p.seller&&p.seller.phone)&&p.seller?.whatsapp_enabled!==false;
+  const canCart=!!p.seller?.cart_enabled;
   const wa=document.getElementById('pd-wa-btn');
-  if(wa)wa.style.display=(p.seller&&p.seller.phone)?'flex':'none';
+  if(wa)wa.style.display=canWa?'flex':'none';
   const cartBtn=document.getElementById('pd-cart-btn');
-  if(cartBtn)cartBtn.style.display=p.seller?.cart_enabled?'flex':'none';
+  if(cartBtn)cartBtn.style.display=canCart?'flex':'none';
+  btn.style.display=(canWa&&canCart)?'none':'';
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
@@ -1697,6 +1700,8 @@ function openOrderForm(){
   const wilayaSel=document.getElementById('cf-wilaya');if(wilayaSel)wilayaSel.value='';
   cfWilayaChanged();
   cfSetDelivery('home');
+  const waBtn=document.getElementById('cf-wa-btn');
+  if(waBtn)waBtn.style.display=p.seller?.whatsapp_enabled!==false?'':'none';
   const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='none';
   const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
   cfOv.style.display='flex';
