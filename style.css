@@ -497,6 +497,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   align-items:center;justify-content:center;gap:10px;
   font-size:12px;color:var(--muted);pointer-events:none}
 .ap-imgs-section{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.ap-imgs-label{font-family:'Fraunces',serif;font-size:13px;font-weight:700;color:var(--gold)}
 .ap-imgs-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;min-height:84px;align-items:center}
 .ap-img-thumb{position:relative;width:80px;height:80px;flex-shrink:0;border-radius:12px;
   overflow:hidden;border:2px solid rgba(210,175,105,.35);background:var(--card)}

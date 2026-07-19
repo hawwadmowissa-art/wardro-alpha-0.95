@@ -310,6 +310,7 @@ async function doSellerSignIn(){
 
 // ══ PRODUCTS ══
 let _apSizes=[],_apCat=null,_apSliderType='none',_apImgFiles=[],_apExistingUrls=[],_apEditId=null,_editorProds={},_apProductType=null,_apColorTags=[],_apAvailable=true,_apExclusive=false;
+let _apDetailImgFiles=[],_apDetailExistingUrls=[];
 
 function _priceLabel(p){return p.is_exclusive?'Exclusive':Number(p.price||0).toLocaleString()+' DZD';}
 
@@ -474,6 +475,52 @@ function removeProductImg(source,idx){
   _renderImgStrip();
 }
 
+function _renderDetailImgStrip(){
+  const strip=document.getElementById('ap-detail-imgs-strip');if(!strip)return;
+  const total=_apDetailExistingUrls.length+_apDetailImgFiles.length;
+  let html='';
+  _apDetailExistingUrls.forEach((url,i)=>{
+    html+=`<div class="ap-img-thumb">
+      <img src="${safeUrl(url)}" alt="">
+      <button type="button" class="ap-img-thumb-rm" onclick="removeProductDetailImg('existing',${i})">✕</button>
+    </div>`;
+  });
+  _apDetailImgFiles.forEach(({dataUrl},i)=>{
+    html+=`<div class="ap-img-thumb">
+      <img src="${dataUrl}" alt="">
+      <button type="button" class="ap-img-thumb-rm" onclick="removeProductDetailImg('new',${i})">✕</button>
+    </div>`;
+  });
+  if(total<5){
+    html+=`<button type="button" class="ap-img-add" onclick="document.getElementById('ap-detail-img-input').click()">+<span>إضافة صورة</span></button>`;
+  }
+  strip.innerHTML=html;
+  const hint=document.getElementById('ap-detail-imgs-hint');
+  if(hint)hint.textContent=total>=5?'الحد الأقصى 5 صور':'اضغط على + لإضافة صورة (0–5)';
+}
+
+function addProductDetailImages(input){
+  const files=Array.from(input.files||[]);
+  let pending=0;
+  for(const file of files){
+    const total=_apDetailExistingUrls.length+_apDetailImgFiles.length+pending;
+    if(total>=5){toast('الحد الأقصى 5 صور تفاصيل للقطعة الواحدة');break;}
+    if(!file.type.startsWith('image/')){toast('الرجاء اختيار صور فقط');continue;}
+    if(file.size>10*1024*1024){toast('حجم الصورة يجب ألا يتجاوز 10 ميغابايت');continue;}
+    pending++;
+    const reader=new FileReader();
+    reader.onload=ev=>{_apDetailImgFiles.push({file,dataUrl:ev.target.result});_renderDetailImgStrip();};
+    reader.readAsDataURL(file);
+  }
+  input.value='';
+}
+
+function removeProductDetailImg(source,idx){
+  if(source==='existing')_apDetailExistingUrls.splice(idx,1);
+  else _apDetailImgFiles.splice(idx,1);
+  _renderDetailImgStrip();
+}
+
 async function saveProduct(){
   const btn=document.getElementById('ap-submit');
   const name=document.getElementById('ap-name').value.trim();
@@ -496,8 +543,16 @@ async function saveProduct(){
     }
     const allImages=[..._apExistingUrls,...newUrls].slice(0,10);
     const img_url=allImages[0]||null;
+    const newDetailUrls=[];
+    for(const {file} of _apDetailImgFiles){
+      const ext=file.name.split('.').pop();
+      const path=`products/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+      const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
+      if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newDetailUrls.push(pu.publicUrl);}
+    }
+    const allDetailImages=[..._apDetailExistingUrls,...newDetailUrls].slice(0,5);
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
-    const payload={name,price:_apExclusive?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,ensemble_state:_apProductType==='ensemble'?'close':null,is_available:_apAvailable,is_exclusive:_apExclusive};
+    const payload={name,price:_apExclusive?null:parseFloat(price),sizes:_apSizes,type:_apCat,color_tags:_apColorTags,description:desc,image:img_url,images:allImages,detail_images:allDetailImages,slider_type:_apSliderType,hero_status,product_type:_apProductType,ensemble_state:_apProductType==='ensemble'?'close':null,is_available:_apAvailable,is_exclusive:_apExclusive};
     if(_apEditId){
       const{error}=await sb.from('products').update(payload).eq('id',_apEditId);
       if(error)throw error;
@@ -686,10 +741,12 @@ function _resetModalForm(){
   document.getElementById('ap-price').value='';
   document.getElementById('ap-desc').value='';
   _apSizes=[];_apCat=null;_apImgFiles=[];_apExistingUrls=[];_apProductType=null;_apColorTags=[];
+  _apDetailImgFiles=[];_apDetailExistingUrls=[];
   document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('active'));
   const sizeBtns=document.getElementById('size-btns');
   if(sizeBtns)sizeBtns.innerHTML='<span style="color:var(--muted);font-size:12px;padding:4px 0">اختر نوع القطعة أولاً</span>';
   _renderImgStrip();
+  _renderDetailImgStrip();
   const legacyNotice=document.getElementById('ap-color-legacy-notice');if(legacyNotice)legacyNotice.style.display='none';
   const btn=document.getElementById('ap-submit');if(btn){btn.disabled=true;btn.style.opacity='0.45';}
   _apAvailable=true;
@@ -741,6 +798,8 @@ function openEditProduct(id){
   if(legacyNotice)legacyNotice.style.display=(p.color||p.color_name)?'block':'none';
   _apExistingUrls=(p.images&&p.images.length)?[...p.images]:(p.image?[p.image]:[]);
   _renderImgStrip();
+  _apDetailExistingUrls=(p.detail_images&&p.detail_images.length)?[...p.detail_images]:[];
+  _renderDetailImgStrip();
   const del=document.getElementById('ap-delete');if(del)del.style.display='';
   const title=document.querySelector('.ap-modal-title');if(title)title.textContent='Edit Product';
   _apAvailable=p.is_available!==false;
@@ -1506,7 +1565,9 @@ function openProdDetail(id){
   const p=_brProds.find(x=>x.id===id);if(!p)return;
   _pdCurrentId=id;
   _logEvent('view',{productId:p.id,sellerId:p.seller_id});
-  _pdImages=(Array.isArray(p.images)&&p.images.length)?p.images:(p.image?[p.image]:[]);
+  const colorImgs=(Array.isArray(p.images)&&p.images.length)?p.images:(p.image?[p.image]:[]);
+  const detailImgs=Array.isArray(p.detail_images)?p.detail_images:[];
+  _pdImages=[...colorImgs,...detailImgs];
   _pdCarouselIdx=0;
   const ov=document.getElementById('pd-overlay');
   const carousel=document.getElementById('pd-carousel');
@@ -1616,13 +1677,15 @@ function _renderColorCircles(containerId,colorKeys,activeKey,handlerName,extraCl
     const info=_AP_COLORS.find(c=>c.key===key)||{key,hex:key,ar:key};
     const isActive=activeKey?key===activeKey:i===0;
     const cls=['pd-color-circle',info.border?'pd-color-circle--light':'',extraClass||'',isActive?'pd-color-circle--active':''].filter(Boolean).join(' ');
-    return `<button type="button" class="${cls}" style="background:${esc(info.hex)}" data-key="${esc(key)}" onclick="${handlerName}(this)" aria-label="${esc(info.ar||key)}"></button>`;
+    return `<button type="button" class="${cls}" style="background:${esc(info.hex)}" data-key="${esc(key)}" data-idx="${i}" onclick="${handlerName}(this)" aria-label="${esc(info.ar||key)}"></button>`;
   }).join('');
 }
 
 function pdSelectColor(btn){
   document.querySelectorAll('#pd-colors-wrap .pd-color-circle').forEach(b=>b.classList.remove('pd-color-circle--active'));
   btn.classList.add('pd-color-circle--active');
+  const idx=parseInt(btn.dataset.idx,10);
+  if(!isNaN(idx))pdGoSlide(idx);
 }
 
 function pdOrderWhatsApp(){
@@ -1715,10 +1778,12 @@ function openOrderForm(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
   _cfPopulateWilayas();
   cfChangeQty(1-_cfQty);
-  const img=document.getElementById('cf-prod-img');if(img)img.src=safeUrl(_pdImages[0]||p.image||'');
   const nameEl=document.getElementById('cf-prod-name');if(nameEl)nameEl.textContent=p.name||'';
   const priceEl=document.getElementById('cf-prod-price');if(priceEl)priceEl.textContent=_priceLabel(p);
   const activeColorBtn=document.querySelector('#pd-colors-wrap .pd-color-circle--active');
+  const activeColorIdx=activeColorBtn?parseInt(activeColorBtn.dataset.idx,10):0;
+  const img=document.getElementById('cf-prod-img');
+  if(img)img.src=safeUrl(_pdImages[activeColorIdx]||_pdImages[0]||p.image||'');
   _renderColorCircles('cf-prod-color',_pdColorKeys(p),activeColorBtn?activeColorBtn.dataset.key:null,'cfSelectColor','pd-color-circle--sm');
   const activeSizeBtn=document.querySelector('.pd-size-pill--active');
   const sizeEl=document.getElementById('cf-prod-size');
@@ -1738,6 +1803,9 @@ function openOrderForm(){
 function cfSelectColor(btn){
   document.querySelectorAll('#cf-prod-color .pd-color-circle').forEach(b=>b.classList.remove('pd-color-circle--active'));
   btn.classList.add('pd-color-circle--active');
+  const idx=parseInt(btn.dataset.idx,10);
+  const img=document.getElementById('cf-prod-img');
+  if(img&&!isNaN(idx)&&_pdImages[idx])img.src=safeUrl(_pdImages[idx]);
 }
 
 function closeOrderForm(){
