@@ -137,7 +137,7 @@ function _handleStoreDeepLink(){
 async function _openDeepLinkProduct(prodId){
   if(!window.db)return;
   try{
-    const{data:p,error}=await window.db.from('products').select('*,seller:sellers(store_name,profile_image,phone)').eq('id',prodId).eq('is_hidden',false).single();
+    const{data:p,error}=await window.db.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled)').eq('id',prodId).eq('is_hidden',false).single();
     if(error||!p)return;
     if(p.slider_type==='main_hero'&&p.hero_status!=='approved')return;
     if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);
@@ -1064,7 +1064,7 @@ async function loadGuestStoreProducts(sellerId){
     if(aboutDesc)aboutDesc.textContent=seller?.bio||'';
     _setStoreCity(seller?.city);
     _computeSellerNumber(sellerId).then(_setSellerNumber);
-    const{data:prods}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone)').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
+    const{data:prods}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled)').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
     const visProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
     renderShowProducts(visProds);
     // Merge into _brProds so openProdDetail works
@@ -1408,7 +1408,7 @@ function _exploreLoadMore(){
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone)').eq('is_hidden',false).order('created_at',{ascending:false});
+    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled)').eq('is_hidden',false).order('created_at',{ascending:false});
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
@@ -1545,6 +1545,8 @@ function openProdDetail(id){
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
   const wa=document.getElementById('pd-wa-btn');
   if(wa)wa.style.display=(p.seller&&p.seller.phone)?'flex':'none';
+  const cartBtn=document.getElementById('pd-cart-btn');
+  if(cartBtn)cartBtn.style.display=p.seller?.cart_enabled?'flex':'none';
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
@@ -1609,6 +1611,127 @@ function pdOrderWhatsApp(){
   const priceLine=p.is_exclusive?'السعر: (حصري)':Number(p.price||0).toLocaleString()+' DZD';
   const msg='السلام عليكم\n\nمهتم بهذي القطعة من متجرك على Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: (..)\n📞 رقم هاتفي: .... \n🎨 اللون: (..)\n\n'+link+'\n\n(استفسار أكثر...)';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+}
+
+// ══ ORDER FORM (cart checkout UI — no data sent yet) ══
+const _DZ_WILAYAS=[
+  ['01','أدرار'],['02','الشلف'],['03','الأغواط'],['04','أم البواقي'],['05','باتنة'],
+  ['06','بجاية'],['07','بسكرة'],['08','بشار'],['09','البليدة'],['10','البويرة'],
+  ['11','تمنراست'],['12','تبسة'],['13','تلمسان'],['14','تيارت'],['15','تيزي وزو'],
+  ['16','الجزائر'],['17','الجلفة'],['18','جيجل'],['19','سطيف'],['20','سعيدة'],
+  ['21','سكيكدة'],['22','سيدي بلعباس'],['23','عنابة'],['24','قالمة'],['25','قسنطينة'],
+  ['26','المدية'],['27','مستغانم'],['28','المسيلة'],['29','معسكر'],['30','ورقلة'],
+  ['31','وهران'],['32','البيض'],['33','إليزي'],['34','برج بوعريريج'],['35','بومرداس'],
+  ['36','الطارف'],['37','تندوف'],['38','تيسمسيلت'],['39','الوادي'],['40','خنشلة'],
+  ['41','سوق أهراس'],['42','تيبازة'],['43','ميلة'],['44','عين الدفلى'],['45','النعامة'],
+  ['46','عين تموشنت'],['47','غرداية'],['48','غليزان'],['49','تيميمون'],['50','برج باجي مختار'],
+  ['51','أولاد جلال'],['52','بني عباس'],['53','عين صالح'],['54','عين قزام'],['55','تقرت'],
+  ['56','جانت'],['57','المغير'],['58','المنيعة']
+];
+const _DZ_COMMUNES={
+  '16':['الجزائر الوسطى','باب الوادي','القبة','حسين داي','باب الزوار','الحراش','الدار البيضاء','بئر مراد رايس'],
+  '31':['وهران','السانيا','بئر الجير','عين الترك','بطيوة','مسرغين'],
+  '25':['قسنطينة','الخروب','ديدوش مراد','حامة بوزيان','عين السمارة'],
+  '30':['ورقلة','حاسي مسعود','النزلة','الرويسات','سيدي خويلد','ماسين','تماسين'],
+  '19':['سطيف','العلمة','عين ولمان','بابور'],
+  '09':['البليدة','بوفاريك','الأربعاء','موزاية'],
+  '15':['تيزي وزو','عزازقة','ذراع بن خدة','بوغني'],
+  '06':['بجاية','أقبو','سيدي عيش','أميزور'],
+  '13':['تلمسان','مغنية','ندرومة','الرمشي'],
+  '23':['عنابة','الحجار','البوني','سرايدي'],
+  '55':['تقرت','المقارين','الزاوية العابدية','النزلة']
+};
+
+function _dzCommunesFor(wilayaName){
+  const entry=_DZ_WILAYAS.find(w=>w[1]===wilayaName);
+  if(!entry)return[];
+  return _DZ_COMMUNES[entry[0]]||[wilayaName];
+}
+
+let _cfDelivery='home';
+
+function _cfPopulateWilayas(){
+  const sel=document.getElementById('cf-wilaya');
+  if(!sel||sel.dataset.filled)return;
+  sel.innerHTML='<option value="">الولاية</option>'+_DZ_WILAYAS.map(w=>`<option value="${w[1]}">${w[0]} - ${w[1]}</option>`).join('');
+  sel.dataset.filled='1';
+}
+
+function cfWilayaChanged(){
+  const wilaya=document.getElementById('cf-wilaya')?.value||'';
+  const communeSel=document.getElementById('cf-commune');if(!communeSel)return;
+  if(!wilaya){
+    communeSel.innerHTML='<option value="">البلدية</option>';
+    communeSel.disabled=true;
+    return;
+  }
+  const communes=_dzCommunesFor(wilaya);
+  communeSel.innerHTML='<option value="">البلدية</option>'+communes.map(c=>`<option value="${c}">${c}</option>`).join('');
+  communeSel.disabled=false;
+}
+
+function cfSetDelivery(mode){
+  _cfDelivery=mode;
+  const home=document.getElementById('cf-deliv-home');
+  const office=document.getElementById('cf-deliv-office');
+  const homeOn=mode==='home';
+  home?.classList.toggle('cf-delivery-opt--active',homeOn);
+  office?.classList.toggle('cf-delivery-opt--active',!homeOn);
+  home?.querySelector('.cf-radio-dot')?.classList.toggle('cf-radio-dot--active',homeOn);
+  office?.querySelector('.cf-radio-dot')?.classList.toggle('cf-radio-dot--active',!homeOn);
+  const hint=document.getElementById('cf-delivery-hint');
+  if(hint)hint.textContent=homeOn?'توصيل سريع وآمن إلى باب منزلك':'استلم طلبك من أقرب مكتب توصيل';
+}
+
+function openOrderForm(){
+  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  _cfPopulateWilayas();
+  const img=document.getElementById('cf-prod-img');if(img)img.src=safeUrl(_pdImages[0]||p.image||'');
+  const nameEl=document.getElementById('cf-prod-name');if(nameEl)nameEl.textContent=p.name||'';
+  const priceEl=document.getElementById('cf-prod-price');if(priceEl)priceEl.textContent=_priceLabel(p);
+  const colorEl=document.getElementById('cf-prod-color');if(colorEl)colorEl.textContent=p.color_name||p.color||'—';
+  const activeSizeBtn=document.querySelector('.pd-size-pill--active');
+  const sizeEl=document.getElementById('cf-prod-size');
+  if(sizeEl)sizeEl.textContent=(activeSizeBtn?activeSizeBtn.textContent:(p.sizes&&p.sizes[0]))||'—';
+  ['cf-name','cf-phone','cf-address'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const wilayaSel=document.getElementById('cf-wilaya');if(wilayaSel)wilayaSel.value='';
+  cfWilayaChanged();
+  cfSetDelivery('home');
+  const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='none';
+  const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
+  cfOv.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>cfOv.classList.add('cf-overlay--open')));
+}
+
+function closeOrderForm(){
+  const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
+  cfOv.classList.remove('cf-overlay--open');
+  setTimeout(()=>{cfOv.style.display='none';},380);
+  const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='flex';
+}
+
+function cfConfirmOrder(){
+  const p=_brProds.find(x=>x.id===_pdCurrentId);
+  console.log('[Wardro] Order confirmed (placeholder — not sent to server):',{
+    product:p?{id:p.id,name:p.name,price:p.price}:null,
+    color:document.getElementById('cf-prod-color')?.textContent||'',
+    size:document.getElementById('cf-prod-size')?.textContent||'',
+    name:document.getElementById('cf-name')?.value||'',
+    phone:document.getElementById('cf-phone')?.value||'',
+    wilaya:document.getElementById('cf-wilaya')?.value||'',
+    commune:document.getElementById('cf-commune')?.value||'',
+    address:document.getElementById('cf-address')?.value||'',
+    delivery:_cfDelivery
+  });
+}
+
+function cfOrderWhatsApp(){
+  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  if(p.seller?.whatsapp_enabled===false){
+    toast('البائع لا يدعم الطلب عبر واتساب حالياً');
+    return;
+  }
+  pdOrderWhatsApp();
 }
 
 function _logBehavior(action,product){
@@ -2102,7 +2225,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     // Primary query — product_type + price (Supabase, no AI); jeans is semantically pants
     const pieceTypes=_dcType==='pants'?['pants','jeans']:[_dcType];
     let q=sb.from('products')
-      .select('*, seller:sellers(store_name,phone)')
+      .select('*, seller:sellers(store_name,phone,cart_enabled,whatsapp_enabled)')
       .in('product_type',pieceTypes)
       .eq('is_hidden',false)
       .gte('price',minPrice)
@@ -2134,7 +2257,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     // Complementary — different piece types, structural only (AI not wired)
     const otherTypes=['shirt','pants','jeans','shoes','accessory','sandals'].filter(t=>!pieceTypes.includes(t));
     const{data:compProds}=await sb.from('products')
-      .select('*, seller:sellers(store_name,phone)')
+      .select('*, seller:sellers(store_name,phone,cart_enabled,whatsapp_enabled)')
       .in('product_type',otherTypes)
       .eq('is_hidden',false)
       .limit(8);
