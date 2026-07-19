@@ -387,6 +387,10 @@ const _AP_COLORS=[
   {key:'dark-green',ar:'أخضر غامق',hex:'#2E4A33'},
   {key:'burgundy',ar:'نبيذي',hex:'#7A3B3B'},
   {key:'rust',ar:'طوباقي',hex:'#B4513A'},
+  {key:'blue',ar:'أزرق',hex:'#1F4E8C'},
+  {key:'sky-blue',ar:'أزرق سماوي',hex:'#5BAFD6'},
+  {key:'mustard',ar:'خردلي',hex:'#C8A832'},
+  {key:'pink',ar:'وردي',hex:'#E8A0B0'},
 ];
 
 const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size'],ensemble:['S','M','L','XL','XXL'],sandals:['39','40','41','42','43','44','45','46']};
