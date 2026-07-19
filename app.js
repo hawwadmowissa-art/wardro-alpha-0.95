@@ -1514,7 +1514,7 @@ function _pdCarouselTouch(){
   carousel.addEventListener('touchend',e=>{
     if(!tracking||axisLocked!=='h'){tracking=false;return;}
     const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>40){dx<0?pdGoSlide(_pdCarouselIdx+1):pdGoSlide(_pdCarouselIdx-1);}
+    if(Math.abs(dx)>40){dx<0?pdGoSlide(_pdCarouselIdx-1):pdGoSlide(_pdCarouselIdx+1);}
     tracking=false;
   },{passive:true});
 }
