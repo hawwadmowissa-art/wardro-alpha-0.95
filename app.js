@@ -795,6 +795,44 @@ async function saveBio(){
   }catch(e){toast(e.message||'خطأ في الحفظ')}
 }
 
+let _esContactMode='whatsapp';
+
+async function openEdSettings(){
+  document.getElementById('ed-settings-backdrop')?.classList.add('ed-settings-backdrop--open');
+  document.getElementById('ed-settings-panel')?.classList.add('ed-settings-panel--open');
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();if(!user)return;
+    const{data:seller}=await sb.from('sellers').select('contact_mode,sheet_url').eq('id',user.id).single();
+    esSetContactMode(seller?.contact_mode||'whatsapp');
+    const urlEl=document.getElementById('es-sheet-url');if(urlEl)urlEl.value=seller?.sheet_url||'';
+  }catch(e){}
+}
+
+function closeEdSettings(){
+  document.getElementById('ed-settings-backdrop')?.classList.remove('ed-settings-backdrop--open');
+  document.getElementById('ed-settings-panel')?.classList.remove('ed-settings-panel--open');
+}
+
+function esSetContactMode(mode){
+  _esContactMode=mode;
+  document.querySelectorAll('#es-contact-mode-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===mode));
+  const grp=document.getElementById('es-sheet-url-group');if(grp)grp.style.display=mode==='form'?'':'none';
+}
+
+async function saveEdSettings(){
+  const sb=getSb();if(!sb)return;
+  const btn=document.getElementById('es-save-btn');
+  const sheetUrl=(document.getElementById('es-sheet-url')?.value||'').trim();
+  try{
+    const{data:{user}}=await sb.auth.getUser();if(!user)return;
+    if(btn){btn.disabled=true;btn.textContent='...';}
+    await sb.from('sellers').update({contact_mode:_esContactMode,sheet_url:sheetUrl||null}).eq('id',user.id);
+    toast('✓ تم حفظ الإعدادات');
+  }catch(e){toast(e.message||'خطأ في الحفظ')}
+  finally{if(btn){btn.disabled=false;btn.textContent='حفظ';}}
+}
+
 async function logOut(){
   const sb=getSb();if(!sb)return;
   try{
@@ -804,6 +842,7 @@ async function logOut(){
     localStorage.removeItem('wardro_profile_image');
     clearInterval(_heroTimer);
     clearInterval(_brHeroTimer);
+    closeEdSettings();
     // Reset registration form
     ['reg-store','reg-phone','reg-email','reg-pass','reg-pass2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     clearRegErrors();
