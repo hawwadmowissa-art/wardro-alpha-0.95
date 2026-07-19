@@ -806,7 +806,18 @@ async function openEdSettings(){
     const{data:seller}=await sb.from('sellers').select('contact_mode,sheet_url').eq('id',user.id).single();
     esSetContactMode(seller?.contact_mode||'whatsapp');
     const urlEl=document.getElementById('es-sheet-url');if(urlEl)urlEl.value=seller?.sheet_url||'';
+    esValidateSave();
   }catch(e){}
+}
+
+function esValidateSave(){
+  const btn=document.getElementById('es-save-btn');if(!btn)return;
+  if(_esContactMode==='form'){
+    const val=(document.getElementById('es-sheet-url')?.value||'').trim();
+    btn.disabled=!val;
+  }else{
+    btn.disabled=false;
+  }
 }
 
 function closeEdSettings(){
@@ -828,6 +839,7 @@ function esSetContactMode(mode){
   waRow?.classList.toggle('es-opt-row--off',!onWa);
   formRow?.classList.toggle('es-opt-row--off',onWa);
   const grp=document.getElementById('es-sheet-url-group');if(grp)grp.style.display=onWa?'none':'';
+  esValidateSave();
 }
 
 async function saveEdSettings(){
