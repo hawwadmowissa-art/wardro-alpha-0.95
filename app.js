@@ -450,7 +450,7 @@ function _renderImgStrip(){
   }
   strip.innerHTML=html;
   const hint=document.getElementById('ap-imgs-hint');
-  if(hint)hint.textContent=total>=10?'الحد الأقصى 10 صور':'اضغط على + لإضافة صورة (1–10)';
+  if(hint)hint.textContent=total>=10?'الحد الأقصى 10 صور':'اضغط على + لإضافة صورة (1-12)';
 }
 
 function addProductImages(input){
@@ -496,7 +496,7 @@ function _renderDetailImgStrip(){
   }
   strip.innerHTML=html;
   const hint=document.getElementById('ap-detail-imgs-hint');
-  if(hint)hint.textContent=total>=5?'الحد الأقصى 5 صور':'اضغط على + لإضافة صورة (0–5)';
+  if(hint)hint.textContent=total>=5?'الحد الأقصى 5 صور':'اضغط على + لإضافة صورة (1-12)';
 }
 
 function addProductDetailImages(input){
