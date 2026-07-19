@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wardro — لا يوجد اتصال</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:#0B0A08;
+    color:#D8CFBA;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:24px;
+    text-align:center;
+    font-family:'Tajawal','Segoe UI',sans-serif;
+  }
+  .off-mark{
+    width:76px;height:76px;
+    border-radius:50%;
+    border:1px solid rgba(210,175,105,.35);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:22px;
+  }
+  .off-mark span{
+    font-family:'Fraunces',Georgia,serif;
+    font-size:26px;
+    font-weight:600;
+    color:#D2AF69;
+    letter-spacing:.04em;
+  }
+  .off-word{
+    font-family:'Fraunces',Georgia,serif;
+    font-size:13px;
+    letter-spacing:.32em;
+    color:#D2AF69;
+    opacity:.85;
+    margin-bottom:34px;
+  }
+  .off-msg{
+    font-family:'Fraunces',Georgia,serif;
+    font-size:19px;
+    font-weight:600;
+    color:#EDE3CC;
+    margin-bottom:8px;
+  }
+  .off-sub{
+    font-size:13px;
+    color:#5A5045;
+    line-height:1.7;
+    max-width:280px;
+    margin-bottom:30px;
+  }
+  .off-retry{
+    padding:12px 30px;
+    background:transparent;
+    border:1px solid rgba(210,175,105,.4);
+    border-radius:12px;
+    color:#D2AF69;
+    font-family:'Tajawal','Segoe UI',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    transition:background .25s,border-color .25s;
+  }
+  .off-retry:hover{background:rgba(210,175,105,.08);border-color:rgba(210,175,105,.7)}
+  .off-retry:active{background:rgba(210,175,105,.14)}
+</style>
+</head>
+<body>
+  <div class="off-mark"><span>WR</span></div>
+  <div class="off-word">WARDRO</div>
+  <div class="off-msg">لا يوجد اتصال بالإنترنت</div>
+  <div class="off-sub">تحقق من اتصالك بالشبكة ثم حاول مرة أخرى</div>
+  <button class="off-retry" onclick="window.location.reload()">إعادة المحاولة</button>
+</body>
+</html>

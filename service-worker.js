@@ -4,6 +4,7 @@ const CACHE_VERSION = 'wardro-v1';
 const SHELL = [
   './',
   './index.html',
+  './offline.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -69,7 +70,9 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(c => c.put(req, clone));
           return res;
         })
-        .catch(() => caches.match('./').then(r => r || caches.match('./index.html')))
+        .catch(() => caches.match('./')
+          .then(r => r || caches.match('./index.html'))
+          .then(r => r || caches.match('./offline.html')))
     );
     return;
   }
