@@ -907,10 +907,13 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pd-store-name:hover{color:var(--gold)}
 .pd-field-block{display:flex;flex-direction:column;gap:5px}
 .pd-field-label{font-size:8px;letter-spacing:2px;color:var(--goldD);text-transform:uppercase;font-weight:700;text-align:right}
-.pd-colors-wrap{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.pd-color-chip{font-size:10px;color:var(--txt);background:var(--dim);
-  border:1px solid var(--brd);border-radius:6px;padding:3px 8px;white-space:nowrap}
-.pd-color-chip--active{border-color:var(--gold);color:var(--gold)}
+.pd-colors-wrap{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pd-color-circle{width:36px;height:36px;border-radius:50%;flex-shrink:0;border:none;cursor:pointer;
+  padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);
+  outline:2.5px solid transparent;outline-offset:3px;transition:outline-color .25s var(--spring)}
+.pd-color-circle--light{box-shadow:0 2px 6px rgba(0,0,0,.35),inset 0 0 0 1px rgba(138,138,138,.45)}
+.pd-color-circle--active{outline-color:var(--gold)}
+.pd-color-circle--sm{width:24px;height:24px;outline-width:2px;outline-offset:2px}
 .pd-size-pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .pd-size-pill{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--brd);
   color:var(--txt);font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;
@@ -1001,6 +1004,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .cf-field-lbl{font-size:11px;color:var(--muted);font-family:'Tajawal',sans-serif;margin-bottom:4px}
 .cf-field-val{background:var(--card);border:1px solid var(--brd);border-radius:12px;
   padding:11px 14px;font-size:13px;color:var(--txt);font-family:'Tajawal',sans-serif}
+.cf-field-val.cf-color-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 10px}
 .cf-sec-title{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--cream);text-align:center}
 .cf-input-wrap{position:relative;display:flex;align-items:center}
 .cf-input-icon{position:absolute;right:14px;color:var(--goldD);pointer-events:none}

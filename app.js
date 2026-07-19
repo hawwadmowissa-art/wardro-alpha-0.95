@@ -1537,8 +1537,7 @@ function openProdDetail(id){
   const _dot=document.getElementById('pd-stock-dot');
   if(_lbl){_lbl.textContent=_avail?'متوفر':'غير متوفر';_lbl.className='pd-stock-lbl '+(_avail?'pd-stock-lbl--yes':'pd-stock-lbl--no');}
   if(_dot){_dot.className='pd-stock-dot'+(_avail?'':' pd-stock-dot--no');}
-  const cWrap=document.getElementById('pd-colors-wrap');
-  cWrap.innerHTML=p.color?`<span class="pd-color-chip pd-color-chip--active">${esc(p.color_name||p.color)}</span>`:'';
+  _renderColorCircles('pd-colors-wrap',_pdColorKeys(p),null,'pdSelectColor');
   const sPills=document.getElementById('pd-size-pills');
   sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
   const btn=document.getElementById('pd-save-btn');
@@ -1604,6 +1603,26 @@ function pdToggleHeart(){
 function pdSelectSize(btn){
   document.querySelectorAll('.pd-size-pill').forEach(b=>b.classList.remove('pd-size-pill--active'));
   btn.classList.add('pd-size-pill--active');
+}
+
+function _pdColorKeys(p){
+  return(p.color_tags&&p.color_tags.length)?p.color_tags:(p.color?[p.color]:[]);
+}
+
+function _renderColorCircles(containerId,colorKeys,activeKey,handlerName,extraClass){
+  const wrap=document.getElementById(containerId);if(!wrap)return;
+  if(!colorKeys||!colorKeys.length){wrap.innerHTML='—';return;}
+  wrap.innerHTML=colorKeys.map((key,i)=>{
+    const info=_AP_COLORS.find(c=>c.key===key)||{key,hex:key,ar:key};
+    const isActive=activeKey?key===activeKey:i===0;
+    const cls=['pd-color-circle',info.border?'pd-color-circle--light':'',extraClass||'',isActive?'pd-color-circle--active':''].filter(Boolean).join(' ');
+    return `<button type="button" class="${cls}" style="background:${esc(info.hex)}" data-key="${esc(key)}" onclick="${handlerName}(this)" aria-label="${esc(info.ar||key)}"></button>`;
+  }).join('');
+}
+
+function pdSelectColor(btn){
+  document.querySelectorAll('#pd-colors-wrap .pd-color-circle').forEach(b=>b.classList.remove('pd-color-circle--active'));
+  btn.classList.add('pd-color-circle--active');
 }
 
 function pdOrderWhatsApp(){
@@ -1699,7 +1718,8 @@ function openOrderForm(){
   const img=document.getElementById('cf-prod-img');if(img)img.src=safeUrl(_pdImages[0]||p.image||'');
   const nameEl=document.getElementById('cf-prod-name');if(nameEl)nameEl.textContent=p.name||'';
   const priceEl=document.getElementById('cf-prod-price');if(priceEl)priceEl.textContent=_priceLabel(p);
-  const colorEl=document.getElementById('cf-prod-color');if(colorEl)colorEl.textContent=p.color_name||p.color||'—';
+  const activeColorBtn=document.querySelector('#pd-colors-wrap .pd-color-circle--active');
+  _renderColorCircles('cf-prod-color',_pdColorKeys(p),activeColorBtn?activeColorBtn.dataset.key:null,'cfSelectColor','pd-color-circle--sm');
   const activeSizeBtn=document.querySelector('.pd-size-pill--active');
   const sizeEl=document.getElementById('cf-prod-size');
   if(sizeEl)sizeEl.textContent=(activeSizeBtn?activeSizeBtn.textContent:(p.sizes&&p.sizes[0]))||'—';
@@ -1715,6 +1735,11 @@ function openOrderForm(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>cfOv.classList.add('cf-overlay--open')));
 }
 
+function cfSelectColor(btn){
+  document.querySelectorAll('#cf-prod-color .pd-color-circle').forEach(b=>b.classList.remove('pd-color-circle--active'));
+  btn.classList.add('pd-color-circle--active');
+}
+
 function closeOrderForm(){
   const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
   cfOv.classList.remove('cf-overlay--open');
@@ -1726,7 +1751,7 @@ function cfConfirmOrder(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);
   console.log('[Wardro] Order confirmed (placeholder — not sent to server):',{
     product:p?{id:p.id,name:p.name,price:p.price}:null,
-    color:document.getElementById('cf-prod-color')?.textContent||'',
+    color:document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'',
     size:document.getElementById('cf-prod-size')?.textContent||'',
     name:document.getElementById('cf-name')?.value||'',
     phone:document.getElementById('cf-phone')?.value||'',
