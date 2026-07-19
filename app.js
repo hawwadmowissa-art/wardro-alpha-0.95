@@ -816,8 +816,18 @@ function closeEdSettings(){
 
 function esSetContactMode(mode){
   _esContactMode=mode;
-  document.querySelectorAll('#es-contact-mode-btns .sel-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===mode));
-  const grp=document.getElementById('es-sheet-url-group');if(grp)grp.style.display=mode==='form'?'':'none';
+  const waSwitch=document.getElementById('es-switch-whatsapp');
+  const formSwitch=document.getElementById('es-switch-form');
+  const waRow=document.getElementById('es-row-whatsapp');
+  const formRow=document.getElementById('es-row-form');
+  const onWa=mode==='whatsapp';
+  waSwitch?.classList.toggle('es-switch--on',onWa);
+  waSwitch?.setAttribute('aria-checked',onWa);
+  formSwitch?.classList.toggle('es-switch--on',!onWa);
+  formSwitch?.setAttribute('aria-checked',!onWa);
+  waRow?.classList.toggle('es-opt-row--off',!onWa);
+  formRow?.classList.toggle('es-opt-row--off',onWa);
+  const grp=document.getElementById('es-sheet-url-group');if(grp)grp.style.display=onWa?'none':'';
 }
 
 async function saveEdSettings(){
@@ -829,8 +839,9 @@ async function saveEdSettings(){
     if(btn){btn.disabled=true;btn.textContent='...';}
     await sb.from('sellers').update({contact_mode:_esContactMode,sheet_url:sheetUrl||null}).eq('id',user.id);
     toast('✓ تم حفظ الإعدادات');
+    closeEdSettings();
   }catch(e){toast(e.message||'خطأ في الحفظ')}
-  finally{if(btn){btn.disabled=false;btn.textContent='حفظ';}}
+  finally{if(btn){btn.disabled=false;btn.textContent='تم';}}
 }
 
 async function logOut(){

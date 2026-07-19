@@ -462,35 +462,6 @@
     <div style="flex:1"></div>
   </div>
 
-  <!-- Settings panel backdrop -->
-  <div class="ed-settings-backdrop" id="ed-settings-backdrop" onclick="closeEdSettings()"></div>
-
-  <!-- Settings Panel (slide-in from right) -->
-  <div class="ed-settings-panel" id="ed-settings-panel" dir="rtl">
-    <div class="ed-settings-hd">
-      <span class="ed-settings-title">الإعدادات</span>
-      <button class="ap-modal-close" onclick="closeEdSettings()">✕</button>
-    </div>
-    <div class="ed-settings-body">
-      <div class="form-group">
-        <label>طريقة استقبال الطلبات</label>
-        <div class="sel-btns" id="es-contact-mode-btns">
-          <button type="button" class="sel-btn" data-val="whatsapp" onclick="esSetContactMode('whatsapp')">واتساب</button>
-          <button type="button" class="sel-btn" data-val="form" onclick="esSetContactMode('form')">استمارة طلب</button>
-        </div>
-      </div>
-      <div class="form-group" id="es-sheet-url-group" style="display:none">
-        <label>رابط Google Sheet (Web App URL)</label>
-        <input type="text" id="es-sheet-url" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <button type="button" class="ap-done" id="es-save-btn" onclick="saveEdSettings()">حفظ</button>
-      <button type="button" class="ed-settings-logout" onclick="logOut()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        تسجيل الخروج
-      </button>
-    </div>
-  </div>
-
   <!-- Main Content -->
   <div class="ed-main">
 
@@ -823,19 +794,27 @@
 
     <!-- Top Bar -->
     <div class="show-topbar">
+      <div class="ed-topbar-left">
+        <button class="ed-menu-btn" onclick="openEdSidebar(this)" title="Menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
       <div class="ed-topbar-titles">
         <div class="ed-topbar-main">SHOW MODE</div>
         <div class="ed-topbar-sub">View your store as customers</div>
       </div>
       <div class="show-topbar-actions">
-        <button class="ed-menu-btn" onclick="openEdSidebar(this)" title="Menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
         <button class="show-exit-btn" onclick="navigateTo('s-editor','slide')">Exit Preview</button>
         <button class="ed-bell-btn" onclick="toast('Notifications — قريباً')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <button class="ed-bell-btn" onclick="openEdSettings()" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </button>
       </div>
@@ -1519,6 +1498,47 @@
     <div class="legal-modal-footer">
       <button class="legal-modal-accept" id="legal-modal-accept" disabled>قبول و متابعة</button>
     </div>
+  </div>
+</div>
+
+<!-- Settings panel backdrop (global — shared by Editor + Show Mode) -->
+<div class="ed-settings-backdrop" id="ed-settings-backdrop" onclick="closeEdSettings()"></div>
+
+<!-- Settings Panel (slide-in from right) -->
+<div class="ed-settings-panel" id="ed-settings-panel" dir="rtl">
+  <div class="ed-settings-hd">
+    <span class="ed-settings-title">الإعدادات</span>
+    <button class="ap-modal-close" onclick="closeEdSettings()">✕</button>
+  </div>
+  <div class="ed-settings-body">
+    <div class="es-section-label">طريقة استقبال الطلبات</div>
+
+    <div class="es-opt-row" id="es-row-whatsapp">
+      <span class="es-opt-label">واتساب</span>
+      <button type="button" class="es-switch" id="es-switch-whatsapp" onclick="esSetContactMode('whatsapp')" role="switch" aria-checked="true" title="واتساب">
+        <span class="es-switch-knob"></span>
+      </button>
+    </div>
+
+    <div class="es-opt-row" id="es-row-form">
+      <span class="es-opt-label">استمارة طلب</span>
+      <button type="button" class="es-switch" id="es-switch-form" onclick="esSetContactMode('form')" role="switch" aria-checked="false" title="استمارة طلب">
+        <span class="es-switch-knob"></span>
+      </button>
+    </div>
+
+    <div class="form-group es-sheet-url-group" id="es-sheet-url-group" style="display:none">
+      <label>رابط Google Sheet (Web App URL)</label>
+      <input type="text" id="es-sheet-url" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+
+    <button type="button" class="ap-done" id="es-save-btn" onclick="saveEdSettings()">تم</button>
+  </div>
+  <div class="ed-settings-footer">
+    <button type="button" class="ed-settings-logout" onclick="logOut()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      تسجيل الخروج
+    </button>
   </div>
 </div>
 
