@@ -1105,10 +1105,10 @@ function leaveGuestStore(){
 async function loadGuestStoreProducts(sellerId){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone').eq('id',sellerId).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone,whatsapp_enabled').eq('id',sellerId).single();
     const guestName=document.getElementById('show-store-name')?.textContent||'?';
     _storeShare={id:sellerId,name:guestName,city:seller?.city||'',phone:seller?.phone||null};
-    _setStoreWaBtn(!!(seller&&seller.phone));
+    _setStoreWaBtn(!!(seller&&seller.phone)&&seller?.whatsapp_enabled!==false);
     const av=document.getElementById('show-avatar');
     const avAbout=document.getElementById('show-about-avatar');
     if(seller?.profile_image){
