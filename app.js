@@ -542,8 +542,10 @@ async function saveProduct(){
     for(const {file} of _apImgFiles){
       const ext=file.name.split('.').pop();
       const path=`products/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-      const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
-      if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newUrls.push(pu.publicUrl);}
+      const compressed=await _compressImage(file);
+      const{error:upErr}=await sb.storage.from('product-images').upload(path,compressed,{upsert:true});
+      if(upErr){toast('فشل رفع الصورة — حاول مجدداً');continue;}
+      const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newUrls.push(pu.publicUrl);
     }
     const allImages=[..._apExistingUrls,...newUrls].slice(0,10);
     const img_url=allImages[0]||null;
@@ -551,8 +553,10 @@ async function saveProduct(){
     for(const {file} of _apDetailImgFiles){
       const ext=file.name.split('.').pop();
       const path=`products/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-      const{error:upErr}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
-      if(!upErr){const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newDetailUrls.push(pu.publicUrl);}
+      const compressed=await _compressImage(file);
+      const{error:upErr}=await sb.storage.from('product-images').upload(path,compressed,{upsert:true});
+      if(upErr){toast('فشل رفع الصورة — حاول مجدداً');continue;}
+      const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);newDetailUrls.push(pu.publicUrl);
     }
     const allDetailImages=[..._apDetailExistingUrls,...newDetailUrls].slice(0,5);
     const hero_status=_apSliderType==='main_hero'?'pending':'none';
@@ -991,6 +995,23 @@ async function _resizeStoreImage(file){
       canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
       canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
       canvas.toBlob(blob=>resolve(blob||file),'image/jpeg',0.85);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
+    img.src=url;
+  });
+}
+
+async function _compressImage(file,maxPx=1200,quality=0.82){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const scale=Math.min(1,maxPx/Math.max(img.width,img.height));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      canvas.toBlob(blob=>resolve(blob||file),'image/jpeg',quality);
     };
     img.onerror=()=>{URL.revokeObjectURL(url);resolve(file);};
     img.src=url;
@@ -1689,7 +1710,7 @@ function pdSelectColor(btn){
   document.querySelectorAll('#pd-colors-wrap .pd-color-circle').forEach(b=>b.classList.remove('pd-color-circle--active'));
   btn.classList.add('pd-color-circle--active');
   const idx=parseInt(btn.dataset.idx,10);
-  if(!isNaN(idx))pdGoSlide(idx);
+  if(!isNaN(idx))pdGoSlide(Math.min(idx,_pdImages.length-1));
 }
 
 function pdOrderWhatsApp(){
@@ -2864,10 +2885,9 @@ async function saveOutfit(){
     if(_bcCoverFile){
       const path=`outfits/${user.id}/${outfitId}.jpg`;
       const{error:upErr}=await sb.storage.from('product-images').upload(path,_bcCoverFile.file,{upsert:true,contentType:_bcCoverFile.file.type});
-      if(!upErr){
-        const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);
-        coverUrl=pu.publicUrl+'?v='+Date.now();
-      }
+      if(upErr){toast('فشل رفع الصورة — حاول مجدداً');return;}
+      const{data:pu}=sb.storage.from('product-images').getPublicUrl(path);
+      coverUrl=pu.publicUrl+'?v='+Date.now();
     }
     const{error:covErr}=await sb.from('outfits').update({cover_image:coverUrl||null}).eq('id',outfitId);
     if(covErr)throw covErr;
