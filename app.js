@@ -1492,7 +1492,7 @@ function _exploreLoadMore(){
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled)').eq('is_hidden',false).order('created_at',{ascending:false});
+    const{data:prods,error}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled,sheet_url)').eq('is_hidden',false).order('created_at',{ascending:false});
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
     _brProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
