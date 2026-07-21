@@ -230,6 +230,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;o
 .ob-skip:hover{color:var(--txtD)}
 
 /* ══ LOGO ══ */
+.w-logo-img{height:72px;width:auto;object-fit:contain;display:block;margin:0 auto}
 #s-logo{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s var(--smooth)}
 #s-logo.fade-out{opacity:0;pointer-events:none}
 .logo-splash-wrap{display:flex;flex-direction:column;align-items:center;gap:24px;opacity:0;transform:scale(.85);animation:logoCin 2.8s var(--expo) .4s forwards}
@@ -1063,6 +1064,10 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   animation:ocGlowPulse 2.2s ease-in-out infinite}
 .oc-w-ring{position:absolute;inset:0;animation:ocRingSpin 7s linear infinite}
 .oc-w-ring-spark{filter:drop-shadow(0 0 4px #D2AF69)}
+.oc-scan-track{position:absolute;inset:0;border:2px solid rgba(210,175,105,.16);border-radius:50%}
+.oc-scan-orbit{position:absolute;inset:0;border-radius:50%;animation:ocOrbitSpin 1.8s linear infinite}
+.oc-scan-dot{position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:9px;height:9px;
+  border-radius:50%;background:#D2AF69;box-shadow:0 0 8px #D2AF69}
 .oc-w-letter{position:relative;font-family:'Fraunces',serif;font-size:54px;font-weight:300;
   color:var(--gold);text-shadow:0 0 22px rgba(210,175,105,.55);animation:ocLetterBreathe 2.2s ease-in-out infinite}
 .oc-w-connector{position:relative;width:1px;height:34px;margin-top:2px;flex-shrink:0;
@@ -1121,6 +1126,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 @keyframes ocGlowPulse{0%,100%{transform:scale(.92);opacity:.75}50%{transform:scale(1.12);opacity:1}}
 @keyframes ocLetterBreathe{0%,100%{opacity:.88}50%{opacity:1}}
 @keyframes ocRingSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes ocOrbitSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes ocFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes ocStepIn{to{opacity:1;transform:translateY(0)}}
 @keyframes ocRingIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}

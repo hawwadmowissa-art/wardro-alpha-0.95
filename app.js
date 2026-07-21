@@ -1634,7 +1634,7 @@ function openProdDetail(id){
   if(wa)wa.style.display=canWa?'flex':'none';
   const cartBtn=document.getElementById('pd-cart-btn');
   if(cartBtn)cartBtn.style.display=canCart?'flex':'none';
-  btn.style.display=(canWa&&canCart)?'none':'';
+  btn.style.display='';
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
@@ -1818,7 +1818,9 @@ function openOrderForm(){
   cfWilayaChanged();
   cfSetDelivery('home');
   const waBtn=document.getElementById('cf-wa-btn');
-  if(waBtn)waBtn.style.display=p.seller?.whatsapp_enabled!==false?'':'none';
+  const _waEnabled=p.seller?.whatsapp_enabled!==false;
+  const _cartEnabled=!!p.seller?.cart_enabled;
+  if(waBtn)waBtn.style.display=(_waEnabled&&!_cartEnabled)?'':'none';
   const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='none';
   const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
   cfOv.style.display='flex';
