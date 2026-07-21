@@ -1337,6 +1337,68 @@
   </div>
 </div>
 
+<!-- ORDER CONFIRMATION ANIMATION SHELL (UI only — no submission logic) -->
+<div id="oc-overlay" class="oc-overlay" dir="rtl">
+
+  <div class="oc-phase oc-phase--active" id="oc-phase-sending">
+    <div class="oc-w-wrap">
+      <div class="oc-w-glow"></div>
+      <svg class="oc-w-ring" viewBox="0 0 140 140" width="140" height="140" aria-hidden="true">
+        <circle cx="70" cy="70" r="56" fill="none" stroke="#D2AF69" stroke-width="1.2" opacity=".5"/>
+        <circle class="oc-w-ring-spark" cx="70" cy="14" r="2.6" fill="#D2AF69"/>
+      </svg>
+      <span class="oc-w-letter">W</span>
+    </div>
+    <div class="oc-w-connector"><span class="oc-w-connector-dot"></span></div>
+    <div class="oc-sending-title">جاري إرسال طلبك...</div>
+    <div class="oc-steps">
+      <div class="oc-step" id="oc-step-1"><span class="oc-step-dot"></span><span>تأكد من توفر القطعة...</span></div>
+      <div class="oc-step" id="oc-step-2"><span class="oc-step-dot"></span><span>نجهز بيانات التواصل...</span></div>
+      <div class="oc-step" id="oc-step-3"><span class="oc-step-dot"></span><span>نرسل الطلب للمتجر...</span></div>
+    </div>
+  </div>
+
+  <div class="oc-phase" id="oc-phase-success">
+    <div class="oc-check-wrap">
+      <svg class="oc-check-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#D2AF69" stroke-width="2"/>
+        <path class="oc-check-path" d="M38 61 L54 77 L84 43" fill="none" stroke="#D2AF69" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="oc-spark oc-spark-1">✦</span>
+      <span class="oc-spark oc-spark-2">✦</span>
+      <span class="oc-spark oc-spark-3">✦</span>
+    </div>
+    <div class="oc-success-title">تم استلام طلبك</div>
+    <div class="oc-success-sub">سيقوم المتجر بمراجعته ثم سيتواصل معك قريباً<br>لتأكيد التفاصيل وموعد التوصيل.</div>
+    <div class="oc-order-pill">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2AF69" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
+      <span>رقم الطلب <b id="oc-order-num">#WR-00000</b></span>
+    </div>
+    <div class="oc-timeline">
+      <div class="oc-tl-row oc-tl-row--active">
+        <div class="oc-tl-dot"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0B0A08" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <span class="oc-tl-label">تم استلام الطلب</span>
+        <span class="oc-tl-status oc-tl-status--active">الآن</span>
+      </div>
+      <div class="oc-tl-row">
+        <div class="oc-tl-dot"></div>
+        <span class="oc-tl-label">مراجعة المتجر</span>
+        <span class="oc-tl-status">قيد الانتظار</span>
+      </div>
+      <div class="oc-tl-row">
+        <div class="oc-tl-dot"></div>
+        <span class="oc-tl-label">التواصل معك</span>
+        <span class="oc-tl-status">قريباً</span>
+      </div>
+    </div>
+    <button type="button" class="oc-home-btn" onclick="ocCloseToHome()">
+      <span>العودة للرئيسية</span>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B0A08" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </button>
+  </div>
+
+</div>
+
 <!-- OUTFIT DETAIL SHEET (public Collections) -->
 <div id="od-overlay" class="od-overlay" onclick="closeOutfitDetailPublic()">
   <div class="od-sheet" onclick="event.stopPropagation()">

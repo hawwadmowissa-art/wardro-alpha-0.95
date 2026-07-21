@@ -1841,18 +1841,44 @@ function closeOrderForm(){
 }
 
 function cfConfirmOrder(){
-  const p=_brProds.find(x=>x.id===_pdCurrentId);
-  console.log('[Wardro] Order confirmed (placeholder — not sent to server):',{
-    product:p?{id:p.id,name:p.name,price:p.price}:null,
-    color:document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'',
-    size:document.getElementById('cf-prod-size')?.textContent||'',
-    name:document.getElementById('cf-name')?.value||'',
-    phone:document.getElementById('cf-phone')?.value||'',
-    wilaya:document.getElementById('cf-wilaya')?.value||'',
-    commune:document.getElementById('cf-commune')?.value||'',
-    address:document.getElementById('cf-address')?.value||'',
-    delivery:_cfDelivery
-  });
+  // TODO: order submission
+  // const p=_brProds.find(x=>x.id===_pdCurrentId);
+  // console.log('[Wardro] Order confirmed (placeholder — not sent to server):',{
+  //   product:p?{id:p.id,name:p.name,price:p.price}:null,
+  //   color:document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'',
+  //   size:document.getElementById('cf-prod-size')?.textContent||'',
+  //   name:document.getElementById('cf-name')?.value||'',
+  //   phone:document.getElementById('cf-phone')?.value||'',
+  //   wilaya:document.getElementById('cf-wilaya')?.value||'',
+  //   commune:document.getElementById('cf-commune')?.value||'',
+  //   address:document.getElementById('cf-address')?.value||'',
+  //   delivery:_cfDelivery
+  // });
+  ocStart();
+}
+
+// ══ ORDER CONFIRMATION ANIMATION (Phase 1: Sending / Phase 2: Success) — UI shell only ══
+function ocStart(){
+  const ov=document.getElementById('oc-overlay');if(!ov)return;
+  const sending=document.getElementById('oc-phase-sending');
+  const success=document.getElementById('oc-phase-success');
+  success.classList.remove('oc-phase--active');
+  sending.classList.add('oc-phase--active');
+  const orderNum=document.getElementById('oc-order-num');
+  if(orderNum)orderNum.textContent='#WR-'+String(Math.floor(10000+Math.random()*90000));
+  ov.classList.add('oc-overlay--open');
+  setTimeout(()=>{
+    sending.classList.remove('oc-phase--active');
+    success.classList.add('oc-phase--active');
+  },2500);
+}
+
+function ocCloseToHome(){
+  const ov=document.getElementById('oc-overlay');if(ov)ov.classList.remove('oc-overlay--open');
+  const cfOv=document.getElementById('cf-overlay');if(cfOv)cfOv.style.display='none';
+  closeProdDetail();
+  const home=document.getElementById('s-browse');
+  if(home&&!home.classList.contains('active'))navigateTo('s-browse','z-axis');
 }
 
 function cfOrderWhatsApp(){

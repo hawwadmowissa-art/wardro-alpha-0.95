@@ -1047,6 +1047,86 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   color:var(--txtD);font-size:9px;font-family:'Tajawal',sans-serif;text-align:center;max-width:80px}
 .cf-trust-item svg{color:var(--gold);opacity:.8}
 
+/* ══ ORDER CONFIRMATION ANIMATION SHELL ══ */
+.oc-overlay{position:fixed;inset:0;z-index:950;background:#0B0A08;display:none;
+  flex-direction:column;align-items:center;justify-content:center;padding:36px 26px;
+  overflow-y:auto;text-align:center}
+.oc-overlay--open{display:flex}
+.oc-phase{display:none;flex-direction:column;align-items:center;width:100%;max-width:360px}
+.oc-phase--active{display:flex}
+
+/* — Phase 1: Sending — */
+.oc-w-wrap{position:relative;width:140px;height:140px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.oc-w-glow{position:absolute;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(210,175,105,.4) 0%,rgba(210,175,105,.1) 55%,transparent 76%);
+  animation:ocGlowPulse 2.2s ease-in-out infinite}
+.oc-w-ring{position:absolute;inset:0;animation:ocRingSpin 7s linear infinite}
+.oc-w-ring-spark{filter:drop-shadow(0 0 4px #D2AF69)}
+.oc-w-letter{position:relative;font-family:'Fraunces',serif;font-size:54px;font-weight:300;
+  color:var(--gold);text-shadow:0 0 22px rgba(210,175,105,.55);animation:ocLetterBreathe 2.2s ease-in-out infinite}
+.oc-w-connector{position:relative;width:1px;height:34px;margin-top:2px;flex-shrink:0;
+  background:repeating-linear-gradient(to bottom,rgba(210,175,105,.55) 0 4px,transparent 4px 8px)}
+.oc-w-connector-dot{position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);
+  width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(210,175,105,.7)}
+.oc-sending-title{font-family:'Fraunces',serif;font-size:21px;font-weight:400;color:var(--gold);
+  margin:20px 0 26px;opacity:0;animation:ocFadeUp .6s var(--expo) .15s forwards}
+.oc-steps{display:flex;flex-direction:column;gap:13px;align-items:flex-end}
+.oc-step{display:flex;align-items:center;gap:9px;font-family:'Tajawal',sans-serif;font-size:13.5px;
+  color:var(--txt);opacity:0;transform:translateY(6px);animation:ocStepIn .5s var(--expo) forwards}
+.oc-step-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;
+  box-shadow:0 0 6px rgba(210,175,105,.6)}
+#oc-step-1{animation-delay:0s}
+#oc-step-2{animation-delay:.7s}
+#oc-step-3{animation-delay:1.4s}
+
+/* — Phase 2: Success — */
+.oc-check-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;opacity:0;animation:ocFadeUp .5s var(--expo) forwards}
+.oc-check-ring{opacity:0;animation:ocRingIn .5s var(--expo) .05s forwards}
+.oc-check-path{stroke-dasharray:70;stroke-dashoffset:70;
+  animation:ocCheckDraw .5s var(--expo) .35s forwards}
+.oc-spark{position:absolute;color:var(--gold);font-size:11px;opacity:0;
+  animation:ocSparkPop .9s var(--expo) forwards}
+.oc-spark-1{top:6px;right:14px;animation-delay:.55s}
+.oc-spark-2{bottom:14px;left:8px;font-size:8px;animation-delay:.72s}
+.oc-spark-3{top:22px;left:2px;font-size:9px;animation-delay:.85s}
+.oc-success-title{font-family:'Fraunces',serif;font-size:25px;font-weight:500;color:var(--gold);
+  margin:20px 0 8px;opacity:0;animation:ocFadeUp .6s var(--expo) .5s forwards}
+.oc-success-sub{font-family:'Tajawal',sans-serif;font-size:12.5px;line-height:1.8;color:var(--cream);
+  opacity:.75;margin-bottom:20px;opacity:0;animation:ocFadeUp .6s var(--expo) .62s forwards}
+.oc-order-pill{display:flex;align-items:center;gap:9px;background:var(--card);
+  border:1px solid rgba(210,175,105,.3);border-radius:14px;padding:12px 18px;margin-bottom:22px;
+  font-family:'Tajawal',sans-serif;font-size:12.5px;color:var(--txtD);width:100%;justify-content:center;
+  opacity:0;animation:ocFadeUp .6s var(--expo) .74s forwards}
+.oc-order-pill b{color:var(--gold);font-weight:700;direction:ltr;unicode-bidi:isolate}
+.oc-timeline{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:16px;
+  padding:6px 16px;margin-bottom:22px;opacity:0;animation:ocFadeUp .6s var(--expo) .86s forwards}
+.oc-tl-row{display:flex;align-items:center;gap:10px;padding:12px 0}
+.oc-tl-row+.oc-tl-row{border-top:1px solid var(--brd)}
+.oc-tl-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;border:1.5px solid #555;background:transparent}
+.oc-tl-row--active .oc-tl-dot{background:var(--gold);border-color:var(--gold);
+  box-shadow:0 0 10px rgba(210,175,105,.45)}
+.oc-tl-label{font-family:'Tajawal',sans-serif;font-size:13px;color:#555;flex:1;text-align:right}
+.oc-tl-row--active .oc-tl-label{color:var(--cream);font-weight:700}
+.oc-tl-status{font-family:'Tajawal',sans-serif;font-size:11px;color:#555}
+.oc-tl-status--active{color:var(--gold);font-weight:700}
+.oc-home-btn{width:100%;padding:15px;background:var(--gold);border:none;border-radius:14px;
+  color:#0B0A08;font-family:'Fraunces',serif;font-size:15px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;transition:all .35s var(--spring);
+  opacity:0;animation:ocFadeUp .6s var(--expo) .98s forwards}
+.oc-home-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(210,175,105,.3)}
+
+@keyframes ocGlowPulse{0%,100%{transform:scale(.92);opacity:.75}50%{transform:scale(1.12);opacity:1}}
+@keyframes ocLetterBreathe{0%,100%{opacity:.88}50%{opacity:1}}
+@keyframes ocRingSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes ocFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ocStepIn{to{opacity:1;transform:translateY(0)}}
+@keyframes ocRingIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes ocCheckDraw{to{stroke-dashoffset:0}}
+@keyframes ocSparkPop{0%{opacity:0;transform:scale(.4) rotate(0)}45%{opacity:1;transform:scale(1.15) rotate(20deg)}100%{opacity:0;transform:scale(.7) rotate(35deg)}}
+
 /* ══ CUSTOMER AUTH MODAL ══ */
 .cust-auth-modal{position:fixed;inset:0;z-index:700;background:rgba(11,10,8,.82);
   backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;
