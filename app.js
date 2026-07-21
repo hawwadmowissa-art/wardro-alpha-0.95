@@ -1635,6 +1635,8 @@ function openProdDetail(id){
   const cartBtn=document.getElementById('pd-cart-btn');
   if(cartBtn)cartBtn.style.display=canCart?'flex':'none';
   btn.style.display='';
+  const actionsWrap=document.getElementById('pd-actions');
+  if(actionsWrap)actionsWrap.classList.toggle('pd-actions--split',canWa&&canCart);
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
