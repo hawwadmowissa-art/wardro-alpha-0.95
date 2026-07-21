@@ -2112,6 +2112,13 @@ async function doCustAuth(){
   }catch(e){toast(e.message||'خطأ');btn.textContent='Continue →';btn.disabled=false;}
 }
 
+async function doCustGoogleAuth(){
+  const sb=getSb();if(!sb)return;
+  localStorage.setItem('wardro_role','customer');
+  const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://hawwadmowissa-art.github.io/wardro-alpha-0.95/'}});
+  if(error)toast(error.message||'تعذّر تسجيل الدخول بحساب Google');
+}
+
 // ══ SAVED SCREEN ══
 function svNavSwitch(tab){
   if(tab==='home'){

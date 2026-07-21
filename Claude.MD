@@ -67,6 +67,8 @@ wardro/
 | PWA — Android Back Button History | `navigateTo()` (الدالة المركزية الوحيدة لكل انتقال شاشة — كل التابات الفرعية Saved/Discover/Profile تمر عبرها أصلاً) تدفع الآن `history.pushState({screen:targetId},'','')` عند كل انتقال حقيقي، مع باراميتر ثالث اختياري `fromHistory` لتفادي push مضاعف عند العودة عبر الخلف؛ `popstate` listener واحد عند تحميل السكريبت يستدعي `navigateTo(screen,'z-axis',true)` (نفس نظام التنقل الموجود، بدون إنشاء نظام جديد)؛ `history.pushState({screen:'s-splash'},'','')` أول سطر بالملف كـ"أرضية" تمنع خروج التطبيق من أول ضغطة رجوع؛ لم تُمس أي أنيميشن أو منطق تنقل موجود | يوليو 2026 |
 | PWA — Offline Fallback Page | `offline.html` جديد بالجذر: WR mark نصي ذهبي + "WARDRO" + "لا يوجد اتصال بالإنترنت" + زر "إعادة المحاولة" (`window.location.reload()`)؛ كله inline بلا أي طلب خارجي (لا @import للخطوط — يعتمد fallback نظامي `Georgia,serif`/`Segoe UI,sans-serif` لأن أي طلب شبكة سيفشل أصلاً وهو offline)؛ `service-worker.js`: أُضيف `./offline.html` لمصفوفة `SHELL` (يُخزَّن عند `install`)، وسلسلة fallback الـ navigate صارت `caches.match('./') → './index.html' → './offline.html'` (نفس `CACHE_VERSION='wardro-v1'` — تغيّر محتوى الملف كافٍ ليُعاد تشغيل install/activate عند الزيارة القادمة)؛ منطق cache-first للأصول الثابتة (CSS/JS/صور) لم يُمس | يوليو 2026 |
 | Product Detail — اتجاه Swipe للصور | `_pdCarouselTouch` (touchend): قُلب الـ ternary (`dx<0?idx-1:idx+1` بدل `idx+1:idx-1`)؛ التتبع الرياضي للكود الأصلي كان يطابق نظرياً "swipe left→next" مسبقاً، لكن المستخدم أكّد اختباراً فعلياً على جهاز أن السلوك المعروض كان معكوساً — تم الانعكاس بناءً على ذلك التأكيد المباشر؛ `_wireHeroTap` (hero sliders) لم يُمس، غير مرتبط بهذه البطاقة | يوليو 2026 |
+| Product Images — إصلاح Silent Failures + ضغط الصور | `saveProduct` (صور المنتج + صور التفاصيل) وحفظ التنسيقة (outfit cover) كانوا يبتلعون أخطاء رفع Supabase Storage بصمت (`if(!upErr){...}` بلا else) — أُضيف `toast` عربي عند فشل الرفع (نفس نمط `previewStoreProfile` الموجود مسبقاً)؛ دالة جديدة `_compressImage(file,maxPx=1200,quality=0.82)` (Canvas API) تُطبَّق على صور المنتج والتفاصيل قبل الرفع — خفّضت الحجم من ~2.5-3.5MB إلى ~150-165KB للصورة الواحدة؛ `pdSelectColor` أيضاً أُصلح (لون بدون صورة مقابلة يذهب لآخر صورة متاحة بدل ألا يفعل شيئاً) | يوليو 2026 |
+| تذكرني + Google Sign-In (Customer فقط) | Checkbox "تذكرني" (`.remember-row/.remember-box`) أُضيف تحت حقل كلمة المرور بشاشة Seller Sign-In (`si-remember`) ونافذة Customer Auth (`ca-remember`) — بلا منطق إضافي لأن Supabase يحفظ الجلسة افتراضياً؛ زر "متابعة بحساب Google" (SVG multicolor inline، بدون CDN) أُضيف في Customer Auth Modal فقط (بعد divider "أو")، يستدعي `doCustGoogleAuth()` الجديدة في `app.js` (`signInWithOAuth({provider:'google',redirectTo:'.../wardro-alpha-0.95/'})`)؛ شاشة Seller Sign-In لم تُمس بخلاف الـ checkbox؛ ⚠️ هذه الميزة كانت مدرجة سابقاً ضمن "خارج النطاق الآن" (تسجيل الدخول/Auth) — نُفذت بعد سؤال المستخدم مباشرة وتم حذفها من قائمة الاستثناءات | يوليو 2026 |
 
 ---
 
@@ -114,7 +116,6 @@ wardro/
 ## خارج النطاق الآن 🚫
 لا تقترح هذه الميزات في Phase 3:
 - Camera Scan للملابس
-- تسجيل الدخول / Auth
 - نظام اشتراكات مدفوع
 - React Native / Flutter
 - PWA conversion
@@ -131,4 +132,4 @@ wardro/
 
 ---
 
-*آخر تحديث: يونيو 2026 | Claude Code — Phase 3A: Home 11-Section Redesign*
+*آخر تحديث: يوليو 2026 | Claude Code — تذكرني + Google Sign-In (Customer)*
