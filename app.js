@@ -1845,36 +1845,73 @@ function closeOrderForm(){
 }
 
 function cfConfirmOrder(){
-  // TODO: order submission
-  // const p=_brProds.find(x=>x.id===_pdCurrentId);
-  // console.log('[Wardro] Order confirmed (placeholder — not sent to server):',{
-  //   product:p?{id:p.id,name:p.name,price:p.price}:null,
-  //   color:document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'',
-  //   size:document.getElementById('cf-prod-size')?.textContent||'',
-  //   name:document.getElementById('cf-name')?.value||'',
-  //   phone:document.getElementById('cf-phone')?.value||'',
-  //   wilaya:document.getElementById('cf-wilaya')?.value||'',
-  //   commune:document.getElementById('cf-commune')?.value||'',
-  //   address:document.getElementById('cf-address')?.value||'',
-  //   delivery:_cfDelivery
-  // });
-  ocStart();
+  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  const name=document.getElementById('cf-name')?.value.trim()||'';
+  const phone=document.getElementById('cf-phone')?.value.trim()||'';
+  const wilaya=document.getElementById('cf-wilaya')?.value||'';
+  if(!name||!phone||!wilaya){
+    toast('يرجى ملء جميع الحقول المطلوبة');
+    return;
+  }
+  const orderNumber='#WR-'+String(Math.floor(10000+Math.random()*90000));
+  const payload={
+    orderNumber,
+    productName:p.name||'',
+    color:document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'',
+    size:document.getElementById('cf-prod-size')?.textContent||'',
+    quantity:_cfQty,
+    price:p.price??'',
+    customerName:name,
+    customerPhone:phone,
+    wilaya,
+    baladia:document.getElementById('cf-commune')?.value||'',
+    address:document.getElementById('cf-address')?.value.trim()||'',
+    deliveryMethod:_cfDelivery,
+    timestamp:new Date().toISOString(),
+    storeName:p.seller?.store_name||''
+  };
+  const sheetUrl=p.seller?.sheet_url;
+  if(!sheetUrl){
+    ocStart(true,orderNumber);
+    return;
+  }
+  ocStart(false,orderNumber);
+  fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+    .then(res=>{
+      if(res.ok)ocShowSuccess();else ocFail();
+    })
+    .catch(()=>ocFail());
 }
 
 // ══ ORDER CONFIRMATION ANIMATION (Phase 1: Sending / Phase 2: Success) — UI shell only ══
-function ocStart(){
+function ocStart(auto,orderNumber){
+  if(auto===undefined)auto=true;
   const ov=document.getElementById('oc-overlay');if(!ov)return;
   const sending=document.getElementById('oc-phase-sending');
   const success=document.getElementById('oc-phase-success');
   success.classList.remove('oc-phase--active');
   sending.classList.add('oc-phase--active');
   const orderNum=document.getElementById('oc-order-num');
-  if(orderNum)orderNum.textContent='#WR-'+String(Math.floor(10000+Math.random()*90000));
+  if(orderNum)orderNum.textContent=orderNumber||('#WR-'+String(Math.floor(10000+Math.random()*90000)));
   ov.classList.add('oc-overlay--open');
-  setTimeout(()=>{
-    sending.classList.remove('oc-phase--active');
-    success.classList.add('oc-phase--active');
-  },2500);
+  if(auto){
+    setTimeout(()=>{
+      sending.classList.remove('oc-phase--active');
+      success.classList.add('oc-phase--active');
+    },2500);
+  }
+}
+
+function ocShowSuccess(){
+  const sending=document.getElementById('oc-phase-sending');
+  const success=document.getElementById('oc-phase-success');
+  if(sending)sending.classList.remove('oc-phase--active');
+  if(success)success.classList.add('oc-phase--active');
+}
+
+function ocFail(){
+  const ov=document.getElementById('oc-overlay');if(ov)ov.classList.remove('oc-overlay--open');
+  toast('فشل إرسال الطلب، حاول مجدداً');
 }
 
 function ocCloseToHome(){
