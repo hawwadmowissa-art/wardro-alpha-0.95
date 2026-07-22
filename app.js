@@ -1859,7 +1859,7 @@ function cfConfirmOrder(){
   const colorTags=p.color_tags||[];
   const selColorIdx=colorTags.length?colorTags.indexOf(color):-1;
   const imageUrl=(selColorIdx>-1?images[selColorIdx]:images[0])||'';
-  const productLink='https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?store='+p.seller_id+'&product='+p.id;
+  const productLink='https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?product='+p.id;
   const payload={
     orderNumber,
     productName:p.name||'',
