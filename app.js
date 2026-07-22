@@ -1854,10 +1854,16 @@ function cfConfirmOrder(){
     return;
   }
   const orderNumber='#WR-'+String(Math.floor(10000+Math.random()*90000));
+  const color=document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'';
+  const images=p.images||[];
+  const colorTags=p.color_tags||[];
+  const selColorIdx=colorTags.length?colorTags.indexOf(color):-1;
+  const imageUrl=(selColorIdx>-1?images[selColorIdx]:images[0])||'';
+  const productLink='https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?store='+p.seller_id+'&product='+p.id;
   const payload={
     orderNumber,
     productName:p.name||'',
-    color:document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'',
+    color,
     size:document.getElementById('cf-prod-size')?.textContent||'',
     quantity:_cfQty,
     price:p.price??'',
@@ -1868,7 +1874,9 @@ function cfConfirmOrder(){
     address:document.getElementById('cf-address')?.value.trim()||'',
     deliveryMethod:_cfDelivery,
     timestamp:new Date().toISOString(),
-    storeName:p.seller?.store_name||''
+    storeName:p.seller?.store_name||'',
+    imageUrl,
+    productLink
   };
   const sheetUrl=p.seller?.sheet_url;
   if(!sheetUrl){
