@@ -998,21 +998,15 @@
       <div class="br-prod-grid" id="br-vgrid-3"></div>
     </div>
 
-    <!-- §7 Sport strip -->
-    <div class="br-section" id="br-sec-sport">
-      <div class="br-sec-head"><span class="br-sec-title">Sport Collection</span></div>
-      <div class="br-strip-scroll" id="br-strip-sport"></div>
-    </div>
-
     <!-- §8 Random vertical grid -->
     <div class="br-section" id="br-sec-vgrid-4">
       <div class="br-prod-grid" id="br-vgrid-4"></div>
     </div>
 
-    <!-- Streetwear strip -->
-    <div class="br-section" id="br-sec-streetwear">
-      <div class="br-sec-head"><span class="br-sec-title">Streetwear</span></div>
-      <div class="br-strip-scroll" id="br-strip-streetwear"></div>
+    <!-- §7 Sport strip -->
+    <div class="br-section" id="br-sec-sport">
+      <div class="br-sec-head"><span class="br-sec-title">Sport Collection</span></div>
+      <div class="br-strip-scroll" id="br-strip-sport"></div>
     </div>
 
     <!-- §9 Top Stores — always shown if 1+ sellers -->
@@ -1026,10 +1020,49 @@
       <div class="br-prod-grid" id="br-vgrid-5"></div>
     </div>
 
+    <!-- Streetwear strip -->
+    <div class="br-section" id="br-sec-streetwear">
+      <div class="br-sec-head"><span class="br-sec-title">Streetwear</span></div>
+      <div class="br-strip-scroll" id="br-strip-streetwear"></div>
+    </div>
+
+    <!-- Color strip: black — NEW -->
+    <div class="br-section" id="br-sec-color-black" style="display:none">
+      <div class="br-sec-head"><span class="br-sec-title">أسود</span></div>
+      <div class="br-strip-scroll" id="br-strip-color-black"></div>
+    </div>
+
+    <!-- Random vertical grid — NEW -->
+    <div class="br-section" id="br-sec-vgrid-6" style="display:none">
+      <div class="br-prod-grid" id="br-vgrid-6"></div>
+    </div>
+
     <!-- §11 Classic strip -->
     <div class="br-section" id="br-sec-classic">
       <div class="br-sec-head"><span class="br-sec-title">Classic Collection</span></div>
       <div class="br-strip-scroll" id="br-strip-classic"></div>
+    </div>
+
+    <!-- Color strip: white — NEW -->
+    <div class="br-section" id="br-sec-color-white" style="display:none">
+      <div class="br-sec-head"><span class="br-sec-title">أبيض</span></div>
+      <div class="br-strip-scroll" id="br-strip-color-white"></div>
+    </div>
+
+    <!-- Random vertical grid — NEW -->
+    <div class="br-section" id="br-sec-vgrid-7" style="display:none">
+      <div class="br-prod-grid" id="br-vgrid-7"></div>
+    </div>
+
+    <!-- Color strip: brown — NEW -->
+    <div class="br-section" id="br-sec-color-brown" style="display:none">
+      <div class="br-sec-head"><span class="br-sec-title">بني</span></div>
+      <div class="br-strip-scroll" id="br-strip-color-brown"></div>
+    </div>
+
+    <!-- Random vertical grid — NEW -->
+    <div class="br-section" id="br-sec-vgrid-8" style="display:none">
+      <div class="br-prod-grid" id="br-vgrid-8"></div>
     </div>
 
     <!-- Old Money strip -->
@@ -1038,8 +1071,35 @@
       <div class="br-strip-scroll" id="br-strip-oldmoney"></div>
     </div>
 
+    <!-- Color strip: wild card 1 — NEW, title set by JS -->
+    <div class="br-section" id="br-sec-color-wild1" style="display:none">
+      <div class="br-sec-head"><span class="br-sec-title"></span></div>
+      <div class="br-strip-scroll" id="br-strip-color-wild1"></div>
+    </div>
+
+    <!-- Random vertical grid — NEW -->
+    <div class="br-section" id="br-sec-vgrid-9" style="display:none">
+      <div class="br-prod-grid" id="br-vgrid-9"></div>
+    </div>
+
+    <!-- Color strip: wild card 2 — NEW, title set by JS -->
+    <div class="br-section" id="br-sec-color-wild2" style="display:none">
+      <div class="br-sec-head"><span class="br-sec-title"></span></div>
+      <div class="br-strip-scroll" id="br-strip-color-wild2"></div>
+    </div>
+
+    <!-- Random vertical grid — NEW -->
+    <div class="br-section" id="br-sec-vgrid-10" style="display:none">
+      <div class="br-prod-grid" id="br-vgrid-10"></div>
+    </div>
+
     <!-- Dormant repeat-appearance overflow — auto-fills when a category count crosses the repeat threshold -->
     <div class="br-section" id="br-sec-repeats" style="display:none"></div>
+
+    <!-- Random vertical grid — NEW, no title, right before Explore -->
+    <div class="br-section" id="br-sec-vgrid-close" style="display:none">
+      <div class="br-prod-grid" id="br-vgrid-close"></div>
+    </div>
 
     <!-- §12 اكتشف أكثر — infinite scroll -->
     <div class="br-section" id="br-sec-explore">
@@ -1545,12 +1605,20 @@
       </div>
     </div>
 
-  </div><!-- /dc-body -->
+    <!-- CTA Button — last element of the filter form, normal flow, right before the search field -->
+    <div class="dc-footer">
+      <button class="dc-results-btn" id="dc-results-btn" onclick="dcShowResults()">✦ أظهر النتائج</button>
+    </div>
 
-  <!-- CTA Button -->
-  <div class="dc-footer">
-    <button class="dc-results-btn" id="dc-results-btn" onclick="dcShowResults()">✦ أظهر النتائج</button>
-  </div>
+    <!-- Search field — NEW -->
+    <div class="dc-search-wrap">
+      <input type="text" id="dc-search-input" class="dc-search-input" placeholder="ابحث عن قطعة..." oninput="dcOnSearchInput()">
+    </div>
+
+    <!-- Live product grid — NEW -->
+    <div class="br-prod-grid" id="dc-grid"></div>
+
+  </div><!-- /dc-body -->
 
   <!-- Bottom Nav — Discover active -->
   <nav class="br-nav">

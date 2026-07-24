@@ -844,6 +844,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 /* Horizontal product strips (§3 Casual / §5 New / §7 Sport / §11 Formal) */
 .br-strip-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;-ms-overflow-style:none;scrollbar-width:none}
 .br-strip-scroll::-webkit-scrollbar{display:none}
+.br-view-all{display:block;text-align:center;color:var(--gold,#D2AF69);font-size:.85rem;padding:8px 0;cursor:pointer}
 .br-strip-card{flex-shrink:0;width:140px;background:var(--card);border-radius:10px;overflow:hidden;
   border:1px solid var(--brd);cursor:pointer;transition:all .3s var(--spring)}
 .br-strip-card:hover{border-color:var(--brd2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
@@ -1467,6 +1468,23 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   color:var(--muted);text-align:center;line-height:1.2;
 }
 .dc-color-swatch--selected .dc-color-swatch-label{color:var(--gold)}
+
+/* Search field (Zone 2) */
+.dc-search-wrap{width:100%}
+.dc-search-input{
+  width:100%;padding:12px 14px;background:rgba(11,10,8,.5);
+  border:1px solid rgba(210,175,105,.18);border-radius:10px;
+  color:var(--txt);font-family:'Tajawal',sans-serif;font-size:14px;
+  text-align:right;direction:rtl;outline:none;transition:border-color .3s var(--expo);
+}
+.dc-search-input::placeholder{color:var(--muted)}
+.dc-search-input:focus{border-color:var(--gold)}
+
+/* Live grid empty state (Zone 3) */
+.dc-grid-empty{
+  grid-column:1/-1;text-align:center;padding:30px 10px;
+  color:var(--muted);font-family:'Tajawal',sans-serif;font-size:13px;
+}
 
 /* CTA Button */
 .dc-footer{padding:14px 18px 6px;flex-shrink:0}

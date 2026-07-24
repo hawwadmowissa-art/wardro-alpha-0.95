@@ -1301,17 +1301,36 @@ function _renderVGrid(gridId,secId,prods){
     </div>`).join('');
 }
 
-function _renderHStrip(stripId,secId,prods){
+function _renderHStrip(stripId,secId,prods,opts={}){
+  const{minCount=2,totalCount=null,viewAllKey=null}=opts;
   const sec=document.getElementById(secId);
   const el=document.getElementById(stripId);
   if(!sec||!el)return;
-  if(prods.length<2){sec.style.display='none';return;}
+  const existingBtn=sec.querySelector('.br-view-all');
+  if(prods.length<minCount){
+    sec.style.display='none';
+    if(existingBtn)existingBtn.remove();
+    return;
+  }
   sec.style.display='';
   el.innerHTML=prods.map(p=>`
     <div class="br-strip-card" onclick="openProdDetail('${p.id}')">
       ${p.image?`<img class="br-strip-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-strip-img br-strip-img--ph"></div>`}
       <div class="br-strip-info"><div class="br-strip-name">${esc(p.name||'')}</div><div class="br-strip-price">${_priceLabel(p)}</div></div>
     </div>`).join('');
+  const total=totalCount!=null?totalCount:prods.length;
+  if(viewAllKey!==null&&total>12){
+    let btn=existingBtn;
+    if(!btn){
+      btn=document.createElement('div');
+      btn.className='br-view-all';
+      el.insertAdjacentElement('afterend',btn);
+    }
+    btn.textContent='عرض الكل';
+    btn.onclick=()=>console.log('view-all:',viewAllKey);
+  }else if(existingBtn){
+    existingBtn.remove();
+  }
 }
 
 const _CAT_LIST=['casual','sport','streetwear','classic','old_money'];
@@ -1322,12 +1341,6 @@ const _CAT_SLOT_SEC={casual:'br-sec-casual',sport:'br-sec-sport',streetwear:'br-
 const _CAT_SLOT_STRIP={casual:'br-strip-casual',sport:'br-strip-sport',streetwear:'br-strip-streetwear',classic:'br-strip-classic',old_money:'br-strip-oldmoney'};
 const _CAT_SLOT_ORDER=['casual','sport','streetwear','classic','old_money'];
 
-function _vgridSizePattern(total){
-  if(total<40)return[8,6,4,6,4];
-  if(total<=100)return[12,9,6];
-  return[18,12,9];
-}
-
 // Dormant until a category count grows past 8 — see rule 4 in the task spec.
 function _repeatAppearances(count){
   if(count<8)return 1;
@@ -1335,10 +1348,13 @@ function _repeatAppearances(count){
   return Math.ceil(count/6);
 }
 
+function _showSec(id){const el=document.getElementById(id);if(el)el.style.display='';}
+function _hideSec(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+
 function _renderBrowseSections(prods){
   const MIN_ANCHOR_COUNT=4;
   const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
-  const newStrip=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo).slice(0,8);
+  const newStripFull=prods.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo);
 
   const catProds={};
   _CAT_LIST.forEach(c=>{catProds[c]=prods.filter(p=>p.type===c);});
@@ -1356,29 +1372,59 @@ function _renderBrowseSections(prods){
   slotAssignment[_CAT_SLOT_ORDER[0]]=anchorCat;
   midCats.forEach((c,i)=>{slotAssignment[_CAT_SLOT_ORDER[i+1]]=c;});
 
+  // Phase detection — drives how many vgrids are active and how big each one is
+  const phase=prods.length<40?'small':prods.length<=120?'medium':'large';
+  const _PHASE_CFG={
+    small:{grids:[1,2,3],sizes:[8,5,4]},
+    medium:{grids:[1,2,3,4,5],sizes:[11,8,7,5,5]},
+    large:{grids:[1,2,3,4,5,6,7],sizes:[17,11,8,8,7,7,7]}
+  };
+  const activeGrids=_PHASE_CFG[phase].grids;
+  const gridSizes=_PHASE_CFG[phase].sizes;
+
+  // Horizontal strip item count — phase-aware, closes over `phase` above
+  function _stripCount(total){
+    if(phase==='small')return Math.min(4,total);
+    if(phase==='medium')return Math.min(8,Math.max(3,Math.floor(total/2.5)));
+    return Math.min(8,Math.max(3,Math.floor(total/3)));
+  }
+  const newStrip=newStripFull.slice(0,_stripCount(newStripFull.length));
+
   // Vertical grids — ALL approved products, shuffled per session
-  // Sizes adapt to catalog size (see _vgridSizePattern); repeats the last value past the pattern length
   const pool=_fyshuffle([...prods]);
   let pos=0;
-  const numGrids=5;
-  const pattern=_vgridSizePattern(prods.length);
-  const gridSizes=Array.from({length:numGrids},(_,i)=>pattern[Math.min(i,pattern.length-1)]);
-  const grids=gridSizes.map(n=>{const s=pool.slice(pos,pos+n);pos+=n;return s;});
+  const usedInGrids=new Set();
+  const gridContents={};
+  activeGrids.forEach((n,i)=>{
+    const items=pool.slice(pos,pos+gridSizes[i]);pos+=gridSizes[i];
+    items.forEach(p=>usedInGrids.add(p.id));
+    gridContents[n]=items;
+  });
+  for(let n=1;n<=10;n++){
+    const gridId=`br-vgrid-${n}`,secId=`br-sec-vgrid-${n}`;
+    if(activeGrids.includes(n)){
+      _renderVGrid(gridId,secId,gridContents[n]);
+    }else{
+      const el=document.getElementById(gridId);if(el)el.innerHTML='';
+      _hideSec(secId);
+    }
+  }
+  // vgrid-close belongs to color interleaving (Part 2) — stays hidden for now
+  const closeEl=document.getElementById('br-vgrid-close');if(closeEl)closeEl.innerHTML='';
+  _hideSec('br-sec-vgrid-close');
 
   function _renderCatSlot(slotId){
     const assignedCat=slotAssignment[slotId];
     const secEl=document.getElementById(_CAT_SLOT_SEC[slotId]);
     if(secEl){const t=secEl.querySelector('.br-sec-title');if(t)t.textContent=_CAT_TITLES[assignedCat];}
-    _renderHStrip(_CAT_SLOT_STRIP[slotId],_CAT_SLOT_SEC[slotId],catProds[assignedCat].slice(0,8));
+    const catList=catProds[assignedCat];
+    const sliced=catList.slice(0,_stripCount(catList.length));
+    _renderHStrip(_CAT_SLOT_STRIP[slotId],_CAT_SLOT_SEC[slotId],sliced,{minCount:2,totalCount:catList.length,viewAllKey:slotId});
   }
 
-  _renderVGrid('br-vgrid-1','br-sec-vgrid-1',grids[0]);
   _renderCatSlot('casual'); // slot 1 — always the anchor
-  _renderVGrid('br-vgrid-2','br-sec-vgrid-2',grids[1]);
-  _renderHStrip('br-strip-new','br-sec-new',newStrip);
-  _renderVGrid('br-vgrid-3','br-sec-vgrid-3',grids[2]);
+  _renderHStrip('br-strip-new','br-sec-new',newStrip,{minCount:4,totalCount:newStripFull.length,viewAllKey:'new'});
   _renderCatSlot('sport'); // slot 2
-  _renderVGrid('br-vgrid-4','br-sec-vgrid-4',grids[3]);
   _renderCatSlot('streetwear'); // slot 3
 
   // Top Stores — R2: always show if 1+ sellers, hide only when 0 sellers
@@ -1388,14 +1434,17 @@ function _renderBrowseSections(prods){
   if(stores.length){renderTopStores(stores);if(storesSec)storesSec.style.display='';}
   else{if(storesSec)storesSec.style.display='none';}
 
-  _renderVGrid('br-vgrid-5','br-sec-vgrid-5',grids[4]);
   _renderCatSlot('classic'); // slot 4
   _renderCatSlot('old_money'); // slot 5
+
+  // Color sections — dormant until Part 2
+  _hideSec('br-sec-color-black');_hideSec('br-sec-color-white');
+  _hideSec('br-sec-color-brown');_hideSec('br-sec-color-wild1');
+  _hideSec('br-sec-color-wild2');
 
   // Repeat appearances (dormant today — no category reaches the 8-item threshold yet).
   // Auto-activates: extra chunks render into #br-sec-repeats, right before Explore.
   const repeatSec=document.getElementById('br-sec-repeats');
-  const repeatUsedIds=[];
   if(repeatSec){
     const extraChunks=[];
     _CAT_LIST.forEach(c=>{
@@ -1420,14 +1469,13 @@ function _renderBrowseSections(prods){
         if(titleEl)titleEl.textContent=_CAT_TITLES[chunk.cat];
         _renderVGrid(`br-repeat-vgrid-${i}`,`br-repeat-sec-${i}`,filler);
         _renderHStrip(`br-repeat-strip-${i}`,`br-repeat-sec-${i}`,chunk.items);
-        repeatUsedIds.push(...filler.map(p=>p.id),...chunk.items.map(p=>p.id));
       });
     }else{repeatSec.style.display='none';repeatSec.innerHTML='';}
   }
 
   // §12 — pool is products not consumed by upper grids or the anchor strip, freshly shuffled
   const anchorIds=catProds[anchorCat].slice(0,8).map(p=>p.id);
-  const usedIds=new Set([...grids.flat().map(p=>p.id),...anchorIds,...repeatUsedIds]);
+  const usedIds=new Set([...usedInGrids,...anchorIds]);
   _initExplore(_fyshuffle(prods.filter(p=>!usedIds.has(p.id))));
 }
 
@@ -2314,12 +2362,15 @@ function renderSaved(items){
 }
 
 // ══ DISCOVER ══
-let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcCategory=null,_discoverSelectedColors=[];
+let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcCategory=null,_discoverSelectedColors=[],_dcSearchQuery='';
 
 function dcInitSlider(){
   // Do NOT reset type/sizes between visits so filters persist
   dcUpdateFill();
   dcCheckRequired();
+  // Live grid (Zone 3) — reuse _brProds from Browse instead of a new query; fetch only if not loaded yet
+  if(!_brProds.length)loadBrowse().then(_dcRunLiveFilter);
+  else _dcRunLiveFilter();
 }
 
 function dcUpdateFill(){
@@ -2348,6 +2399,7 @@ function dcOnSliderInput(which){
   if(disp)disp.textContent=`${minLbl} DZD — ${maxLbl} DZD`;
   _dcBudgetTouched=true;
   dcCheckRequired();
+  _dcRunLiveFilter();
 }
 
 function dcCheckRequired(){
@@ -2383,6 +2435,7 @@ function dcSelectType(btn){
   if(menu)menu.style.display='none';
   if(chevron)chevron.classList.remove('dc-chevron--open');
   dcCheckRequired();
+  _dcRunLiveFilter();
 }
 
 const _DC_OPT_KEYS=['size','color','category'];
@@ -2418,6 +2471,7 @@ function dcToggleSizeOpt(btn){
   }else{
     _dcSizes=_dcSizes.filter(s=>s!==v);
   }
+  _dcRunLiveFilter();
 }
 
 function dcToggleCatOpt(btn){
@@ -2425,6 +2479,7 @@ function dcToggleCatOpt(btn){
   document.querySelectorAll('#panel-category .dc-size-btn').forEach(b=>b.classList.remove('dc-size-btn--active'));
   if(!wasActive)btn.classList.add('dc-size-btn--active');
   _dcCategory=wasActive?null:btn.dataset.val;
+  _dcRunLiveFilter();
 }
 
 function _initDiscoverColorSwatches(){
@@ -2441,6 +2496,7 @@ function dcToggleColorSwatch(key){
   const clearBtn=document.getElementById('dc-color-clear-btn');
   if(clearBtn)clearBtn.style.display=_discoverSelectedColors.length?'block':'none';
   _dcUpdateColorChipLabel();
+  _dcRunLiveFilter();
 }
 
 function dcClearColors(){
@@ -2449,6 +2505,7 @@ function dcClearColors(){
   const clearBtn=document.getElementById('dc-color-clear-btn');
   if(clearBtn)clearBtn.style.display='none';
   _dcUpdateColorChipLabel();
+  _dcRunLiveFilter();
 }
 
 function _dcUpdateColorChipLabel(){
@@ -2460,10 +2517,51 @@ function _dcUpdateColorChipLabel(){
   if(chip)chip.classList.toggle('dc-opt-chip--active',!!_discoverSelectedColors.length||panelOpen);
 }
 
+// ══ Zone 2/3 — inline search + live grid (works alongside the full #s-results flow below) ══
+function _dcStripHtml(str){return(str||'').replace(/<[^>]*>/g,'');}
+
+function dcOnSearchInput(){
+  const el=document.getElementById('dc-search-input');
+  _dcSearchQuery=_dcStripHtml(el?el.value:'').toLowerCase().trim();
+  _dcRunLiveFilter();
+}
+
+function _dcRenderGrid(prods){
+  const el=document.getElementById('dc-grid');
+  if(!el)return;
+  if(!prods.length){
+    el.innerHTML='<div class="dc-grid-empty">ما لقينا قطعة بهذا الوصف</div>';
+    return;
+  }
+  el.innerHTML=prods.map(p=>`
+    <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
+      ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+      <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${_priceLabel(p)}</div></div>
+    </div>`).join('');
+}
+
+function _dcRunLiveFilter(){
+  const minEl=document.getElementById('dc-min'),maxEl=document.getElementById('dc-max');
+  const min=minEl?parseInt(minEl.value)||0:0;
+  const max=maxEl?parseInt(maxEl.value)||20000:20000;
+  let pool=_brProds.slice();
+  if(_dcType){
+    const pieceTypes=_dcType==='pants'?['pants','jeans']:[_dcType];
+    pool=pool.filter(p=>pieceTypes.includes(p.product_type));
+  }
+  pool=pool.filter(p=>{const pr=Number(p.price);return pr>=min&&pr<=max;});
+  if(_dcCategory)pool=pool.filter(p=>p.type===_dcCategory);
+  if(_dcSizes.length)pool=pool.filter(p=>Array.isArray(p.sizes)&&p.sizes.some(s=>_dcSizes.includes(s)));
+  if(_discoverSelectedColors.length)pool=pool.filter(p=>Array.isArray(p.color_tags)&&p.color_tags.some(c=>_discoverSelectedColors.includes(c)));
+  if(_dcSearchQuery)pool=pool.filter(p=>(p.name||'').toLowerCase().includes(_dcSearchQuery));
+  _dcRenderGrid(pool);
+}
+
 async function dcShowResults(){
   if(!document.getElementById('dc-results-btn').classList.contains('dc-results-btn--active'))return;
   const min=parseInt(document.getElementById('dc-min').value)||0;
   const max=parseInt(document.getElementById('dc-max').value)||20000;
+  _dcRunLiveFilter(); // keep #dc-grid (filters + search) in sync for when the user comes back
   navigateTo('s-results','slide');
   setTimeout(()=>runDiscover(min,max,[..._discoverSelectedColors]),320);
 }
