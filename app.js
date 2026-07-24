@@ -2363,6 +2363,8 @@ function renderSaved(items){
 
 // ══ DISCOVER ══
 let _dcType=null,_dcBudgetTouched=false,_dcSizes=[],_dcCategory=null,_discoverSelectedColors=[],_dcSearchQuery='';
+let _dcMode='all',_dcChipType=null,_dcChipCat=null,_dcSheetKind=null;
+const _DC_TYPE_LABELS_AR={shirt:'قميص',pants:'سروال',jacket:'جاكيت',shoes:'حذاء',jeans:'جينز',accessory:'إكسسوار',sandals:'نعل',ensemble:'تنسيق'};
 
 function dcInitSlider(){
   // Do NOT reset type/sizes between visits so filters persist
@@ -2540,21 +2542,80 @@ function _dcRenderGrid(prods){
     </div>`).join('');
 }
 
+// Live grid (Zone 3) pipeline — driven by the All/Filter toggle + its two chips + search only.
+// Independent of the top filter form's own state (_dcType/budget/_dcCategory/_dcSizes/colors),
+// which remains reserved for the "أظهر النتائج" → #s-results flow.
 function _dcRunLiveFilter(){
-  const minEl=document.getElementById('dc-min'),maxEl=document.getElementById('dc-max');
-  const min=minEl?parseInt(minEl.value)||0:0;
-  const max=maxEl?parseInt(maxEl.value)||20000:20000;
   let pool=_brProds.slice();
-  if(_dcType){
-    const pieceTypes=_dcType==='pants'?['pants','jeans']:[_dcType];
-    pool=pool.filter(p=>pieceTypes.includes(p.product_type));
+  if(_dcMode==='filter'){
+    if(_dcChipType){const chipTypes=_dcChipType==='pants'?['pants','jeans']:[_dcChipType];pool=pool.filter(p=>chipTypes.includes(p.product_type));}
+    if(_dcChipCat)pool=pool.filter(p=>p.type===_dcChipCat);
   }
-  pool=pool.filter(p=>{const pr=Number(p.price);return pr>=min&&pr<=max;});
-  if(_dcCategory)pool=pool.filter(p=>p.type===_dcCategory);
-  if(_dcSizes.length)pool=pool.filter(p=>Array.isArray(p.sizes)&&p.sizes.some(s=>_dcSizes.includes(s)));
-  if(_discoverSelectedColors.length)pool=pool.filter(p=>Array.isArray(p.color_tags)&&p.color_tags.some(c=>_discoverSelectedColors.includes(c)));
   if(_dcSearchQuery)pool=pool.filter(p=>(p.name||'').toLowerCase().includes(_dcSearchQuery));
   _dcRenderGrid(pool);
+}
+
+function dcSetMode(mode){
+  _dcMode=mode;
+  const allBtn=document.getElementById('dc-mode-all');
+  const filterBtn=document.getElementById('dc-mode-filter');
+  const chipRow=document.getElementById('dc-chip-row');
+  if(allBtn)allBtn.classList.toggle('dc-mode-pill--active',mode==='all');
+  if(filterBtn)filterBtn.classList.toggle('dc-mode-pill--active',mode==='filter');
+  if(mode==='all'){
+    _dcChipType=null;_dcChipCat=null;
+    _dcUpdateChipLabel('type');
+    _dcUpdateChipLabel('category');
+    if(chipRow)chipRow.classList.remove('dc-chip-row--visible');
+  }else if(chipRow){
+    chipRow.classList.add('dc-chip-row--visible');
+  }
+  _dcRunLiveFilter();
+}
+
+function dcOpenOptSheet(kind){
+  const overlay=document.getElementById('dc-opt-sheet-overlay');
+  const title=document.getElementById('dc-opt-sheet-title');
+  const list=document.getElementById('dc-opt-sheet-list');
+  if(!overlay||!title||!list)return;
+  _dcSheetKind=kind;
+  let options,current;
+  if(kind==='type'){
+    title.textContent='نوع القطعة';
+    options=Object.keys(_AP_TYPE_SIZES).filter(k=>k!=='jeans').map(k=>({val:k,label:_DC_TYPE_LABELS_AR[k]||k}));
+    current=_dcChipType;
+  }else{
+    title.textContent='الفئة';
+    options=_CAT_LIST.map(k=>({val:k,label:_CAT_TITLES[k]||k}));
+    current=_dcChipCat;
+  }
+  list.innerHTML=`<div class="dc-opt-sheet-row${current?'':' dc-opt-sheet-row--active'}" onclick="dcPickOpt(null)">الكل</div>`
+    +options.map(o=>`<div class="dc-opt-sheet-row${current===o.val?' dc-opt-sheet-row--active':''}" onclick="dcPickOpt('${o.val}')">${esc(o.label)}</div>`).join('');
+  overlay.classList.add('dc-opt-sheet-overlay--open');
+}
+
+function dcCloseOptSheet(){
+  const overlay=document.getElementById('dc-opt-sheet-overlay');
+  if(overlay)overlay.classList.remove('dc-opt-sheet-overlay--open');
+}
+
+function dcPickOpt(val){
+  if(_dcSheetKind==='type'){_dcChipType=val;_dcUpdateChipLabel('type');}
+  else if(_dcSheetKind==='category'){_dcChipCat=val;_dcUpdateChipLabel('category');}
+  dcCloseOptSheet();
+  _dcRunLiveFilter();
+}
+
+function _dcUpdateChipLabel(kind){
+  if(kind==='type'){
+    const lbl=document.getElementById('dc-chip-type-label'),chip=document.getElementById('dc-chip-type');
+    if(lbl)lbl.textContent=_dcChipType?(_DC_TYPE_LABELS_AR[_dcChipType]||_dcChipType):'نوع القطعة';
+    if(chip)chip.classList.toggle('dc-mini-chip--active',!!_dcChipType);
+  }else{
+    const lbl=document.getElementById('dc-chip-cat-label'),chip=document.getElementById('dc-chip-cat');
+    if(lbl)lbl.textContent=_dcChipCat?(_CAT_TITLES[_dcChipCat]||_dcChipCat):'الفئة';
+    if(chip)chip.classList.toggle('dc-mini-chip--active',!!_dcChipCat);
+  }
 }
 
 async function dcShowResults(){

@@ -1486,6 +1486,38 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   color:var(--muted);font-family:'Tajawal',sans-serif;font-size:13px;
 }
 
+/* All | Filter toggle */
+.dc-mode-toggle{display:flex;justify-content:center;gap:10px}
+.dc-mode-pill{
+  padding:8px 28px;border-radius:999px;border:1px solid #D2AF69;
+  background:transparent;color:#D2AF69;
+  font-family:'Tajawal',sans-serif;font-size:.9rem;
+  cursor:pointer;transition:all .25s var(--expo);
+}
+.dc-mode-pill--active{background:#D2AF69;color:#0B0A08}
+
+/* Filter chips row (Filter mode only) */
+.dc-chip-row{display:none;justify-content:center;gap:10px}
+.dc-chip-row--visible{display:flex;animation:panelSlide .2s var(--expo)}
+.dc-mini-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 16px;border-radius:999px;border:1px solid #D2AF69;
+  background:transparent;color:#EDE3CC;
+  font-family:'Tajawal',sans-serif;font-size:.85rem;
+  cursor:pointer;transition:background .2s ease;
+}
+.dc-mini-chip--active{background:rgba(210,175,105,.15)}
+
+/* Discover option sheet (نوع القطعة / الفئة) — same bottom-sheet pattern as .bc-picker */
+.dc-opt-sheet-overlay{position:fixed;inset:0;z-index:560;background:rgba(11,10,8,.7);display:none;align-items:flex-end;justify-content:center}
+.dc-opt-sheet-overlay--open{display:flex}
+.dc-opt-sheet{width:100%;max-width:480px;max-height:60vh;background:var(--surf);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--brd);border-bottom:none}
+.dc-opt-sheet-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--brd);color:var(--cream);font-size:13px;font-weight:700;flex-shrink:0}
+.dc-opt-sheet-list{flex:1;overflow-y:auto;padding:8px 12px 24px}
+.dc-opt-sheet-row{padding:12px 10px;border-bottom:1px solid var(--brd);color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;text-align:right;transition:background .2s}
+.dc-opt-sheet-row:hover{background:rgba(210,175,105,.06)}
+.dc-opt-sheet-row--active{color:var(--gold)}
+
 /* CTA Button */
 .dc-footer{padding:14px 18px 6px;flex-shrink:0}
 .dc-results-btn{

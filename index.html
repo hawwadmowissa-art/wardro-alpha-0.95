@@ -1615,6 +1615,24 @@
       <input type="text" id="dc-search-input" class="dc-search-input" placeholder="ابحث عن قطعة..." oninput="dcOnSearchInput()">
     </div>
 
+    <!-- All | Filter toggle — NEW -->
+    <div class="dc-mode-toggle">
+      <button type="button" class="dc-mode-pill dc-mode-pill--active" id="dc-mode-all" onclick="dcSetMode('all')">الكل</button>
+      <button type="button" class="dc-mode-pill" id="dc-mode-filter" onclick="dcSetMode('filter')">فلترة</button>
+    </div>
+
+    <!-- Filter chips row — NEW, hidden unless Filter mode is active -->
+    <div class="dc-chip-row" id="dc-chip-row">
+      <button type="button" class="dc-mini-chip" id="dc-chip-type" onclick="dcOpenOptSheet('type')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2AF69" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a2 2 0 0 1 2 2 2 2 0 0 1-2 2"/><path d="M12 7 3 13.5a1.5 1.5 0 0 0 .9 2.7H20a1.5 1.5 0 0 0 .9-2.7L12 7Z"/><line x1="3" y1="20" x2="21" y2="20"/></svg>
+        <span id="dc-chip-type-label">نوع القطعة</span>
+      </button>
+      <button type="button" class="dc-mini-chip" id="dc-chip-cat" onclick="dcOpenOptSheet('category')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2AF69" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1.2" fill="#D2AF69" stroke="none"/></svg>
+        <span id="dc-chip-cat-label">الفئة</span>
+      </button>
+    </div>
+
     <!-- Live product grid — NEW -->
     <div class="br-prod-grid" id="dc-grid"></div>
 
@@ -1640,6 +1658,17 @@
     </button>
   </nav>
 
+</div>
+
+<!-- Discover Filter Option Sheet (نوع القطعة / الفئة) -->
+<div id="dc-opt-sheet-overlay" class="dc-opt-sheet-overlay" onclick="if(event.target===this)dcCloseOptSheet()">
+  <div class="dc-opt-sheet" dir="rtl">
+    <div class="dc-opt-sheet-hd">
+      <span id="dc-opt-sheet-title"></span>
+      <button class="ap-modal-close" onclick="dcCloseOptSheet()">✕</button>
+    </div>
+    <div class="dc-opt-sheet-list" id="dc-opt-sheet-list"></div>
+  </div>
 </div>
 
 <!-- RESULTS SCREEN -->
