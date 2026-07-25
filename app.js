@@ -80,7 +80,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
       try{
         const{data:{session}}=await window.db.auth.getSession();
         if(session){
-          const{data:seller}=await window.db.from('sellers').select('store_name,approval_status').eq('id',session.user.id).single();
+          const{data:seller}=await window.db.from('sellers').select('store_name,approval_status,lang').eq('id',session.user.id).single();
+          _applySellerLang(seller?.lang||'default');
           if(seller?.approval_status==='approved'){
             navigateTo('s-show','z-axis');
           }else{
@@ -250,7 +251,8 @@ async function doSellerReg(){
       try{
         const{data:siData,error:siErr}=await sb.auth.signInWithPassword({email,password:pass});
         if(!siErr&&siData?.user){
-          const{data:seller}=await sb.from('sellers').select('store_name,approval_status').eq('id',siData.user.id).single();
+          const{data:seller}=await sb.from('sellers').select('store_name,approval_status,lang').eq('id',siData.user.id).single();
+          _applySellerLang(seller?.lang||'default');
           const name=seller?.store_name||email.split('@')[0];
           localStorage.setItem('wardro_store_name',name);
           localStorage.setItem('wardro_role','seller');
@@ -290,7 +292,8 @@ async function doSellerSignIn(){
   try{
     const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
     if(error)throw error;
-    const{data:seller}=await sb.from('sellers').select('store_name,approval_status').eq('id',data.user.id).single();
+    const{data:seller}=await sb.from('sellers').select('store_name,approval_status,lang').eq('id',data.user.id).single();
+    _applySellerLang(seller?.lang||'default');
     const name=seller?.store_name||email.split('@')[0];
     localStorage.setItem('wardro_store_name',name);
     localStorage.setItem('wardro_role','seller');
@@ -611,8 +614,10 @@ function _edProdCardHtml(p){
     ?`<div class="ed-appr-badge ed-appr-badge--pending">قيد المراجعة</div>`
     :'';
   const ensBadge=p.product_type==='ensemble'
-    ?`<span style="font-size:9px;color:var(--gold);opacity:.75;letter-spacing:.5px">ENSEMBLE ${p.ensemble_state==='close'?'🔒':'🔓'}</span>`
+    ?`<span style="font-size:9px;color:var(--gold);opacity:.75;letter-spacing:.5px">${_sellerLang==='ar'?'تنسيق':'ENSEMBLE'} ${p.ensemble_state==='close'?'🔒':'🔓'}</span>`
     :'';
+  const priceLabel=p.is_exclusive?(_sellerLang==='ar'?'حصري':'Exclusive'):_priceLabel(p);
+  const inStockLabel=_sellerLang==='ar'?'متوفر':'In Stock';
   return `
     <div class="ed-prod-card" onclick="openEditProduct('${p.id}')">
       <button class="ed-prod-dots" onclick="event.stopPropagation();openEditProduct('${p.id}')">···</button>
@@ -620,9 +625,9 @@ function _edProdCardHtml(p){
       ${p.image?`<img class="ed-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="ed-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.3">👔</div>`}
       <div class="ed-prod-info">
         <div class="ed-prod-name">${esc(p.name)}</div>
-        <div class="ed-prod-price">${_priceLabel(p)}</div>
+        <div class="ed-prod-price">${priceLabel}</div>
         <div class="ed-prod-info-row">
-          <div class="ed-prod-badge">In Stock</div>
+          <div class="ed-prod-badge">${inStockLabel}</div>
           ${ensBadge}
         </div>
       </div>
@@ -864,6 +869,50 @@ async function saveBio(){
 
 let _esWhatsappEnabled=true;
 let _esCartEnabled=false;
+let _sellerLang='default';
+
+function _applySellerLang(lang){
+  _sellerLang=lang==='ar'?'ar':'default';
+  const ar=_sellerLang==='ar';
+  const setTxt=(sel,txt)=>{const el=document.querySelector(sel);if(el)el.textContent=txt;};
+  setTxt('#product-type-btns .sel-btn[data-val="shirt"]',ar?'قميص':'Shirt');
+  setTxt('#product-type-btns .sel-btn[data-val="pants"]',ar?'سروال':'Pants');
+  setTxt('#product-type-btns .sel-btn[data-val="jeans"]',ar?'جينز':'Jeans');
+  setTxt('#product-type-btns .sel-btn[data-val="shoes"]',ar?'حذاء':'Shoes');
+  setTxt('#product-type-btns .sel-btn[data-val="accessory"]',ar?'إكسسوار':'Accessory');
+  setTxt('#product-type-btns .sel-btn[data-val="ensemble"]',ar?'تنسيق':'Ensemble');
+  setTxt('#product-type-btns .sel-btn[data-val="sandals"]',ar?'نعل':'Sandals');
+  setTxt('#slidertype-btns .sel-btn[data-val="none"]',ar?'قطعة':'Product');
+  setTxt('#slidertype-btns .sel-btn[data-val="hero"]',ar?'الواجهة':'Hero Slider');
+  setTxt('#slidertype-btns .sel-btn[data-val="main_hero"]',ar?'الواجهة الرئيسية':'Main Hero');
+  setTxt('#ap-excl-btn',ar?'حصري':'Exclusive');
+  setTxt('#bc-excl-btn',ar?'حصري':'Exclusive');
+  setTxt('#ed-sec-title-mainhero',ar?'الواجهة الرئيسية':'Main Hero Slider');
+  setTxt('#ed-sec-sub-mainhero',ar?'تظهر في الصفحة الرئيسية':'Featured on Wardro Home');
+  setTxt('#ed-sec-title-hero',ar?'الواجهة':'Hero Slider');
+  setTxt('#ed-sec-title-products',ar?'القطع':'Products');
+  setTxt('#show-topbar-sub',ar?'شاهد متجرك كما يراه الزبائن':'View your store as customers');
+  setTxt('#show-exit-btn',ar?'الخروج من المعاينة':'Exit Preview');
+  setTxt('#show-share-label',ar?'مشاركة المتجر':'Share Store');
+  setTxt('#show-tab-home-btn',ar?'الرئيسية':'Home');
+  setTxt('#show-tab-products-btn',ar?'كل القطع':'All Products');
+  setTxt('#show-tab-collections-btn',ar?'التنسيقات':'Collections');
+  setTxt('#show-tab-about-btn',ar?'عن المتجر':'About Store');
+  setTxt('#ap-mode-all-label',ar?'الكل':'All');
+  setTxt('#ap-mode-filter-label',ar?'فلتر':'Filter');
+  document.getElementById('es-lang-default')?.classList.toggle('es-lang-pill--active',!ar);
+  document.getElementById('es-lang-ar')?.classList.toggle('es-lang-pill--active',ar);
+  renderEditorProducts(Object.values(_editorProds));
+}
+
+async function esSetLang(lang){
+  _applySellerLang(lang);
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:{user}}=await sb.auth.getUser();if(!user)return;
+    await sb.from('sellers').update({lang:_sellerLang}).eq('id',user.id);
+  }catch(e){toast(e.message||'خطأ في الحفظ')}
+}
 
 async function openEdSettings(){
   document.getElementById('ed-settings-backdrop')?.classList.add('ed-settings-backdrop--open');
@@ -871,10 +920,11 @@ async function openEdSettings(){
   const sb=getSb();if(!sb)return;
   try{
     const{data:{user}}=await sb.auth.getUser();if(!user)return;
-    const{data:seller}=await sb.from('sellers').select('whatsapp_enabled,cart_enabled,sheet_url').eq('id',user.id).single();
+    const{data:seller}=await sb.from('sellers').select('whatsapp_enabled,cart_enabled,sheet_url,lang').eq('id',user.id).single();
     esSetWhatsapp(seller?.whatsapp_enabled!==false);
     esSetCart(!!seller?.cart_enabled);
     const urlEl=document.getElementById('es-sheet-url');if(urlEl)urlEl.value=seller?.sheet_url||'';
+    _applySellerLang(seller?.lang||'default');
     esValidateSave();
   }catch(e){}
 }

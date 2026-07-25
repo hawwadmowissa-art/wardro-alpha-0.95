@@ -1486,6 +1486,16 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   color:var(--muted);font-family:'Tajawal',sans-serif;font-size:13px;
 }
 
+/* Seller settings — language toggle */
+.es-lang-toggle{display:flex;gap:10px}
+.es-lang-pill{
+  padding:8px 24px;border-radius:999px;border:1px solid #D2AF69;
+  background:transparent;color:#D2AF69;
+  font-family:'Tajawal',sans-serif;font-size:.9rem;
+  cursor:pointer;transition:all .25s var(--expo);
+}
+.es-lang-pill--active{background:#D2AF69;color:#0B0A08}
+
 /* All | Filter toggle */
 .dc-mode-toggle{display:flex;justify-content:center;gap:10px}
 .dc-mode-pill{
