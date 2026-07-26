@@ -594,6 +594,11 @@
           <div class="ap-imgs-strip" id="ap-imgs-strip"></div>
         </div>
         <div class="ap-imgs-section">
+          <div class="ap-imgs-label">صورة الغلاف</div>
+          <input type="file" id="ap-cover-input" accept="image/*" hidden onchange="addProductCoverImage(this)">
+          <div class="ap-imgs-strip" id="ap-cover-strip"></div>
+        </div>
+        <div class="ap-imgs-section">
           <div class="ap-imgs-label">صور التفاصيل</div>
           <input type="file" id="ap-detail-img-input" accept="image/*" multiple hidden onchange="addProductDetailImages(this)">
           <div class="ap-imgs-strip" id="ap-detail-imgs-strip"></div>
