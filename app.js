@@ -644,6 +644,7 @@ async function saveProduct(){
     }else{
       const{data:inserted,error}=await sb.from('products').insert({seller_id:user.id,...payload}).select('id').single();
       if(error)throw error;
+      if(!inserted||!inserted.id)throw new Error('فشل إنشاء القطعة — لم يتم استرجاع المعرّف');
       await _saveStockRows(sb,inserted.id);
       toast(hero_status==='pending'?'✓ تم الإرسال للمراجعة':'✓ تمت إضافة القطعة');
     }
