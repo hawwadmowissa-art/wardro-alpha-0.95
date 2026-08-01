@@ -301,6 +301,20 @@
     .adm-demo-opt.active-demo{background:var(--gold);color:var(--bg)}
     .adm-demo-opt.active-real{background:var(--cream);color:var(--bg)}
     .adm-demo-opt:disabled{opacity:.5;cursor:not-allowed}
+
+    /* ── APPROVED SELLERS (compact) ── */
+    .adm-approved-title{
+      font-size:12px;color:var(--muted);letter-spacing:.04em;
+      margin:22px 0 8px;padding-top:14px;border-top:1px solid var(--brd);
+    }
+    .adm-approved-row{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:9px 2px;border-bottom:1px solid var(--brd);
+    }
+    .adm-approved-row:last-child{border-bottom:none}
+    .adm-approved-name{
+      font-size:13px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
   </style>
 </head>
 <body>
@@ -357,7 +371,13 @@
     </div>
     <div class="adm-content">
       <div class="adm-panel-tab active" id="ptab-sellers">
-        <div class="adm-loading">جاري التحميل...</div>
+        <div id="ptab-sellers-pending">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
+        <div class="adm-approved-title">البائعون المقبولون</div>
+        <div id="ptab-sellers-approved">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
       </div>
       <div class="adm-panel-tab" id="ptab-prods">
         <div class="adm-loading">جاري التحميل...</div>
@@ -455,6 +475,7 @@
       document.getElementById('adm-panel').classList.add('visible');
       loadLaunchMode();
       loadSellers();
+      loadApprovedSellers();
       loadProds();
       loadAllProducts();
     }
@@ -549,7 +570,7 @@
 
     // ── SELLERS ──
     async function loadSellers() {
-      const el = document.getElementById('ptab-sellers');
+      const el = document.getElementById('ptab-sellers-pending');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
         const { data, error } = await sb.rpc('get_pending_sellers_with_email');
@@ -581,6 +602,29 @@
               <button class="adm-approve" onclick="doAction('seller','${s.id}','approved')">✓ موافقة</button>
               <button class="adm-reject"  onclick="doAction('seller','${s.id}','rejected')">✕ رفض</button>
             </div>
+          </div>`).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // ── APPROVED SELLERS (compact, temporary) ──
+    async function loadApprovedSellers() {
+      const el = document.getElementById('ptab-sellers-approved');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const { data, error } = await sb.from('sellers')
+          .select('id,store_name,is_demo')
+          .eq('approval_status', 'approved');
+        if (error) throw error;
+        if (!data?.length) {
+          el.innerHTML = '<div class="adm-empty">ما عندك حتى بائع مقبول</div>';
+          return;
+        }
+        el.innerHTML = data.map(s => `
+          <div class="adm-approved-row">
+            <div class="adm-approved-name">${esc(s.store_name || '—')}</div>
+            ${_sellerDemoPillHtml(s.id, !!s.is_demo)}
           </div>`).join('');
       } catch (e) {
         el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
