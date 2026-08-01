@@ -59,9 +59,21 @@ function triggerStagger(id){
   if(id==='s-discover'){dcInitSlider();}
 }
 
+// ══ LAUNCH MODE ══
+// Read-only on the frontend — only admin.html ever writes system_settings.launch_mode
+let _launchMode='all';
+async function _loadLaunchMode(){
+  try{
+    if(!window.db)return;
+    const{data}=await window.db.from('system_settings').select('value').eq('key','launch_mode').single();
+    _launchMode=data?.value||'all';
+  }catch(_){}
+}
+
 // ══ LOGO ══
 window.addEventListener('DOMContentLoaded',async()=>{
   localStorage.removeItem('wardro_claude_key');
+  await _loadLaunchMode();
   const onboarded=localStorage.getItem('wardro_onboarded')==='true';
   if(onboarded){const ob=document.getElementById('s-onboard');if(ob)ob.classList.add('gone')}
 
@@ -1366,7 +1378,15 @@ function loadShowMode(){
 }
 
 // Customer taps a Top Store → read-only store view
-function openStoreView(sellerId,storeName,storeImg){
+async function openStoreView(sellerId,storeName,storeImg){
+  if(_launchMode==='demo'){
+    const sb=getSb();
+    if(!sb)return;
+    try{
+      const{data:seller}=await sb.from('sellers').select('is_demo').eq('id',sellerId).single();
+      if(seller?.is_demo!==true){toast('متوفر يوم الإطلاق ✦');return;}
+    }catch(_){toast('متوفر يوم الإطلاق ✦');return;}
+  }
   _guestSellerId=sellerId;
   _storeShare={id:sellerId,name:storeName||'',city:'',phone:null};
   _setStoreWaBtn(false); // hidden until this store's phone is known
@@ -1814,14 +1834,31 @@ async function loadBrowse(){
   try{
     const{data:visibleIds,error:visErr}=await sb.rpc('browse_visible_product_ids');
     if(visErr)console.error('browse_visible_product_ids error:',visErr);
-    let query=sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled,sheet_url)').eq('is_hidden',false).order('created_at',{ascending:false});
+    let query=sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled,sheet_url,is_demo)').eq('is_hidden',false).order('created_at',{ascending:false});
     if(visibleIds)query=query.in('id',visibleIds.map(r=>typeof r==='string'?r:Object.values(r)[0]));
     const{data:prods,error}=await query;
     if(error){console.error('browse query error:',error);throw error;}
     console.log('browse loaded:',prods?.length,'products');
-    _brProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+    let filtered=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+    if(_launchMode==='demo')filtered=filtered.filter(p=>p.seller?.is_demo===true);
+    else if(_launchMode==='production')filtered=filtered.filter(p=>p.seller?.is_demo!==true);
+    _brProds=filtered;
     buildBrowseHero(_brProds);
     _renderBrowseSections(_brProds);
+    // Demo mode: Top Stores shows ALL approved sellers (demo = clickable, real = teaser-only)
+    // instead of just the demo sellers already present in the filtered _brProds.
+    if(_launchMode==='demo'){
+      try{
+        const{data:allStores,error:storesErr}=await sb.from('sellers')
+          .select('id,store_name,profile_image,is_demo')
+          .eq('approval_status','approved');
+        if(storesErr)throw storesErr;
+        const mapped=(allStores||[]).map(s=>({id:s.id,name:s.store_name,img:s.profile_image,is_demo:s.is_demo}));
+        const storesSec=document.getElementById('br-sec-stores');
+        if(mapped.length){renderTopStores(mapped);if(storesSec)storesSec.style.display='';}
+        else if(storesSec)storesSec.style.display='none';
+      }catch(e){console.error('top stores (demo) load:',e);}
+    }
   }catch(e){toast('❌ browse: '+e.message);console.error('browse load:',e)}
 }
 
@@ -1847,8 +1884,13 @@ function renderTopStores(stores){
       <div class="br-store-circle"${s.img?` style="background-image:url('${safeUrl(s.img||'')}')"`:''}>${!s.img&&!s._demo?`<span class="store-av-letter" style="font-size:26px">${esc((s.name||'?')[0].toUpperCase())}</span>`:''}${!s.img&&s._demo?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".35"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M8 9V5a4 4 0 0 1 8 0v4"/></svg>`:''}</div>
       <div class="br-store-name${s._demo?' br-store-name--ph':''}">${s._demo?'':esc(s.name)}</div>
     </div>`).join('');
+  const byId=new Map(list.filter(s=>!s._demo).map(s=>[String(s.id),s]));
   el.querySelectorAll('.br-store-item[data-sid]').forEach(item=>{
-    item.onclick=()=>openStoreView(item.dataset.sid,item.dataset.sname,item.dataset.simg);
+    const storeData=byId.get(item.dataset.sid);
+    const blocked=_launchMode==='demo'&&storeData&&storeData.is_demo!==true;
+    item.onclick=blocked
+      ?()=>toast('متوفر يوم الإطلاق ✦')
+      :()=>openStoreView(item.dataset.sid,item.dataset.sname,item.dataset.simg);
   });
 }
 
@@ -2993,7 +3035,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     // Primary query — product_type + price (Supabase, no AI); jeans is semantically pants
     const pieceTypes=_dcType==='pants'?['pants','jeans']:[_dcType];
     let q=sb.from('products')
-      .select('*, seller:sellers(store_name,phone,cart_enabled,whatsapp_enabled)')
+      .select('*, seller:sellers(store_name,phone,cart_enabled,whatsapp_enabled,is_demo)')
       .in('product_type',pieceTypes)
       .eq('is_hidden',false)
       .gte('price',minPrice)
@@ -3007,7 +3049,9 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
 
     if(loading)loading.style.display='none';
 
-    const results=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+    let results=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+    if(_launchMode==='demo')results=results.filter(p=>p.seller?.is_demo===true);
+    else if(_launchMode==='production')results=results.filter(p=>p.seller?.is_demo!==true);
 
     if(!results.length){if(empty)empty.style.display='flex';return;}
 
