@@ -474,11 +474,15 @@
       </div>
     </div>
 
-    <!-- Editor Tabs: Catalog | Outfits -->
+    <!-- Editor Tabs: Catalog | المخزون | Outfits -->
     <div class="ed-tabs">
       <button class="ed-tab ed-tab--active" id="ed-tab-btn-catalog" onclick="edSwitchTab('catalog')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
         Catalog
+      </button>
+      <button class="ed-tab" id="ed-tab-btn-stock" onclick="edSwitchTab('stock')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M3 8l3-4h12l3 4"/><path d="M3 8h18"/></svg>
+        <span class="ed-tab-label" id="ed-tab-lbl-stock">📦 Stock</span>
       </button>
       <button class="ed-tab" id="ed-tab-btn-outfits" onclick="edSwitchTab('outfits')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.9V6a2 2 0 1 1 2-2"/><path d="M12 6.9L21 13.2a1.2 1.2 0 0 1-.7 2.2H3.7A1.2 1.2 0 0 1 3 13.2z"/></svg>
@@ -557,6 +561,14 @@
         <div class="ed-prod-grid" id="prod-grid" style="display:none"></div>
       </div>
 
+    </div>
+
+    <!-- Stock tab body -->
+    <div class="editor-body" id="ed-stock-screen" style="display:none">
+      <div class="st-list" id="st-list"></div>
+      <div class="ed-sec-empty" id="st-empty" style="display:none">
+        <div class="ede-text">لا توجد قطع بعد</div>
+      </div>
     </div>
 
     <!-- Outfits tab body -->
@@ -661,12 +673,9 @@
             <label>وصف قصير <span style="color:var(--muted);font-weight:400">(اختياري)</span></label>
             <textarea id="ap-desc" rows="3" placeholder="مثال: قميص فاخر للمناسبات الرسمية"></textarea>
           </div>
-          <div class="form-group">
-            <label>حالة التوفر</label>
-            <div class="avail-toggle" id="ap-avail-toggle">
-              <button type="button" class="avail-btn avail-btn--yes active" id="ap-avail-yes" onclick="setAvailability(true)">متوفر</button>
-              <button type="button" class="avail-btn avail-btn--no" id="ap-avail-no" onclick="setAvailability(false)">غير متوفر</button>
-            </div>
+          <div class="form-group" id="ap-stock-group" style="display:none">
+            <label>المخزون</label>
+            <div class="stock-grid-wrap" id="ap-stock-grid"></div>
           </div>
         </div>
       </div>
@@ -1210,7 +1219,9 @@
       <div class="pd-field-block">
         <div class="pd-field-label">SIZE</div>
         <div class="pd-size-pills" id="pd-size-pills"></div>
+        <div class="pd-size-oos-note" id="pd-size-oos-note" style="display:none">غير متوفر</div>
       </div>
+      <div class="pd-oos-banner" id="pd-oos-banner" style="display:none">هذه القطعة غير متوفرة حالياً</div>
       <div class="pd-desc" id="pd-desc"></div>
       <div class="pd-stock-row">
         <span class="pd-stock-dot" id="pd-stock-dot"></span>
@@ -1673,6 +1684,23 @@
       <button class="ap-modal-close" onclick="dcCloseOptSheet()">✕</button>
     </div>
     <div class="dc-opt-sheet-list" id="dc-opt-sheet-list"></div>
+  </div>
+</div>
+
+<!-- Stock Bottom Sheet -->
+<div id="st-sheet-overlay" class="dc-opt-sheet-overlay" onclick="if(event.target===this)closeStockSheet()">
+  <div class="dc-opt-sheet st-sheet" dir="rtl">
+    <div class="dc-opt-sheet-hd">
+      <span id="st-sheet-title">المخزون</span>
+      <button class="ap-modal-close" onclick="closeStockSheet()">✕</button>
+    </div>
+    <div class="dc-opt-sheet-list">
+      <div class="stock-grid-wrap" id="st-sheet-grid"></div>
+    </div>
+    <div class="st-sheet-actions">
+      <button class="ap-cancel" onclick="closeStockSheet()">إلغاء</button>
+      <button class="ap-done" onclick="saveStockSheet()">حفظ</button>
+    </div>
   </div>
 </div>
 
