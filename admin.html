@@ -267,6 +267,40 @@
       transition:background .2s;
     }
     .adm-gal-dot.active{background:var(--gold)}
+
+    /* ── LAUNCH CONTROL ── */
+    #adm-launch-bar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;padding:12px 18px;
+      background:var(--card2);border-bottom:1px solid var(--brd2);
+      flex-wrap:wrap;
+    }
+    .adm-launch-label{
+      font-size:12px;color:var(--muted);letter-spacing:.04em;white-space:nowrap;
+    }
+    .adm-launch-toggle{display:flex;gap:6px}
+    .adm-launch-btn{
+      background:transparent;border:1px solid var(--brd2);
+      border-radius:16px;color:var(--txt);
+      font-family:'Tajawal',sans-serif;font-size:12px;
+      padding:7px 14px;cursor:pointer;
+      transition:background .2s,color .2s,border-color .2s;
+    }
+    .adm-launch-btn.active{
+      background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:500;
+    }
+    .adm-launch-btn:disabled{opacity:.5;cursor:not-allowed}
+
+    /* ── PER-SELLER is_demo PILL ── */
+    .adm-demo-pill{display:flex;gap:0;border:1px solid var(--brd2);border-radius:14px;overflow:hidden;width:fit-content}
+    .adm-demo-opt{
+      background:transparent;border:none;color:var(--muted);
+      font-family:'Tajawal',sans-serif;font-size:11px;
+      padding:5px 11px;cursor:pointer;transition:background .2s,color .2s;
+    }
+    .adm-demo-opt.active-demo{background:var(--gold);color:var(--bg)}
+    .adm-demo-opt.active-real{background:var(--cream);color:var(--bg)}
+    .adm-demo-opt:disabled{opacity:.5;cursor:not-allowed}
   </style>
 </head>
 <body>
@@ -292,6 +326,14 @@
 
   <!-- PANEL -->
   <div id="adm-panel">
+    <div id="adm-launch-bar">
+      <span class="adm-launch-label">وضع الإطلاق</span>
+      <div class="adm-launch-toggle">
+        <button class="adm-launch-btn" id="launch-btn-demo" onclick="setLaunchMode('demo')">تجريبي 🧪</button>
+        <button class="adm-launch-btn" id="launch-btn-all" onclick="setLaunchMode('all')">الكل 🌐</button>
+        <button class="adm-launch-btn" id="launch-btn-production" onclick="setLaunchMode('production')">حقيقي 🚀</button>
+      </div>
+    </div>
     <div class="adm-header">
       <div class="adm-header-left">
         <span class="adm-hdr-wr">WR</span>
@@ -411,6 +453,7 @@
     function revealPanel() {
       document.getElementById('adm-login').style.display = 'none';
       document.getElementById('adm-panel').classList.add('visible');
+      loadLaunchMode();
       loadSellers();
       loadProds();
       loadAllProducts();
@@ -451,6 +494,59 @@
       }
     }
 
+    // ── LAUNCH CONTROL ──
+    function _reflectLaunchBtns(mode) {
+      document.getElementById('launch-btn-demo').classList.toggle('active', mode === 'demo');
+      document.getElementById('launch-btn-all').classList.toggle('active', mode === 'all');
+      document.getElementById('launch-btn-production').classList.toggle('active', mode === 'production');
+    }
+    async function loadLaunchMode() {
+      try {
+        const { data, error } = await sb.from('system_settings').select('value').eq('key', 'launch_mode').single();
+        if (error) throw error;
+        _reflectLaunchBtns(data?.value || 'demo');
+      } catch (e) {
+        toast('خطأ في تحميل وضع الإطلاق: ' + e.message);
+      }
+    }
+    async function setLaunchMode(mode) {
+      const demoBtn = document.getElementById('launch-btn-demo');
+      const allBtn  = document.getElementById('launch-btn-all');
+      const prodBtn = document.getElementById('launch-btn-production');
+      demoBtn.disabled = true; allBtn.disabled = true; prodBtn.disabled = true;
+      try {
+        const { error } = await sb.from('system_settings').update({ value: mode }).eq('key', 'launch_mode');
+        if (error) throw error;
+        _reflectLaunchBtns(mode);
+        toast(mode === 'demo' ? 'تم التبديل إلى وضع التجريبي' : mode === 'all' ? 'يظهر كل المحتوى' : 'تم الإطلاق الحقيقي 🚀');
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+      } finally {
+        demoBtn.disabled = false; allBtn.disabled = false; prodBtn.disabled = false;
+      }
+    }
+
+    // ── PER-SELLER is_demo ──
+    function _sellerDemoPillHtml(id, isDemo) {
+      return `<div class="adm-demo-pill" id="dp-${esc(id)}">
+        <button class="adm-demo-opt${isDemo ? ' active-demo' : ''}" onclick="toggleSellerDemo('${esc(id)}',true)">تجريبي</button>
+        <button class="adm-demo-opt${!isDemo ? ' active-real' : ''}" onclick="toggleSellerDemo('${esc(id)}',false)">حقيقي</button>
+      </div>`;
+    }
+    async function toggleSellerDemo(id, isDemo) {
+      const wrap = document.getElementById('dp-' + id);
+      if (wrap) wrap.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const { error } = await sb.from('sellers').update({ is_demo: isDemo }).eq('id', id);
+        if (error) throw error;
+        if (wrap) wrap.outerHTML = _sellerDemoPillHtml(id, isDemo);
+        toast(isDemo ? '✓ البائع تجريبي' : '✓ البائع حقيقي');
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+        if (wrap) wrap.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    }
+
     // ── SELLERS ──
     async function loadSellers() {
       const el = document.getElementById('ptab-sellers');
@@ -464,6 +560,12 @@
           el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">✓</div>ما عندك حتى بائع قيد المراجعة</div>';
           return;
         }
+        let demoMap = {};
+        try {
+          const { data: demoRows, error: demoErr } = await sb.from('sellers').select('id,is_demo').in('id', data.map(s => s.id));
+          if (demoErr) throw demoErr;
+          demoMap = Object.fromEntries((demoRows || []).map(r => [r.id, r.is_demo]));
+        } catch (_) { /* pill just defaults to حقيقي if this fails */ }
         el.innerHTML = data.map(s => `
           <div class="adm-card" id="sc-${s.id}">
             <div class="adm-card-row">
@@ -472,6 +574,7 @@
                 <div class="adm-card-name">${esc(s.store_name || '—')}</div>
                 <div class="adm-card-email" onclick="copyEmail('${esc(s.email || '')}')">${esc(s.email || '—')}</div>
                 <div class="adm-card-date">${fmtDate(s.created_at)}</div>
+                ${_sellerDemoPillHtml(s.id, !!demoMap[s.id])}
               </div>
             </div>
             <div class="adm-actions">
