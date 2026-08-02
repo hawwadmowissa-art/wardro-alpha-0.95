@@ -302,6 +302,59 @@
     .adm-demo-opt.active-real{background:var(--cream);color:var(--bg)}
     .adm-demo-opt:disabled{opacity:.5;cursor:not-allowed}
 
+    /* ── ANALYTICS ── */
+    .adm-an-header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .adm-an-header-lbl{font-size:12px;color:var(--muted)}
+    .adm-an-refresh-btn{
+      background:rgba(210,175,105,.11);border:1px solid rgba(210,175,105,.22);
+      border-radius:16px;color:var(--gold);
+      font-family:'Tajawal',sans-serif;font-size:12px;
+      padding:7px 14px;cursor:pointer;
+      transition:background .2s,transform .1s;
+    }
+    .adm-an-refresh-btn:hover{background:rgba(210,175,105,.2)}
+    .adm-an-refresh-btn:active{transform:scale(.97)}
+    .adm-an-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:8px}
+    .adm-an-card{
+      background:var(--card);border:1px solid var(--brd);border-radius:14px;
+      padding:14px;text-align:center;
+    }
+    .adm-an-num{font-family:'Fraunces',serif;font-size:26px;font-weight:300;color:var(--gold)}
+    .adm-an-lbl{font-size:11px;color:var(--txt);margin-top:4px}
+    .adm-an-section-title{
+      font-size:12px;color:var(--muted);letter-spacing:.04em;
+      margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--brd);
+    }
+    .adm-an-pills{display:flex;gap:8px;margin-bottom:12px}
+    .adm-an-pill{
+      flex:1;background:transparent;border:1px solid var(--brd2);
+      border-radius:16px;color:var(--txt);
+      font-family:'Tajawal',sans-serif;font-size:12px;
+      padding:8px;cursor:pointer;transition:background .2s,color .2s;
+    }
+    .adm-an-pill.active{background:var(--gold);color:var(--bg);font-weight:500}
+    .adm-an-hour{font-size:12px;color:var(--muted);text-align:center;margin-top:2px}
+    .adm-an-list-row{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:8px 2px;border-bottom:1px solid var(--brd);
+    }
+    .adm-an-list-row:last-child{border-bottom:none}
+    .adm-an-list-name{
+      font-size:13px;color:var(--txt);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .adm-an-list-count{font-size:12px;color:var(--gold);flex-shrink:0}
+    .adm-an-cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .adm-an-card-sm{
+      background:var(--card);border:1px solid var(--brd);border-radius:12px;
+      padding:10px 6px;text-align:center;
+    }
+    .adm-an-card-sm .adm-an-num{font-size:18px}
+    .adm-an-card-sm .adm-an-lbl{font-size:9px}
+
     /* ── APPROVED SELLERS (compact) ── */
     .adm-approved-title{
       font-size:12px;color:var(--muted);letter-spacing:.04em;
@@ -368,6 +421,9 @@
         كل المنتجات
         <span class="adm-tab-n" id="cnt-allprods"></span>
       </button>
+      <button class="adm-tab" id="stab-analytics" onclick="switchTab('analytics')">
+        📊 الإحصاء
+      </button>
     </div>
     <div class="adm-content">
       <div class="adm-panel-tab active" id="ptab-sellers">
@@ -386,6 +442,44 @@
         <input id="ap-search" class="adm-inp adm-search" type="text"
                placeholder="بحث بالاسم أو المتجر..." oninput="filterAllProducts()">
         <div id="ap-list"><div class="adm-loading">جاري التحميل...</div></div>
+      </div>
+      <div class="adm-panel-tab" id="ptab-analytics">
+        <div class="adm-an-header">
+          <span class="adm-an-header-lbl">لوحة الإحصائيات</span>
+          <button class="adm-an-refresh-btn" onclick="loadAnalytics()">🔄 تحديث</button>
+        </div>
+
+        <div class="adm-an-cards" id="an-quick-cards">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
+
+        <div class="adm-an-section-title">النشاط حسب الفترة</div>
+        <div class="adm-an-pills">
+          <button class="adm-an-pill active" id="an-pill-today" onclick="anSetPeriod('today')">اليوم</button>
+          <button class="adm-an-pill" id="an-pill-week" onclick="anSetPeriod('week')">الأسبوع</button>
+          <button class="adm-an-pill" id="an-pill-month" onclick="anSetPeriod('month')">الشهر</button>
+        </div>
+        <div class="adm-an-cards" id="an-period-cards">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
+        <div class="adm-an-hour" id="an-top-hour"></div>
+
+        <div class="adm-an-section-title">أكثر المنتجات مشاهدة</div>
+        <div id="an-top-viewed"><div class="adm-loading">جاري التحميل...</div></div>
+
+        <div class="adm-an-section-title">أكثر المنتجات طلباً</div>
+        <div id="an-top-ordered"><div class="adm-loading">جاري التحميل...</div></div>
+
+        <div class="adm-an-section-title">أكثر المتاجر زيارة</div>
+        <div id="an-top-stores"><div class="adm-loading">جاري التحميل...</div></div>
+
+        <div class="adm-an-section-title">مؤشرات التحويل</div>
+        <div class="adm-an-cards-3" id="an-conversion-cards">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
+
+        <div class="adm-an-section-title">مشاهدات بدون طلبات</div>
+        <div id="an-no-orders"><div class="adm-loading">جاري التحميل...</div></div>
       </div>
     </div>
   </div>
@@ -503,6 +597,7 @@
       document.getElementById('ptab-' + tab).classList.add('active');
       // Re-measure gallery widths now that the prods tab is visible
       if (tab === 'prods') initAdmGalleries();
+      if (tab === 'analytics' && !_anLoaded) loadAnalytics();
     }
 
     // ── COPY EMAIL ──
@@ -879,6 +974,185 @@
         });
         wrap.addEventListener('mouseleave', () => { mDrag = false; });
       });
+    }
+
+    // ── ANALYTICS ──
+    let _anLoaded = false;
+    let _anPeriod = 'today';
+
+    function _anPeriodStart(period) {
+      const d = new Date();
+      if (period === 'today') d.setHours(0, 0, 0, 0);
+      else if (period === 'week') d.setDate(d.getDate() - 7);
+      else if (period === 'month') d.setDate(d.getDate() - 30);
+      return d.toISOString();
+    }
+
+    function _anCountBy(rows, key) {
+      const m = {};
+      (rows || []).forEach(r => { const k = r[key]; if (!k) return; m[k] = (m[k] || 0) + 1; });
+      return m;
+    }
+    function _anTopN(map, n) {
+      return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, n);
+    }
+    function _anRenderList(entries, nameMap, emptyMsg) {
+      return entries.length
+        ? entries.map(([id, c]) => `<div class="adm-an-list-row"><div class="adm-an-list-name">${esc(nameMap[id] || '—')}</div><div class="adm-an-list-count">${c}</div></div>`).join('')
+        : `<div class="adm-empty">${emptyMsg}</div>`;
+    }
+
+    async function loadAnalyticsCards() {
+      const el = document.getElementById('an-quick-cards');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const [sellers, active, hidden, views, saves, orders] = await Promise.all([
+          sb.from('sellers').select('id', { count: 'exact', head: true }).eq('approval_status', 'approved'),
+          sb.from('products').select('id', { count: 'exact', head: true }).eq('is_hidden', false),
+          sb.from('products').select('id', { count: 'exact', head: true }).eq('is_hidden', true),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'view'),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'save'),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).in('event_type', ['whatsapp_order', 'form_order'])
+        ]);
+        [sellers, active, hidden, views, saves, orders].forEach(r => { if (r.error) throw r.error; });
+        const cards = [
+          [sellers.count, 'التجار المقبولون'],
+          [active.count, 'المنتجات النشطة'],
+          [hidden.count, 'المنتجات المخفية'],
+          [views.count, 'إجمالي المشاهدات'],
+          [saves.count, 'إجمالي المحفوظات'],
+          [orders.count, 'إجمالي الطلبات']
+        ];
+        el.innerHTML = cards.map(([n, l]) => `<div class="adm-an-card"><div class="adm-an-num">${n || 0}</div><div class="adm-an-lbl">${esc(l)}</div></div>`).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    async function loadAnalyticsPeriod() {
+      const el = document.getElementById('an-period-cards');
+      const hourEl = document.getElementById('an-top-hour');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      hourEl.textContent = '';
+      try {
+        const startIso = _anPeriodStart(_anPeriod);
+        const [viewsRes, ordersRes, hoursRes] = await Promise.all([
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'view').gte('created_at', startIso),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).in('event_type', ['whatsapp_order', 'form_order']).gte('created_at', startIso),
+          sb.from('user_behavior_log').select('created_at').gte('created_at', startIso)
+        ]);
+        if (viewsRes.error) throw viewsRes.error;
+        if (ordersRes.error) throw ordersRes.error;
+        if (hoursRes.error) throw hoursRes.error;
+        el.innerHTML = `
+          <div class="adm-an-card"><div class="adm-an-num">${viewsRes.count || 0}</div><div class="adm-an-lbl">المشاهدات في الفترة</div></div>
+          <div class="adm-an-card"><div class="adm-an-num">${ordersRes.count || 0}</div><div class="adm-an-lbl">الطلبات في الفترة</div></div>
+        `;
+        const hourCounts = {};
+        (hoursRes.data || []).forEach(r => {
+          const h = new Date(r.created_at).getHours();
+          hourCounts[h] = (hourCounts[h] || 0) + 1;
+        });
+        let topHour = null, topCount = 0;
+        Object.entries(hourCounts).forEach(([h, c]) => { if (c > topCount) { topCount = c; topHour = h; } });
+        hourEl.textContent = topHour !== null ? `أكثر نشاط: الساعة ${topHour}` : 'لا يوجد نشاط بهذه الفترة';
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    function anSetPeriod(period) {
+      _anPeriod = period;
+      document.getElementById('an-pill-today').classList.toggle('active', period === 'today');
+      document.getElementById('an-pill-week').classList.toggle('active', period === 'week');
+      document.getElementById('an-pill-month').classList.toggle('active', period === 'month');
+      loadAnalyticsPeriod();
+    }
+
+    async function loadAnalyticsLists() {
+      const viewedEl = document.getElementById('an-top-viewed');
+      const orderedEl = document.getElementById('an-top-ordered');
+      const storesEl = document.getElementById('an-top-stores');
+      const noOrdersEl = document.getElementById('an-no-orders');
+      viewedEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      orderedEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      storesEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      noOrdersEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const [viewRows, orderRows, visitRows] = await Promise.all([
+          sb.from('user_behavior_log').select('product_id').eq('event_type', 'view'),
+          sb.from('user_behavior_log').select('product_id').in('event_type', ['whatsapp_order', 'form_order']),
+          sb.from('user_behavior_log').select('seller_id').eq('event_type', 'store_visit')
+        ]);
+        if (viewRows.error) throw viewRows.error;
+        if (orderRows.error) throw orderRows.error;
+        if (visitRows.error) throw visitRows.error;
+
+        const viewMap = _anCountBy(viewRows.data, 'product_id');
+        const orderMap = _anCountBy(orderRows.data, 'product_id');
+        const visitMap = _anCountBy(visitRows.data, 'seller_id');
+
+        const topViewed = _anTopN(viewMap, 5);
+        const topOrdered = _anTopN(orderMap, 5);
+        const topStores = _anTopN(visitMap, 5);
+        const orderedIdsSet = new Set(Object.keys(orderMap));
+        const noOrders = Object.entries(viewMap)
+          .filter(([pid]) => !orderedIdsSet.has(pid))
+          .sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        const prodIds = [...new Set([...topViewed, ...topOrdered, ...noOrders].map(([id]) => id))];
+        const sellerIds = [...new Set(topStores.map(([id]) => id))];
+
+        let prodNames = {}, storeNames = {};
+        if (prodIds.length) {
+          const { data, error } = await sb.from('products').select('id,name').in('id', prodIds);
+          if (error) throw error;
+          prodNames = Object.fromEntries((data || []).map(p => [p.id, p.name]));
+        }
+        if (sellerIds.length) {
+          const { data, error } = await sb.from('sellers').select('id,store_name').in('id', sellerIds);
+          if (error) throw error;
+          storeNames = Object.fromEntries((data || []).map(s => [s.id, s.store_name]));
+        }
+
+        viewedEl.innerHTML = _anRenderList(topViewed, prodNames, 'لا توجد مشاهدات بعد');
+        orderedEl.innerHTML = _anRenderList(topOrdered, prodNames, 'لا توجد طلبات بعد');
+        storesEl.innerHTML = _anRenderList(topStores, storeNames, 'لا توجد زيارات بعد');
+        noOrdersEl.innerHTML = _anRenderList(noOrders, prodNames, 'ما كاين منتجات بدون طلبات');
+      } catch (e) {
+        const msg = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+        viewedEl.innerHTML = msg; orderedEl.innerHTML = msg; storesEl.innerHTML = msg; noOrdersEl.innerHTML = msg;
+      }
+    }
+
+    async function loadAnalyticsConversion() {
+      const el = document.getElementById('an-conversion-cards');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const [saveThenOrder, revisit, refWa] = await Promise.all([
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('action', 'save_then_order'),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('action', 'revisit'),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'ref_wa')
+        ]);
+        [saveThenOrder, revisit, refWa].forEach(r => { if (r.error) throw r.error; });
+        el.innerHTML = `
+          <div class="adm-an-card-sm"><div class="adm-an-num">${saveThenOrder.count || 0}</div><div class="adm-an-lbl">طلبات بعد حفظ</div></div>
+          <div class="adm-an-card-sm"><div class="adm-an-num">${revisit.count || 0}</div><div class="adm-an-lbl">عودة لنفس القطعة</div></div>
+          <div class="adm-an-card-sm"><div class="adm-an-num">${refWa.count || 0}</div><div class="adm-an-lbl">تحقق البائع من طلب</div></div>
+        `;
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    async function loadAnalytics() {
+      _anLoaded = true;
+      await Promise.all([
+        loadAnalyticsCards(),
+        loadAnalyticsPeriod(),
+        loadAnalyticsLists(),
+        loadAnalyticsConversion()
+      ]);
     }
 
     // ── SESSION RESTORE ──
