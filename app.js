@@ -173,6 +173,17 @@ function _handleProductDeepLink(){
   if(!prodId||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(prodId))return;
   const colorParam=params.get('color');
   const colorIdx=colorParam!==null&&/^\d+$/.test(colorParam)?parseInt(colorParam,10):undefined;
+  if(params.get('ref')==='wa'){
+    (async()=>{
+      try{
+        const sb=window.db;if(!sb)return;
+        const{data}=await sb.auth.getSession();
+        if(data?.session&&localStorage.getItem('wardro_role')==='seller'){
+          _logEvent('ref_wa',{productId:prodId});
+        }
+      }catch(_){}
+    })();
+  }
   _waitIdle(()=>{
     if(document.getElementById('s-browse')?.classList.contains('active')){
       _openDeepLinkProduct(prodId,colorIdx);
@@ -1333,6 +1344,7 @@ function storeWhatsApp(){
   const url=location.origin+location.pathname+'?store='+_storeShare.id;
   const msg='السلام عليكم\n\nمهتم بمتجرك على Wardro:\n\n🏪 '+(_storeShare.name||'')+'\n📍 '+(_storeShare.city||'ورقلة')+', الجزائر\n\n'+url+'\n\n(استفسار أكثر...)';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+  try{_logEvent('whatsapp_store',{sellerId:_storeShare.id});}catch(_){}
 }
 
 function _setStoreWaBtn(show){
@@ -2168,10 +2180,11 @@ function pdOrderWhatsApp(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
   const phone=String(p.seller?.phone||'').replace(/\D/g,'');
   if(!phone)return;
-  const link=location.origin+location.pathname+'?product='+p.id;
+  const link=location.origin+location.pathname+'?product='+p.id+'&ref=wa';
   const priceLine=p.is_exclusive?'السعر: (حصري)':Number(p.price||0).toLocaleString()+' DZD';
   const msg='السلام عليكم\n\nمهتم بهذي القطعة من متجرك على Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: (..)\n📞 رقم هاتفي: .... \n🎨 اللون: (..)\n\n'+link+'\n\n(استفسار أكثر...)';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+  try{_logEvent('whatsapp_order',{productId:p.id,sellerId:p.seller_id});}catch(_){}
 }
 
 // ══ ORDER FORM (cart checkout UI — no data sent yet) ══
@@ -2383,7 +2396,10 @@ function cfConfirmOrder(){
   ocStart(false,orderNumber);
   fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
     .then(res=>{
-      if(res.ok)ocShowSuccess();else ocFail();
+      if(res.ok){
+        ocShowSuccess();
+        try{_logEvent('form_order',{productId:p.id,sellerId:p.seller_id});}catch(_){}
+      }else ocFail();
     })
     .catch(()=>ocFail());
 }
@@ -2453,18 +2469,35 @@ function _logBehavior(action,product){
   }).catch(()=>{});
 }
 
-// Fire-and-forget event stream (view/save/store_visit) — works for anonymous visitors too.
-// Never blocks the UI action it's attached to and never surfaces errors to the user.
+// Fire-and-forget event stream (view/save/store_visit/whatsapp_order/form_order/whatsapp_store/ref_wa) —
+// works for anonymous visitors too. Never blocks the UI action it's attached to and never surfaces errors to the user.
 function _logEvent(eventType,{productId,sellerId}={}){
   const sb=window.db;if(!sb)return;
-  try{
-    sb.from('user_behavior_log').insert({
-      action:eventType,
-      event_type:eventType,
-      product_id:productId||null,
-      seller_id:sellerId||null
-    }).then(({error})=>{if(error)console.error('event log:',error);}).catch(()=>{});
-  }catch(_){}
+  (async()=>{
+    try{
+      const{data:sessData}=await sb.auth.getSession();
+      const userId=sessData?.session?.user?.id||null;
+      let action=eventType;
+      if(eventType==='view'&&productId&&userId){
+        const{data:seen}=await sb.from('user_behavior_log').select('id')
+          .eq('product_id',productId).eq('user_id',userId).eq('event_type','view').limit(1);
+        if(seen&&seen.length)action='revisit';
+      }
+      if((eventType==='form_order'||eventType==='whatsapp_order')&&productId&&userId){
+        const{data:sv}=await sb.from('saved_items').select('id')
+          .eq('product_id',productId).eq('customer_id',userId).limit(1);
+        if(sv&&sv.length)action='save_then_order';
+      }
+      const{error}=await sb.from('user_behavior_log').insert({
+        action,
+        event_type:eventType,
+        product_id:productId||null,
+        seller_id:sellerId||null,
+        user_id:userId||null
+      });
+      if(error)console.error('event log:',error);
+    }catch(_){}
+  })();
 }
 
 async function saveItem(){
