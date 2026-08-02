@@ -62,6 +62,7 @@ function triggerStagger(id){
 // ══ LAUNCH MODE ══
 // Read-only on the frontend — only admin.html ever writes system_settings.launch_mode
 let _launchMode='all';
+let currentSeller=null; // populated by loadEditorProducts() for the logged-in seller only (never set for guest/customer sessions)
 async function _loadLaunchMode(){
   try{
     if(!window.db)return;
@@ -69,11 +70,19 @@ async function _loadLaunchMode(){
     _launchMode=data?.value||'all';
   }catch(_){}
 }
+function _syncDemoBanner(){
+  const show=_launchMode==='demo'&&currentSeller?.is_demo!==true;
+  ['show-demo-banner','editor-demo-banner'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=show?'block':'none';
+  });
+}
 
 // ══ LOGO ══
 window.addEventListener('DOMContentLoaded',async()=>{
   localStorage.removeItem('wardro_claude_key');
   await _loadLaunchMode();
+  _syncDemoBanner(); // in case a seller is already on #s-show/#s-editor (session restore below)
   const onboarded=localStorage.getItem('wardro_onboarded')==='true';
   if(onboarded){const ob=document.getElementById('s-onboard');if(ob)ob.classList.add('gone')}
 
@@ -806,7 +815,8 @@ async function loadEditorProducts(){
   try{
     const{data:{user}}=await sb.auth.getUser();
     if(!user)return;
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city').eq('id',user.id).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,is_demo').eq('id',user.id).single();
+    currentSeller=seller||null;
     const circle=document.getElementById('sp-img-circle');
     const spLetter=document.getElementById('sp-img-letter');
     if(seller?.profile_image){
@@ -828,6 +838,7 @@ async function loadEditorProducts(){
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
     renderEditorProducts(prods||[]);
     renderShowProducts(prods||[]);
+    _syncDemoBanner();
   }catch(e){}
 }
 
@@ -1375,6 +1386,7 @@ function loadShowMode(){
   _setStoreWaBtn(false);
   // Load fresh data
   loadEditorProducts();
+  _syncDemoBanner();
 }
 
 // Customer taps a Top Store → read-only store view
