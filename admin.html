@@ -354,6 +354,19 @@
     }
     .adm-an-card-sm .adm-an-num{font-size:18px}
     .adm-an-card-sm .adm-an-lbl{font-size:9px}
+    .an-period-row{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:8px 2px;border-bottom:1px solid var(--brd);
+    }
+    .an-period-row:last-child{border-bottom:none}
+    .an-period-label{font-size:13px;color:var(--txt)}
+    .an-revisit-block{flex-direction:column;align-items:flex-start;gap:6px}
+    .an-top5-list{width:100%}
+    .an-revisit-seller{margin-bottom:10px}
+    .an-revisit-seller-name{font-size:11px;color:#D2AF69;font-weight:700;margin-bottom:4px;font-family:Tajawal,sans-serif}
+    .an-revisit-row{display:flex;justify-content:space-between;font-size:12px;color:#EDE3CC;padding:2px 0 2px 8px;font-family:Tajawal,sans-serif}
+    .an-cnt{color:#D2AF69;font-weight:600}
+    .an-empty-note{color:#888;font-size:12px}
 
     /* ── APPROVED SELLERS (compact) ── */
     .adm-approved-title{
@@ -463,6 +476,9 @@
           <div class="adm-loading">جاري التحميل...</div>
         </div>
         <div class="adm-an-hour" id="an-top-hour"></div>
+        <div id="an-order-types">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
 
         <div class="adm-an-section-title">أكثر المنتجات مشاهدة</div>
         <div id="an-top-viewed"><div class="adm-loading">جاري التحميل...</div></div>
@@ -1032,22 +1048,64 @@
     async function loadAnalyticsPeriod() {
       const el = document.getElementById('an-period-cards');
       const hourEl = document.getElementById('an-top-hour');
+      const typesEl = document.getElementById('an-order-types');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       hourEl.textContent = '';
+      typesEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
         const startIso = _anPeriodStart(_anPeriod);
-        const [viewsRes, ordersRes, hoursRes] = await Promise.all([
+        const [viewsRes, waRes, formRes, refWaRes, revisitRowsRes, hoursRes] = await Promise.all([
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'view').gte('created_at', startIso),
-          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).in('event_type', ['whatsapp_order', 'form_order']).gte('created_at', startIso),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_order').gte('created_at', startIso),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'form_order').gte('created_at', startIso),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'ref_wa').gte('created_at', startIso),
+          sb.from('user_behavior_log').select('product_id,seller_id').eq('action', 'revisit').gte('created_at', startIso),
           sb.from('user_behavior_log').select('created_at').gte('created_at', startIso)
         ]);
-        if (viewsRes.error) throw viewsRes.error;
-        if (ordersRes.error) throw ordersRes.error;
-        if (hoursRes.error) throw hoursRes.error;
+        [viewsRes, waRes, formRes, refWaRes, revisitRowsRes, hoursRes].forEach(r => { if (r.error) throw r.error; });
         el.innerHTML = `
-          <div class="adm-an-card"><div class="adm-an-num">${viewsRes.count || 0}</div><div class="adm-an-lbl">المشاهدات في الفترة</div></div>
-          <div class="adm-an-card"><div class="adm-an-num">${ordersRes.count || 0}</div><div class="adm-an-lbl">الطلبات في الفترة</div></div>
+          <div class="adm-an-card" style="grid-column:1/-1"><div class="adm-an-num">${viewsRes.count || 0}</div><div class="adm-an-lbl">المشاهدات في الفترة</div></div>
         `;
+        typesEl.innerHTML = `
+          <div class="adm-an-list-row"><div class="adm-an-list-name">نوايا واتساب</div><div class="adm-an-list-count">${waRes.count || 0}</div></div>
+          <div class="adm-an-list-row"><div class="adm-an-list-name">طلبات مؤكدة (استمارة)</div><div class="adm-an-list-count">${formRes.count || 0}</div></div>
+          <div class="adm-an-list-row"><div class="adm-an-list-name">تحقق البائع</div><div class="adm-an-list-count">${refWaRes.count || 0}</div></div>
+          <div class="an-period-row an-revisit-block">
+            <div class="an-period-label">🔁 عودة لقطعة (لكل بائع)</div>
+            <div id="an-revisit-top5" class="an-top5-list"><span class="an-empty-note">—</span></div>
+          </div>
+        `;
+
+        const revisitRows = (revisitRowsRes.data || []).filter(r => r.product_id);
+        const bySellerProd = {};
+        revisitRows.forEach(r => {
+          const sk = r.seller_id || '__unknown__';
+          if (!bySellerProd[sk]) bySellerProd[sk] = {};
+          bySellerProd[sk][r.product_id] = (bySellerProd[sk][r.product_id] || 0) + 1;
+        });
+        const revisitEl = document.getElementById('an-revisit-top5');
+        if (!Object.keys(bySellerProd).length) {
+          revisitEl.innerHTML = '<span class="an-empty-note">لا توجد عودات في هذه الفترة</span>';
+        } else {
+          try {
+            const allPids = [...new Set(revisitRows.map(r => r.product_id))];
+            const allSids = [...new Set(revisitRows.filter(r => r.seller_id).map(r => r.seller_id))];
+            const [{ data: prods }, { data: sellers }] = await Promise.all([
+              sb.from('products').select('id,name').in('id', allPids),
+              allSids.length ? sb.from('sellers').select('id,store_name').in('id', allSids) : Promise.resolve({ data: [] })
+            ]);
+            const pm = {}, sm = {};
+            (prods || []).forEach(p => pm[p.id] = p.name);
+            (sellers || []).forEach(s => sm[s.id] = s.store_name);
+            let html = '';
+            for (const [sid, prodCounts] of Object.entries(bySellerProd)) {
+              const top2 = Object.entries(prodCounts).sort((a, b) => b[1] - a[1]).slice(0, 2);
+              html += `<div class="an-revisit-seller"><div class="an-revisit-seller-name">🏪 ${esc(sm[sid] || '—')}</div>${top2.map(([pid, cnt]) => `<div class="an-revisit-row"><span class="an-prod-name">${esc(pm[pid] || '—')}</span><span class="an-cnt">${cnt}</span></div>`).join('')}</div>`;
+            }
+            revisitEl.innerHTML = html;
+          } catch { revisitEl.innerHTML = '<span class="an-empty-note">خطأ</span>'; }
+        }
+
         const hourCounts = {};
         (hoursRes.data || []).forEach(r => {
           const h = new Date(r.created_at).getHours();
@@ -1057,7 +1115,9 @@
         Object.entries(hourCounts).forEach(([h, c]) => { if (c > topCount) { topCount = c; topHour = h; } });
         hourEl.textContent = topHour !== null ? `أكثر نشاط: الساعة ${topHour}` : 'لا يوجد نشاط بهذه الفترة';
       } catch (e) {
-        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+        const msg = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+        el.innerHTML = msg;
+        typesEl.innerHTML = msg;
       }
     }
 
