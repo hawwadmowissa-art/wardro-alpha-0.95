@@ -30,6 +30,7 @@ function isBypassed(url) {
 
 // install: pre-cache shell
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_VERSION).then(cache => cache.addAll(SHELL))
   );
