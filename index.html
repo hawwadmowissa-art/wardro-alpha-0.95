@@ -1151,6 +1151,21 @@
     </button>
   </nav>
 
+  <!-- View All overlay — full vertical grid for a strip's viewAllKey, stays inside Browse -->
+  <div id="br-viewall-overlay" class="br-viewall-overlay" style="display:none">
+    <div class="br-viewall-head">
+      <button class="br-viewall-back" onclick="_brCloseViewAll()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="br-viewall-title" id="br-viewall-title"></span>
+    </div>
+    <div class="br-viewall-body">
+      <div class="br-section" id="br-viewall-sec">
+        <div class="br-prod-grid" id="br-viewall-grid"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- CUSTOMER SAVED -->

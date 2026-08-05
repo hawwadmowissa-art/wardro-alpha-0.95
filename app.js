@@ -1640,13 +1640,34 @@ function _renderHStrip(stripId,secId,prods,opts={}){
     if(!btn){
       btn=document.createElement('div');
       btn.className='br-view-all';
-      el.insertAdjacentElement('afterend',btn);
+      const head=sec.querySelector('.br-sec-head');
+      if(head)head.appendChild(btn);else el.insertAdjacentElement('afterend',btn);
     }
     btn.textContent='عرض الكل';
-    btn.onclick=()=>console.log('view-all:',viewAllKey);
+    btn.onclick=()=>_brOpenViewAll(viewAllKey);
   }else if(existingBtn){
     existingBtn.remove();
   }
+}
+
+function _brOpenViewAll(key){
+  let list;
+  if(key==='new'){
+    const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
+    list=_brProds.filter(p=>p.created_at&&new Date(p.created_at)>=sevenDaysAgo);
+  }else{
+    list=_brProds.filter(p=>p.type===key);
+  }
+  const titleEl=document.getElementById('br-viewall-title');
+  if(titleEl)titleEl.textContent=key==='new'?'New This Week':(_CAT_TITLES[key]||key);
+  _renderVGrid('br-viewall-grid','br-viewall-sec',list);
+  const overlay=document.getElementById('br-viewall-overlay');
+  if(overlay)overlay.style.display='flex';
+}
+
+function _brCloseViewAll(){
+  const overlay=document.getElementById('br-viewall-overlay');
+  if(overlay)overlay.style.display='none';
 }
 
 const _CAT_LIST=['casual','sport','streetwear','classic','old_money'];
@@ -1735,7 +1756,7 @@ function _renderBrowseSections(prods){
     if(secEl){const t=secEl.querySelector('.br-sec-title');if(t)t.textContent=_CAT_TITLES[assignedCat];}
     const catList=catProds[assignedCat];
     const sliced=catList.slice(0,_stripCount(catList.length));
-    _renderHStrip(_CAT_SLOT_STRIP[slotId],_CAT_SLOT_SEC[slotId],sliced,{minCount:2,totalCount:catList.length,viewAllKey:slotId});
+    _renderHStrip(_CAT_SLOT_STRIP[slotId],_CAT_SLOT_SEC[slotId],sliced,{minCount:2,totalCount:catList.length,viewAllKey:assignedCat});
   }
 
   _renderCatSlot('casual'); // slot 1 — always the anchor
