@@ -1756,6 +1756,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .del-modal-confirm{flex:1.3;padding:12px;border:none;border-radius:12px;background:#7A3B3B;color:#EDE3CC;font-family:'Tajawal',sans-serif;font-size:14px;cursor:pointer;transition:opacity .15s}
 .del-modal-confirm:disabled{opacity:.4;cursor:not-allowed}
 .del-modal-confirm:not(:disabled):hover{opacity:.88}
+.ca-skip-btn{width:100%;margin-top:10px;padding:10px;border:none;background:none;color:var(--txtD,#9a9282);font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer}
 /* Legal Modal */
 .legal-modal-overlay{
   position:fixed;inset:0;z-index:600;

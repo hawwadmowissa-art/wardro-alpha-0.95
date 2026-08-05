@@ -35,7 +35,19 @@ window.addEventListener('popstate',e=>{
   else history.pushState({screen:'s-splash'},'','');
 });
 
-function goCustomer(){navigateTo('s-browse','slide')}
+let _authContext=null; // 'revisit' — set when a returning anonymous visitor taps the customer entry; openCustAuth() shows a skip option for this context
+function goCustomer(){
+  const count=parseInt(localStorage.getItem('wardro_visit_count')||'0',10);
+  const sb=getSb();
+  if(count>=2&&sb){
+    sb.auth.getSession().then(({data:{session}})=>{
+      if(session)navigateTo('s-browse','slide');
+      else{_authContext='revisit';openCustAuth();}
+    });
+    return;
+  }
+  navigateTo('s-browse','slide');
+}
 
 function goSeller(){navigateTo('s-seller-signin','slide')}
 
@@ -80,7 +92,14 @@ function _syncDemoBanner(){
 
 // ══ LOGO ══
 window.addEventListener('DOMContentLoaded',async()=>{
+  if(sessionStorage.getItem('wardro_oauth_reload')){
+    sessionStorage.removeItem('wardro_oauth_reload');
+    window.location.reload();
+    return;
+  }
   localStorage.removeItem('wardro_claude_key');
+  const _visits=(parseInt(localStorage.getItem('wardro_visit_count')||'0',10))+1;
+  localStorage.setItem('wardro_visit_count',String(_visits));
   await _loadLaunchMode();
   _syncDemoBanner(); // in case a seller is already on #s-show/#s-editor (session restore below)
   const onboarded=localStorage.getItem('wardro_onboarded')==='true';
@@ -2197,8 +2216,13 @@ function pdSelectColor(btn){
   _pdSyncAvailability();
 }
 
-function pdOrderWhatsApp(){
+let _pendingAction=null; // 'whatsapp' | 'form' — resumed by doCustAuth/doCustGoogleAuth after a login prompted mid-checkout
+
+async function pdOrderWhatsApp(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  const sb=getSb();if(!sb)return;
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){_pendingAction='whatsapp';openCustAuth();return;}
   const phone=String(p.seller?.phone||'').replace(/\D/g,'');
   if(!phone)return;
   const link=location.origin+location.pathname+'?product='+p.id+'&ref=wa';
@@ -2374,8 +2398,11 @@ function closeOrderForm(){
   const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='flex';
 }
 
-function cfConfirmOrder(){
+async function cfConfirmOrder(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  const sb=getSb();if(!sb)return;
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){_pendingAction='form';openCustAuth();return;}
   const name=document.getElementById('cf-name')?.value.trim()||'';
   const phone=document.getElementById('cf-phone')?.value.trim()||'';
   const wilaya=document.getElementById('cf-wilaya')?.value||'';
@@ -2700,6 +2727,8 @@ function odOrderWhatsApp(){
 function openCustAuth(){
   const m=document.getElementById('cust-auth-modal');
   m.style.display='flex';
+  const skipBtn=document.getElementById('ca-skip-btn');
+  if(skipBtn)skipBtn.style.display=_authContext==='revisit'?'block':'none';
   requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('cust-auth--open')));
 }
 function closeCustAuth(){
@@ -2708,6 +2737,7 @@ function closeCustAuth(){
   setTimeout(()=>{m.style.display='none';},380);
 }
 function custAuthBackdrop(e){if(e.target===e.currentTarget)closeCustAuth();}
+function custAuthSkip(){closeCustAuth();_authContext=null;navigateTo('s-browse','slide');}
 
 async function doCustAuth(){
   const sb=getSb();if(!sb)return;
@@ -2730,7 +2760,13 @@ async function doCustAuth(){
       localStorage.setItem('wardro_role','customer');
       toast('✓ تم تسجيل الدخول');
       closeCustAuth();
-      setTimeout(()=>saveItem(),420);
+      _authContext=null;
+      const pending=_pendingAction;_pendingAction=null;
+      setTimeout(()=>{
+        if(pending==='whatsapp')pdOrderWhatsApp();
+        else if(pending==='form')cfConfirmOrder();
+        else saveItem();
+      },420);
     }else{
       toast('تحقق من بريدك الإلكتروني لتأكيد الحساب');
       btn.textContent='Continue →';btn.disabled=false;
@@ -2742,7 +2778,12 @@ async function doCustGoogleAuth(){
   const sb=getSb();if(!sb)return;
   localStorage.setItem('wardro_role','customer');
   const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://hawwadmowissa-art.github.io/wardro-alpha-0.95/'}});
-  if(error)toast(error.message||'تعذّر تسجيل الدخول بحساب Google');
+  if(error){toast(error.message||'تعذّر تسجيل الدخول بحساب Google');return;}
+  sessionStorage.setItem('wardro_oauth_reload','1');
+  _authContext=null;
+  const pending=_pendingAction;_pendingAction=null;
+  if(pending==='whatsapp')pdOrderWhatsApp();
+  else if(pending==='form')cfConfirmOrder();
 }
 
 // ══ SAVED SCREEN ══
