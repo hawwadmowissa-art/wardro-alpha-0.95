@@ -1946,6 +1946,27 @@
   // ── Install prompt helpers ───────────────────────────────────────────────
   var DISMISSED_KEY = 'wardro_pwa_dismissed';
   var _bannerTimer = null;
+  var isInAppBrowser = /Instagram|FBAN|FBAV|Telegram|TikTok/i.test(navigator.userAgent);
+
+  function _copyLinkFallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function _copyLink() {
+    var url = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).catch(function () { _copyLinkFallback(url); });
+    } else {
+      _copyLinkFallback(url);
+    }
+  }
 
   function _injectBannerStyles() {
     if (document.getElementById('pwa-banner-style')) return;
@@ -1975,7 +1996,7 @@
     }, { once: true });
   }
 
-  function createBanner(text, onAccept, onDismiss) {
+  function createBanner(text, onAccept, onDismiss, acceptLabel) {
     if (localStorage.getItem(DISMISSED_KEY)) return;
     _injectBannerStyles();
 
@@ -1989,8 +2010,8 @@
 
     var acceptBtn = document.createElement('button');
     acceptBtn.id = 'pwa-banner-accept';
-    acceptBtn.setAttribute('aria-label', 'تثبيت');
-    acceptBtn.textContent = 'تثبيت';
+    acceptBtn.setAttribute('aria-label', acceptLabel || 'تثبيت');
+    acceptBtn.textContent = acceptLabel || 'تثبيت';
 
     var closeBtn = document.createElement('button');
     closeBtn.id = 'pwa-banner-close';
@@ -2024,7 +2045,7 @@
     clearTimeout(_bannerTimer);
     _bannerTimer = setTimeout(function () {
       createBanner(text, onAccept, onDismiss);
-    }, 30000);
+    }, 15000);
   }
 
   // ── Android/Chrome install prompt ────────────────────────────────────────
@@ -2032,6 +2053,7 @@
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
+    if (isInAppBrowser) return;
     _showBannerDelayed(
       'ثبّت تطبيق Wardro',
       function () {
@@ -2048,12 +2070,25 @@
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   var isStandalone = window.navigator.standalone === true;
   var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  if (isIOS && isSafari && !isStandalone) {
+  if (isIOS && isSafari && !isStandalone && !isInAppBrowser) {
     _showBannerDelayed(
       'أضف Wardro إلى الشاشة الرئيسية من زر المشاركة ⬆️',
       null,
       null
     );
+  }
+
+  // ── In-app browser hint (Instagram/Facebook/Telegram/TikTok) ────────────
+  if (isInAppBrowser) {
+    clearTimeout(_bannerTimer);
+    _bannerTimer = setTimeout(function () {
+      createBanner(
+        'افتح في Chrome لتثبيت التطبيق',
+        function () { _copyLink(); },
+        null,
+        'نسخ الرابط'
+      );
+    }, 10000);
   }
 }());
 </script>
