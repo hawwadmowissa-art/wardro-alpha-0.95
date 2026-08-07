@@ -1516,9 +1516,26 @@ function _wireHeroTap(track,cfg){
   track.onclick=e=>{
     if(moved){moved=false;return;}
     const slide=e.target.closest('.show-hero-slide,.br-hero-slide');
-    const id=slide&&slide.dataset.id;
-    if(id)openProdDetail(id);
+    if(slide)_handleHeroSlideClick(slide);
   };
+}
+
+function _handleHeroSlideClick(slide){
+  const linkType=slide.dataset.linkType;
+  const linkTarget=slide.dataset.linkTarget;
+  if(linkType==='product'){if(linkTarget)openProdDetail(linkTarget);return;}
+  if(linkType==='store'){if(linkTarget)_openHeroStoreLink(linkTarget);return;}
+  if(linkType==='url'){if(linkTarget)window.open(linkTarget,'_blank');return;}
+  const id=slide.dataset.id;
+  if(id)openProdDetail(id);
+}
+
+async function _openHeroStoreLink(sellerId){
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data:seller}=await sb.from('sellers').select('store_name,profile_image').eq('id',sellerId).single();
+    openStoreView(sellerId,seller?.store_name||'',seller?.profile_image||null);
+  }catch(e){console.error('hero editorial store link:',e);}
 }
 
 function buildHeroSlider(prods){
@@ -1959,7 +1976,7 @@ function renderTopStores(stores){
   });
 }
 
-function buildBrowseHero(prods){
+async function buildBrowseHero(prods){
   const track=document.getElementById('br-hero-track');
   const dots=document.getElementById('br-hero-dots');
   if(!track||!dots)return;
@@ -1969,17 +1986,29 @@ function buildBrowseHero(prods){
   let slides;
   if(prods&&prods.length){
     let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.hero_status==='approved'&&(p.cover_image||p.image));
-    heroProds.sort((a,b)=>(b.hero_pinned?1:0)-(a.hero_pinned?1:0)||(a.hero_order||0)-(b.hero_order||0));
-    if(!heroProds.length)heroProds=prods.filter(p=>p.cover_image||p.image);
-    if(heroProds.length){
-      slides=heroProds.slice(0,20).map(p=>({
-        bg:p.cover_image||p.image,
-        id:p.id,
-        label:(p.type||'FEATURED').toUpperCase(),
-        title:p.name,
-        sub:p.description||'Premium quality clothing',
-        cta:_priceLabel(p)
-      }));
+    let editSlides=[];
+    const sb=getSb();
+    if(sb){
+      try{const{data}=await sb.from('hero_editorial_slides').select('*');editSlides=data||[];}
+      catch(e){console.error('hero editorial slides load:',e);}
+    }
+    let items=[
+      ...heroProds.map(p=>({kind:'product',hero_order:p.hero_order||0,hero_pinned:!!p.hero_pinned,data:p})),
+      ...editSlides.map(s=>({kind:'editorial',hero_order:s.hero_order||0,hero_pinned:false,data:s}))
+    ];
+    items.sort((a,b)=>(b.hero_pinned?1:0)-(a.hero_pinned?1:0)||a.hero_order-b.hero_order);
+    if(!items.length){
+      items=prods.filter(p=>p.cover_image||p.image).map(p=>({kind:'product',hero_order:0,hero_pinned:false,data:p}));
+    }
+    if(items.length){
+      slides=items.slice(0,20).map(it=>it.kind==='editorial'?{
+        bg:it.data.image_url,id:'',linkType:it.data.link_type||'',linkTarget:it.data.link_target||'',
+        label:'',title:it.data.title||'',sub:'',cta:null
+      }:{
+        bg:it.data.cover_image||it.data.image,id:it.data.id,linkType:'',linkTarget:'',
+        label:(it.data.type||'FEATURED').toUpperCase(),title:it.data.name,
+        sub:it.data.description||'Premium quality clothing',cta:_priceLabel(it.data)
+      });
     }
   }
   if(!slides){
@@ -1987,13 +2016,13 @@ function buildBrowseHero(prods){
   }
 
   track.innerHTML=slides.map((s,i)=>`
-    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}" data-link-type="${s.linkType||''}" data-link-target="${esc(s.linkTarget||'')}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
       <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
-        <div class="br-hero-label">${esc(s.label)}</div>
+        ${s.label?`<div class="br-hero-label">${esc(s.label)}</div>`:''}
         <div class="br-hero-title">${esc(s.title)}</div>
-        <div class="br-hero-sub">${esc(s.sub)}</div>
-        ${s.id?`<div class="br-hero-cta">${esc(s.cta)} →</div>`:`<button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${esc(s.cta)} →</button>`}
+        ${s.sub?`<div class="br-hero-sub">${esc(s.sub)}</div>`:''}
+        ${s.cta?(s.id?`<div class="br-hero-cta">${esc(s.cta)} →</div>`:`<button class="br-hero-cta" onclick="toast('${s.cta} — قريباً')">${esc(s.cta)} →</button>`):''}
       </div>
     </div>`).join('');
   dots.innerHTML=slides.map((_,i)=>`<button class="br-hero-dot${i===0?' active':''}" onclick="goBrHeroSlide(${i})"></button>`).join('');

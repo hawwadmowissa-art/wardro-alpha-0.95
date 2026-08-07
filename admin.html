@@ -264,6 +264,25 @@
     .adm-card[draggable="true"]{cursor:grab}
     .adm-card.dragging{opacity:.5}
     .hero-drag-over{border:2px solid #D2AF69 !important;transform:scale(1.02) !important;transition:all .15s ease}
+    .adm-editorial-form{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+    .adm-editorial-preview{position:relative;height:355px;border-radius:10px;background:#1A1208}
+    .adm-editorial-preview-img{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center center}
+    .adm-kebab-wrap{position:relative}
+    .adm-kebab-menu{
+      display:none;position:absolute;bottom:calc(100% + 6px);left:0;
+      background:var(--card2);border:1px solid var(--brd2);border-radius:10px;
+      overflow:hidden;z-index:20;min-width:110px;
+      box-shadow:0 4px 16px rgba(0,0,0,.4);
+    }
+    .adm-kebab-menu.show{display:block}
+    .adm-kebab-menu button{
+      display:block;width:100%;padding:10px 14px;background:transparent;border:none;
+      color:var(--txt);font-family:'Tajawal',sans-serif;font-size:13px;text-align:right;cursor:pointer;
+      transition:background .2s;
+    }
+    .adm-kebab-menu button:hover{background:rgba(210,175,105,.1)}
+    .adm-editorial-preview-overlay{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:linear-gradient(to top,rgba(11,10,8,.88) 0%,transparent 100%)}
+    .adm-editorial-preview-title{font-family:'Fraunces',serif;font-size:15px;font-weight:300;color:#EDE3CC}
 
     /* ── ADD SLIDE MODAL ── */
     .adm-slide-modal-overlay{
@@ -501,6 +520,7 @@
         <div class="adm-hero-subtabs">
           <button class="adm-hero-subtab active" id="phtab-queue" onclick="switchProdsSubTab('queue')">قائمة الانتظار</button>
           <button class="adm-hero-subtab" id="phtab-approved" onclick="switchProdsSubTab('approved')">الموافق عليها</button>
+          <button class="adm-hero-subtab" id="phtab-editorial" onclick="switchProdsSubTab('editorial')">Editorial</button>
         </div>
         <div class="adm-hero-subpanel active" id="ptab-prods-queue">
           <div class="adm-loading">جاري التحميل...</div>
@@ -509,6 +529,34 @@
           <button class="adm-add-slide-btn" onclick="openAddSlideModal()">+ إضافة شريحة</button>
           <div id="ptab-prods-approved-list">
             <div class="adm-loading">جاري التحميل...</div>
+          </div>
+        </div>
+        <div class="adm-hero-subpanel" id="ptab-prods-editorial">
+          <div class="adm-editorial-form">
+            <label class="adm-slide-label">صورة الشريحة *</label>
+            <input class="adm-inp" id="edt-image-input" type="file" accept="image/*" onchange="_edtUpdatePreviewImage()">
+            <label class="adm-slide-label">العنوان (اختياري)</label>
+            <input class="adm-inp" id="edt-title-input" type="text" placeholder="عنوان قصير يظهر فوق الشريحة" oninput="_edtUpdatePreviewTitle()">
+            <label class="adm-slide-label">الرابط (اختياري)</label>
+            <select class="adm-inp" id="edt-link-type" onchange="_edtOnLinkTypeChange()">
+              <option value="">بدون رابط</option>
+              <option value="product">قطعة</option>
+              <option value="store">متجر</option>
+              <option value="url">رابط خارجي</option>
+            </select>
+            <div id="edt-link-target-row" style="display:none;margin-top:8px">
+              <select class="adm-inp" id="edt-link-target-select" style="display:none"></select>
+              <input class="adm-inp" id="edt-link-target" type="text" placeholder="https://..." style="display:none">
+            </div>
+            <label class="adm-slide-label">معاينة</label>
+            <div class="adm-editorial-preview" id="edt-preview">
+              <div class="adm-editorial-preview-img" id="edt-preview-img"></div>
+              <div class="adm-editorial-preview-overlay">
+                <div class="adm-editorial-preview-title" id="edt-preview-title"></div>
+              </div>
+            </div>
+            <div class="adm-err" id="edt-err"></div>
+            <button class="adm-btn-gold" id="edt-submit-btn" onclick="submitEditorialSlide()">نشر الشريحة</button>
           </div>
         </div>
       </div>
@@ -588,12 +636,12 @@
 
     // ── TOAST ──
     let _tt;
-    function toast(m) {
+    function toast(m, duration) {
       clearTimeout(_tt);
       const el = document.getElementById('adm-toast');
       el.textContent = m;
       el.classList.add('show');
-      _tt = setTimeout(() => el.classList.remove('show'), 2500);
+      _tt = setTimeout(() => el.classList.remove('show'), duration || 2500);
     }
 
     // ── HELPERS ──
@@ -860,59 +908,100 @@
       document.querySelectorAll('.adm-hero-subtab').forEach(b => b.classList.remove('active'));
       document.getElementById('phtab-' + sub).classList.add('active');
       document.querySelectorAll('.adm-hero-subpanel').forEach(p => p.classList.remove('active'));
-      document.getElementById(sub === 'queue' ? 'ptab-prods-queue' : 'ptab-prods-approved').classList.add('active');
+      const panelId = sub === 'queue' ? 'ptab-prods-queue' : (sub === 'approved' ? 'ptab-prods-approved' : 'ptab-prods-editorial');
+      document.getElementById(panelId).classList.add('active');
       if (sub === 'approved') loadApprovedHero();
     }
 
-    // ── MAIN HERO — APPROVED SLIDES ──
+    // ── MAIN HERO — APPROVED SLIDES (products + editorial, merged) ──
+    const _heroLinkLabels = { product: 'قطعة', store: 'متجر', url: 'رابط خارجي' };
+
+    function _heroEditorialCardHtml(s) {
+      return `
+      <div class="adm-card" id="ahc-${esc(s.id)}" data-id="${esc(s.id)}" data-kind="editorial" draggable="true"
+           ondragstart="onHeroDragStart(event)" ondragend="onHeroDragEnd(event)"
+           ondragover="onHeroDragOver(event)" ondrop="onHeroDrop(event)"
+           ondragenter="onHeroDragEnter(event)" ondragleave="onHeroDragLeave(event)">
+        <div class="adm-card-row">
+          <img class="adm-thumb" src="${safeUrl(s.image_url)}" alt="${esc(s.title || '')}">
+          <div class="adm-card-info">
+            <div class="adm-card-name">${esc(s.title || '(Editorial)')} <span class="adm-hidden-tag" style="background:rgba(210,175,105,.12);border-color:rgba(210,175,105,.22);color:var(--gold)">Editorial</span></div>
+            ${s.link_type ? `<div class="adm-card-detail">${esc(_heroLinkLabels[s.link_type] || s.link_type)}: ${esc(s.link_target || '')}</div>` : ''}
+            <div class="adm-card-detail">ترتيب: ${s.hero_order ?? 0}</div>
+          </div>
+        </div>
+        <div class="adm-actions">
+          <div class="adm-kebab-wrap">
+            <button class="adm-hero-order-btn" onclick="event.stopPropagation();toggleEditorialMenu('${esc(s.id)}')">⋮</button>
+            <div class="adm-kebab-menu" id="ekm-${esc(s.id)}">
+              <button onclick="openEditorialEdit('${esc(s.id)}')">تعديل</button>
+              <button onclick="deleteEditorialSlide('${esc(s.id)}')">حذف</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function _heroProductCardHtml(p) {
+      const imgUrl = p.cover_image || p.image || (Array.isArray(p.images) && p.images[0]) || '';
+      const thumb = imgUrl
+        ? `<img class="adm-thumb" src="${safeUrl(imgUrl)}" alt="${esc(p.name || '')}">`
+        : `<div class="adm-thumb-ph">👔</div>`;
+      return `
+      <div class="adm-card" id="ahc-${esc(p.id)}" data-id="${esc(p.id)}" data-kind="product" draggable="true"
+           ondragstart="onHeroDragStart(event)" ondragend="onHeroDragEnd(event)"
+           ondragover="onHeroDragOver(event)" ondrop="onHeroDrop(event)"
+           ondragenter="onHeroDragEnter(event)" ondragleave="onHeroDragLeave(event)">
+        <div class="adm-card-row">
+          ${thumb}
+          <div class="adm-card-info">
+            <div class="adm-card-name">${esc(p.name || '—')}${p.hero_pinned ? ' 📌' : ''}</div>
+            <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
+            <div class="adm-card-price">${p.is_exclusive ? 'Exclusive' : `${Number(p.price || 0).toLocaleString()} DZD`}</div>
+            <div class="adm-card-detail">ترتيب: ${p.hero_order ?? 0}</div>
+          </div>
+        </div>
+        <div class="adm-actions">
+          <button class="adm-hero-order-btn" onclick="pinHeroSlide('${esc(p.id)}')">📌</button>
+          <button class="adm-reject" onclick="removeHeroSlide('${esc(p.id)}')">🗑</button>
+        </div>
+      </div>`;
+    }
+
     async function loadApprovedHero() {
       const el = document.getElementById('ptab-prods-approved-list');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
-        const { data, error } = await sb.from('products')
-          .select('id,name,price,is_exclusive,image,images,cover_image,hero_order,hero_pinned,seller:sellers(store_name)')
-          .eq('slider_type', 'main_hero')
-          .eq('hero_status', 'approved')
-          .order('hero_pinned', { ascending: false })
-          .order('hero_order', { ascending: true });
-        if (error) throw error;
-        if (!data.length) {
+        const [{ data: prods, error: prodErr }, { data: slides, error: slideErr }] = await Promise.all([
+          sb.from('products')
+            .select('id,name,price,is_exclusive,image,images,cover_image,hero_order,hero_pinned,seller:sellers(store_name)')
+            .eq('slider_type', 'main_hero').eq('hero_status', 'approved'),
+          sb.from('hero_editorial_slides').select('*')
+        ]);
+        if (prodErr) throw prodErr;
+        if (slideErr) throw slideErr;
+        const items = [
+          ...(prods || []).map(p => ({ kind: 'product', id: p.id, hero_order: p.hero_order || 0, hero_pinned: !!p.hero_pinned, data: p })),
+          ...(slides || []).map(s => ({ kind: 'editorial', id: s.id, hero_order: s.hero_order || 0, hero_pinned: false, data: s }))
+        ];
+        if (!items.length) {
           el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">🖼</div>ما فيش شرائح موافق عليها</div>';
           return;
         }
-        const orders = data.map(p => p.hero_order || 0);
+        items.sort((a, b) => (b.hero_pinned ? 1 : 0) - (a.hero_pinned ? 1 : 0) || a.hero_order - b.hero_order);
+        const orders = items.map(it => it.hero_order);
         const needsNormalize = new Set(orders).size !== orders.length || orders.every(o => o === 0);
         if (needsNormalize) {
-          await Promise.all(data.map((p, i) => {
-            p.hero_order = i + 1;
-            return sb.from('products').update({ hero_order: i + 1 }).eq('id', p.id);
+          await Promise.all(items.map((it, i) => {
+            it.hero_order = i + 1;
+            const table = it.kind === 'editorial' ? 'hero_editorial_slides' : 'products';
+            return sb.from(table).update({ hero_order: i + 1 }).eq('id', it.id);
           }));
         }
-        el.innerHTML = data.map(p => {
-          const imgUrl = p.cover_image || p.image || (Array.isArray(p.images) && p.images[0]) || '';
-          const thumb = imgUrl
-            ? `<img class="adm-thumb" src="${safeUrl(imgUrl)}" alt="${esc(p.name || '')}">`
-            : `<div class="adm-thumb-ph">👔</div>`;
-          return `
-          <div class="adm-card" id="ahc-${esc(p.id)}" data-id="${esc(p.id)}" draggable="true"
-               ondragstart="onHeroDragStart(event)" ondragend="onHeroDragEnd(event)"
-               ondragover="onHeroDragOver(event)" ondrop="onHeroDrop(event)"
-               ondragenter="onHeroDragEnter(event)" ondragleave="onHeroDragLeave(event)">
-            <div class="adm-card-row">
-              ${thumb}
-              <div class="adm-card-info">
-                <div class="adm-card-name">${esc(p.name || '—')}${p.hero_pinned ? ' 📌' : ''}</div>
-                <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
-                <div class="adm-card-price">${p.is_exclusive ? 'Exclusive' : `${Number(p.price || 0).toLocaleString()} DZD`}</div>
-                <div class="adm-card-detail">ترتيب: ${p.hero_order ?? 0}</div>
-              </div>
-            </div>
-            <div class="adm-actions">
-              <button class="adm-hero-order-btn" onclick="pinHeroSlide('${esc(p.id)}')">📌</button>
-              <button class="adm-reject" onclick="removeHeroSlide('${esc(p.id)}')">🗑</button>
-            </div>
-          </div>`;
-        }).join('');
+        el.innerHTML = items.map(it => it.kind === 'editorial'
+          ? _heroEditorialCardHtml(it.data)
+          : _heroProductCardHtml(it.data)
+        ).join('');
       } catch (e) {
         el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
       }
@@ -920,9 +1009,11 @@
 
     // ── DRAG-AND-DROP REORDER ──
     let _heroDragId = null;
+    let _heroDragKind = null;
 
     function onHeroDragStart(e) {
       _heroDragId = e.currentTarget.dataset.id;
+      _heroDragKind = e.currentTarget.dataset.kind;
       e.currentTarget.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', _heroDragId);
@@ -932,6 +1023,7 @@
       e.currentTarget.classList.remove('dragging');
       document.querySelectorAll('.hero-drag-over').forEach(el => el.classList.remove('hero-drag-over'));
       _heroDragId = null;
+      _heroDragKind = null;
     }
 
     function onHeroDragOver(e) {
@@ -953,19 +1045,22 @@
     async function onHeroDrop(e) {
       e.preventDefault();
       const targetId = e.currentTarget.dataset.id;
+      const targetKind = e.currentTarget.dataset.kind;
       const draggedId = _heroDragId;
+      const draggedKind = _heroDragKind;
       e.currentTarget.classList.remove('hero-drag-over');
       if (!draggedId || draggedId === targetId) return;
       try {
-        const { data: rows, error } = await sb.from('products')
-          .select('id,hero_order').in('id', [draggedId, targetId]);
-        if (error) throw error;
-        const draggedOrder = rows.find(r => r.id === draggedId)?.hero_order || 0;
-        const targetOrder = rows.find(r => r.id === targetId)?.hero_order || 0;
-        const { error: e1 } = await sb.from('products').update({ hero_order: targetOrder }).eq('id', draggedId);
+        const draggedTable = draggedKind === 'editorial' ? 'hero_editorial_slides' : 'products';
+        const targetTable = targetKind === 'editorial' ? 'hero_editorial_slides' : 'products';
+        const { data: draggedRow, error: e1 } = await sb.from(draggedTable).select('hero_order').eq('id', draggedId).single();
         if (e1) throw e1;
-        const { error: e2 } = await sb.from('products').update({ hero_order: draggedOrder }).eq('id', targetId);
+        const { data: targetRow, error: e2 } = await sb.from(targetTable).select('hero_order').eq('id', targetId).single();
         if (e2) throw e2;
+        const { error: e3 } = await sb.from(draggedTable).update({ hero_order: targetRow.hero_order || 0 }).eq('id', draggedId);
+        if (e3) throw e3;
+        const { error: e4 } = await sb.from(targetTable).update({ hero_order: draggedRow.hero_order || 0 }).eq('id', targetId);
+        if (e4) throw e4;
         loadApprovedHero();
       } catch (err) {
         toast('خطأ: ' + err.message);
@@ -1041,6 +1136,157 @@
         toast('✓ تمت الإضافة');
         closeAddSlideModal();
         loadApprovedHero();
+      } catch (e) {
+        errEl.textContent = 'خطأ: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── MAIN HERO — EDITORIAL SLIDES ──
+    let _edtEditingId = null;
+    let _edtEditingImageUrl = null;
+
+    function toggleEditorialMenu(id) {
+      document.querySelectorAll('.adm-kebab-menu.show').forEach(m => { if (m.id !== 'ekm-' + id) m.classList.remove('show'); });
+      document.getElementById('ekm-' + id).classList.toggle('show');
+    }
+    document.addEventListener('click', () => document.querySelectorAll('.adm-kebab-menu.show').forEach(m => m.classList.remove('show')));
+
+    async function deleteEditorialSlide(id) {
+      if (!confirm('هل تريد حذف هذه الشريحة؟')) return;
+      try {
+        const { error } = await sb.from('hero_editorial_slides').delete().eq('id', id);
+        if (error) throw error;
+        toast('✓ تم الحذف');
+        loadApprovedHero();
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+      }
+    }
+
+    async function openEditorialEdit(id) {
+      try {
+        const { data: s, error } = await sb.from('hero_editorial_slides').select('*').eq('id', id).single();
+        if (error) throw error;
+        _edtEditingId = s.id;
+        _edtEditingImageUrl = s.image_url;
+        switchProdsSubTab('editorial');
+        document.getElementById('edt-image-input').value = '';
+        document.getElementById('edt-title-input').value = s.title || '';
+        document.getElementById('edt-link-type').value = s.link_type || '';
+        await _edtOnLinkTypeChange();
+        if (s.link_type === 'url') {
+          document.getElementById('edt-link-target').value = s.link_target || '';
+        } else if (s.link_type === 'product' || s.link_type === 'store') {
+          document.getElementById('edt-link-target-select').value = s.link_target || '';
+        }
+        document.getElementById('edt-preview-img').style.backgroundImage = s.image_url ? `url('${s.image_url}')` : '';
+        document.getElementById('edt-preview-title').textContent = s.title || '';
+        document.getElementById('edt-submit-btn').textContent = 'حفظ التعديلات';
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+      }
+    }
+
+    function _edtUpdatePreviewImage() {
+      const file = document.getElementById('edt-image-input').files[0];
+      const imgEl = document.getElementById('edt-preview-img');
+      if (!file) { imgEl.style.backgroundImage = ''; return; }
+      const reader = new FileReader();
+      reader.onload = () => { imgEl.style.backgroundImage = `url('${reader.result}')`; };
+      reader.readAsDataURL(file);
+    }
+
+    function _edtUpdatePreviewTitle() {
+      document.getElementById('edt-preview-title').textContent = document.getElementById('edt-title-input').value.trim();
+    }
+
+    async function _edtOnLinkTypeChange() {
+      const lt = document.getElementById('edt-link-type').value;
+      const row = document.getElementById('edt-link-target-row');
+      const sel = document.getElementById('edt-link-target-select');
+      const inp = document.getElementById('edt-link-target');
+      if (!lt) { row.style.display = 'none'; return; }
+      row.style.display = 'block';
+      if (lt === 'url') {
+        sel.style.display = 'none';
+        inp.style.display = 'block';
+        return;
+      }
+      inp.style.display = 'none';
+      sel.style.display = 'block';
+      sel.innerHTML = '<option value="">جاري التحميل...</option>';
+      try {
+        if (lt === 'store') {
+          const { data, error } = await sb.from('sellers').select('id,store_name').eq('approval_status', 'approved').order('store_name');
+          if (error) throw error;
+          sel.innerHTML = (data || []).map(s => `<option value="${esc(s.id)}">${esc(s.store_name || '—')}</option>`).join('') || '<option value="">لا يوجد متاجر</option>';
+        } else if (lt === 'product') {
+          const { data, error } = await sb.from('products').select('id,name,seller:sellers(store_name)').order('name');
+          if (error) throw error;
+          sel.innerHTML = (data || []).map(p => `<option value="${esc(p.id)}">${esc(p.name || '—')} — ${esc(p.seller?.store_name || '—')}</option>`).join('') || '<option value="">لا يوجد منتجات</option>';
+        }
+      } catch (e) {
+        sel.innerHTML = `<option value="">خطأ: ${esc(e.message)}</option>`;
+      }
+    }
+
+    function _resetEditorialForm() {
+      _edtEditingId = null;
+      _edtEditingImageUrl = null;
+      document.getElementById('edt-image-input').value = '';
+      document.getElementById('edt-title-input').value = '';
+      document.getElementById('edt-link-type').value = '';
+      document.getElementById('edt-link-target').value = '';
+      document.getElementById('edt-link-target-select').innerHTML = '';
+      document.getElementById('edt-link-target-row').style.display = 'none';
+      document.getElementById('edt-preview-img').style.backgroundImage = '';
+      document.getElementById('edt-preview-title').textContent = '';
+      document.getElementById('edt-submit-btn').textContent = 'نشر الشريحة';
+    }
+
+    async function submitEditorialSlide() {
+      const file = document.getElementById('edt-image-input').files[0];
+      const title = document.getElementById('edt-title-input').value.trim();
+      const linkType = document.getElementById('edt-link-type').value;
+      const linkTarget = linkType === 'url'
+        ? document.getElementById('edt-link-target').value.trim()
+        : document.getElementById('edt-link-target-select').value;
+      const errEl = document.getElementById('edt-err');
+      errEl.textContent = '';
+      if (!file && !_edtEditingId) { errEl.textContent = 'الصورة مطلوبة'; return; }
+      const btn = document.getElementById('edt-submit-btn');
+      btn.disabled = true;
+      try {
+        let imageUrl = _edtEditingImageUrl;
+        if (file) {
+          const path = `${Date.now()}.jpg`;
+          const { error: upErr } = await sb.storage.from('hero-editorial').upload(path, file, { upsert: true });
+          if (upErr) throw upErr;
+          const { data: urlData } = sb.storage.from('hero-editorial').getPublicUrl(path);
+          imageUrl = urlData.publicUrl;
+        }
+        const payload = {
+          image_url: imageUrl,
+          title: title || null,
+          link_type: linkType || null,
+          link_target: linkType ? (linkTarget || null) : null
+        };
+        const editingId = _edtEditingId;
+        if (editingId) {
+          const { error } = await sb.from('hero_editorial_slides').update(payload).eq('id', editingId);
+          if (error) throw error;
+        } else {
+          const { data: maxRow } = await sb.from('hero_editorial_slides')
+            .select('hero_order').order('hero_order', { ascending: false }).limit(1).maybeSingle();
+          payload.hero_order = (maxRow?.hero_order || 0) + 1;
+          const { error } = await sb.from('hero_editorial_slides').insert(payload);
+          if (error) throw error;
+        }
+        toast(editingId ? 'تم حفظ التعديلات ✓' : 'تم نشر الشريحة ✓', 2000);
+        _resetEditorialForm();
+        switchProdsSubTab('approved');
       } catch (e) {
         errEl.textContent = 'خطأ: ' + e.message;
       } finally {
