@@ -435,6 +435,8 @@
     .an-revisit-row{display:flex;justify-content:space-between;font-size:12px;color:#EDE3CC;padding:2px 0 2px 8px;font-family:Tajawal,sans-serif}
     .an-cnt{color:#D2AF69;font-weight:600}
     .an-empty-note{color:#888;font-size:12px}
+    .an-reg-note{font-size:10px;color:var(--muted);padding:0 2px 8px;margin-top:-4px}
+    .an-cvr-store{font-size:10px;color:var(--muted);margin-top:2px}
 
     /* ── APPROVED SELLERS (compact) ── */
     .adm-approved-title{
@@ -588,6 +590,9 @@
         <div id="an-order-types">
           <div class="adm-loading">جاري التحميل...</div>
         </div>
+
+        <div class="adm-an-section-title">أعلى 3 قطع تحويلاً</div>
+        <div id="an-top-cvr"><div class="adm-loading">جاري التحميل...</div></div>
 
         <div class="adm-an-section-title">أكثر المنتجات مشاهدة</div>
         <div id="an-top-viewed"><div class="adm-loading">جاري التحميل...</div></div>
@@ -1537,22 +1542,24 @@
       const el = document.getElementById('an-quick-cards');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
-        const [sellers, active, hidden, views, saves, orders] = await Promise.all([
+        const [sellers, active, hidden, views, saves, orders, totalReg] = await Promise.all([
           sb.from('sellers').select('id', { count: 'exact', head: true }).eq('approval_status', 'approved'),
           sb.from('products').select('id', { count: 'exact', head: true }).eq('is_hidden', false),
           sb.from('products').select('id', { count: 'exact', head: true }).eq('is_hidden', true),
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'view'),
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'save'),
-          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).in('event_type', ['whatsapp_order', 'form_order'])
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).in('event_type', ['whatsapp_order', 'form_order']),
+          sb.rpc('get_registered_customers_count')
         ]);
-        [sellers, active, hidden, views, saves, orders].forEach(r => { if (r.error) throw r.error; });
+        [sellers, active, hidden, views, saves, orders, totalReg].forEach(r => { if (r.error) throw r.error; });
         const cards = [
           [sellers.count, 'التجار المقبولون'],
           [active.count, 'المنتجات النشطة'],
           [hidden.count, 'المنتجات المخفية'],
           [views.count, 'إجمالي المشاهدات'],
           [saves.count, 'إجمالي المحفوظات'],
-          [orders.count, 'إجمالي الطلبات']
+          [orders.count, 'إجمالي الطلبات'],
+          [totalReg.data, 'إجمالي المسجلين']
         ];
         el.innerHTML = cards.map(([n, l]) => `<div class="adm-an-card"><div class="adm-an-num">${n || 0}</div><div class="adm-an-lbl">${esc(l)}</div></div>`).join('');
       } catch (e) {
@@ -1564,32 +1571,95 @@
       const el = document.getElementById('an-period-cards');
       const hourEl = document.getElementById('an-top-hour');
       const typesEl = document.getElementById('an-order-types');
+      const cvrEl = document.getElementById('an-top-cvr');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       hourEl.textContent = '';
       typesEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      cvrEl.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
         const startIso = _anPeriodStart(_anPeriod);
-        const [viewsRes, waRes, formRes, refWaRes, revisitRowsRes, hoursRes] = await Promise.all([
+        const [viewsRes, waRes, formRes, refWaRes, revisitRowsRes, hoursRes, waRegRes, formRegRes, orderUserRowsRes, totalRegRes, orderProductRowsRes, sellersIdRes, viewProdRowsRes, periodRegRes] = await Promise.all([
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'view').gte('created_at', startIso),
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_order').gte('created_at', startIso),
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'form_order').gte('created_at', startIso),
           sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'ref_wa').gte('created_at', startIso),
           sb.from('user_behavior_log').select('product_id,seller_id').eq('action', 'revisit').gte('created_at', startIso),
-          sb.from('user_behavior_log').select('created_at').gte('created_at', startIso)
+          sb.from('user_behavior_log').select('created_at').gte('created_at', startIso),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_order').not('user_id', 'is', null).gte('created_at', startIso),
+          sb.from('user_behavior_log').select('id', { count: 'exact', head: true }).eq('event_type', 'form_order').not('user_id', 'is', null).gte('created_at', startIso),
+          sb.from('user_behavior_log').select('user_id').in('event_type', ['whatsapp_order', 'form_order']).not('user_id', 'is', null).gte('created_at', startIso),
+          sb.rpc('get_registered_customers_count'),
+          sb.from('user_behavior_log').select('product_id').in('event_type', ['whatsapp_order', 'form_order']).gte('created_at', startIso),
+          sb.from('sellers').select('id'),
+          sb.from('user_behavior_log').select('product_id').eq('event_type', 'view').gte('created_at', startIso),
+          sb.rpc('get_registered_customers_count', { since: startIso })
         ]);
-        [viewsRes, waRes, formRes, refWaRes, revisitRowsRes, hoursRes].forEach(r => { if (r.error) throw r.error; });
+        [viewsRes, waRes, formRes, refWaRes, revisitRowsRes, hoursRes, waRegRes, formRegRes, orderUserRowsRes, totalRegRes, orderProductRowsRes, sellersIdRes, viewProdRowsRes, periodRegRes].forEach(r => { if (r.error) throw r.error; });
+
+        const sellerIdSet = new Set((sellersIdRes.data || []).map(s => s.id));
+        const regOrderersCount = new Set((orderUserRowsRes.data || []).filter(r => !sellerIdSet.has(r.user_id)).map(r => r.user_id)).size;
+        const totalRegistered = totalRegRes.data || 0;
+        const periodRegistered = periodRegRes.data || 0;
+        const regConvRate = totalRegistered ? ((regOrderersCount / totalRegistered) * 100).toFixed(1) : '0.0';
+        const overallOrders = (waRes.count || 0) + (formRes.count || 0);
+        const overallConvRate = viewsRes.count ? ((overallOrders / viewsRes.count) * 100).toFixed(1) : '0.0';
+
+        const orderPids = (orderProductRowsRes.data || []).filter(r => r.product_id).map(r => r.product_id);
+        let aov = 0;
+        if (orderPids.length) {
+          const { data: aovProds } = await sb.from('products').select('id,price').in('id', [...new Set(orderPids)]);
+          const priceMap = {};
+          (aovProds || []).forEach(p => priceMap[p.id] = Number(p.price) || 0);
+          const totalValue = orderPids.reduce((sum, pid) => sum + (priceMap[pid] || 0), 0);
+          aov = Math.round(totalValue / orderPids.length);
+        }
+
         el.innerHTML = `
           <div class="adm-an-card" style="grid-column:1/-1"><div class="adm-an-num">${viewsRes.count || 0}</div><div class="adm-an-lbl">المشاهدات في الفترة</div></div>
+          <div class="adm-an-card" style="grid-column:1/-1"><div class="adm-an-num">${periodRegistered}</div><div class="adm-an-lbl">مسجلون في الفترة</div></div>
         `;
         typesEl.innerHTML = `
           <div class="adm-an-list-row"><div class="adm-an-list-name">نوايا واتساب</div><div class="adm-an-list-count">${waRes.count || 0}</div></div>
+          <div class="an-reg-note">منها ${waRegRes.count || 0} مسجلون</div>
           <div class="adm-an-list-row"><div class="adm-an-list-name">طلبات مؤكدة (استمارة)</div><div class="adm-an-list-count">${formRes.count || 0}</div></div>
+          <div class="an-reg-note">منها ${formRegRes.count || 0} مسجلون</div>
           <div class="adm-an-list-row"><div class="adm-an-list-name">تحقق البائع</div><div class="adm-an-list-count">${refWaRes.count || 0}</div></div>
           <div class="an-period-row an-revisit-block">
             <div class="an-period-label">🔁 عودة لقطعة (لكل بائع)</div>
             <div id="an-revisit-top5" class="an-top5-list"><span class="an-empty-note">—</span></div>
           </div>
+          <div class="adm-an-list-row"><div class="adm-an-list-name">مسجلون طلبوا فعلاً</div><div class="adm-an-list-count">${regOrderersCount}</div></div>
+          <div class="adm-an-list-row"><div class="adm-an-list-name">معدل تحويل المسجلين (CVR-U)</div><div class="adm-an-list-count">${regConvRate}%</div></div>
+          <div class="adm-an-list-row"><div class="adm-an-list-name">معدل التحويل العام (CVR)</div><div class="adm-an-list-count">${overallConvRate}%</div></div>
+          <div class="adm-an-list-row"><div class="adm-an-list-name">متوسط قيمة الطلبية (AOV)</div><div class="adm-an-list-count">${aov.toLocaleString()} دج</div></div>
         `;
+
+        try {
+          const viewCountMap = _anCountBy(viewProdRowsRes.data, 'product_id');
+          const orderCountMap = _anCountBy(orderProductRowsRes.data, 'product_id');
+          const cvrList = Object.entries(viewCountMap)
+            .filter(([, v]) => v >= 20)
+            .map(([pid, v]) => [pid, ((orderCountMap[pid] || 0) / v) * 100])
+            .sort((a, b) => b[1] - a[1]).slice(0, 3);
+          if (!cvrList.length) {
+            cvrEl.innerHTML = '<div class="adm-empty">لا توجد قطع بـ20 مشاهدة أو أكثر بعد</div>';
+          } else {
+            const cvrPids = cvrList.map(([id]) => id);
+            const { data: cvrProds } = await sb.from('products').select('id,name,seller_id').in('id', cvrPids);
+            const cvrProdMap = Object.fromEntries((cvrProds || []).map(p => [p.id, p]));
+            const cvrSellerIds = [...new Set((cvrProds || []).map(p => p.seller_id).filter(Boolean))];
+            const { data: cvrSellers } = cvrSellerIds.length
+              ? await sb.from('sellers').select('id,store_name').in('id', cvrSellerIds)
+              : { data: [] };
+            const cvrStoreMap = Object.fromEntries((cvrSellers || []).map(s => [s.id, s.store_name]));
+            cvrEl.innerHTML = cvrList.map(([pid, pct]) => {
+              const p = cvrProdMap[pid] || {};
+              return `<div class="adm-an-list-row"><div class="adm-an-list-name">${esc(p.name || '—')}<div class="an-cvr-store">🏪 ${esc(cvrStoreMap[p.seller_id] || '—')}</div></div><div class="adm-an-list-count">${pct.toFixed(1)}%</div></div>`;
+            }).join('');
+          }
+        } catch (e) {
+          cvrEl.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+        }
 
         const revisitRows = (revisitRowsRes.data || []).filter(r => r.product_id);
         const bySellerProd = {};
@@ -1633,6 +1703,7 @@
         const msg = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
         el.innerHTML = msg;
         typesEl.innerHTML = msg;
+        cvrEl.innerHTML = msg;
       }
     }
 
