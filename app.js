@@ -1528,6 +1528,7 @@ function buildHeroSlider(prods){
   clearInterval(_heroTimer);_heroIdx=0;
   const _heroThumb=p=>p.cover_image||(Array.isArray(p.images)?p.images[0]:p.image)||p.image; // cover_image-aware
   let heroProds=prods.filter(p=>_heroThumb(p)&&(p.slider_type==='hero'||(p.slider_type==='main_hero'&&p.hero_status==='approved')));
+  heroProds.sort((a,b)=>(b.hero_pinned?1:0)-(a.hero_pinned?1:0)||(a.hero_order||0)-(b.hero_order||0));
   if(!heroProds.length)heroProds=prods.filter(p=>_heroThumb(p)).slice(0,20);
   else heroProds=heroProds.slice(0,20);
   let slides;
@@ -1968,6 +1969,7 @@ function buildBrowseHero(prods){
   let slides;
   if(prods&&prods.length){
     let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.hero_status==='approved'&&(p.cover_image||p.image));
+    heroProds.sort((a,b)=>(b.hero_pinned?1:0)-(a.hero_pinned?1:0)||(a.hero_order||0)-(b.hero_order||0));
     if(!heroProds.length)heroProds=prods.filter(p=>p.cover_image||p.image);
     if(heroProds.length){
       slides=heroProds.slice(0,20).map(p=>({

@@ -233,6 +233,55 @@
     }
     .adm-search{width:100%;margin-bottom:12px}
 
+    /* ── MAIN HERO SUB-TABS ── */
+    .adm-hero-subtabs{display:flex;gap:8px;margin-bottom:14px}
+    .adm-hero-subtab{
+      flex:1;background:transparent;border:1px solid var(--brd2);
+      border-radius:16px;color:var(--muted);
+      font-family:'Tajawal',sans-serif;font-size:12px;
+      padding:8px;cursor:pointer;transition:background .2s,color .2s;
+    }
+    .adm-hero-subtab.active{background:var(--gold);color:var(--bg);font-weight:500}
+    .adm-hero-subpanel{display:none}
+    .adm-hero-subpanel.active{display:block}
+    .adm-add-slide-btn{
+      width:100%;margin-bottom:14px;padding:11px;
+      background:rgba(210,175,105,.11);border:1px solid rgba(210,175,105,.22);
+      border-radius:10px;color:var(--gold);
+      font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;
+      transition:background .2s;
+    }
+    .adm-add-slide-btn:hover{background:rgba(210,175,105,.2)}
+    .adm-hero-order-btn{
+      flex:0 0 auto;padding:9px 12px;
+      background:rgba(210,175,105,.11);border:1px solid rgba(210,175,105,.22);
+      border-radius:9px;color:var(--gold);font-size:14px;cursor:pointer;
+      transition:background .2s,transform .1s;
+    }
+    .adm-hero-order-btn:hover{background:rgba(210,175,105,.2)}
+    .adm-hero-order-btn:active{transform:scale(.97)}
+    .adm-hero-order-btn:disabled{opacity:.4;cursor:not-allowed}
+    .adm-card[draggable="true"]{cursor:grab}
+    .adm-card.dragging{opacity:.5}
+    .hero-drag-over{border:2px solid #D2AF69 !important;transform:scale(1.02) !important;transition:all .15s ease}
+
+    /* ── ADD SLIDE MODAL ── */
+    .adm-slide-modal-overlay{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+      z-index:200;align-items:center;justify-content:center;padding:20px;
+    }
+    .adm-slide-modal-overlay.show{display:flex}
+    .adm-slide-modal{
+      width:100%;max-width:360px;background:var(--card);
+      border:1px solid var(--brd2);border-radius:18px;
+      padding:22px;display:flex;flex-direction:column;gap:10px;
+    }
+    .adm-slide-modal-title{
+      font-family:'Fraunces',serif;font-size:17px;font-weight:200;
+      color:var(--cream);margin-bottom:4px;
+    }
+    .adm-slide-label{font-size:12px;color:var(--muted);margin-top:4px}
+
     /* ── TOAST ── */
     #adm-toast{
       position:fixed;bottom:28px;left:50%;
@@ -449,7 +498,19 @@
         </div>
       </div>
       <div class="adm-panel-tab" id="ptab-prods">
-        <div class="adm-loading">جاري التحميل...</div>
+        <div class="adm-hero-subtabs">
+          <button class="adm-hero-subtab active" id="phtab-queue" onclick="switchProdsSubTab('queue')">قائمة الانتظار</button>
+          <button class="adm-hero-subtab" id="phtab-approved" onclick="switchProdsSubTab('approved')">الموافق عليها</button>
+        </div>
+        <div class="adm-hero-subpanel active" id="ptab-prods-queue">
+          <div class="adm-loading">جاري التحميل...</div>
+        </div>
+        <div class="adm-hero-subpanel" id="ptab-prods-approved">
+          <button class="adm-add-slide-btn" onclick="openAddSlideModal()">+ إضافة شريحة</button>
+          <div id="ptab-prods-approved-list">
+            <div class="adm-loading">جاري التحميل...</div>
+          </div>
+        </div>
       </div>
       <div class="adm-panel-tab" id="ptab-allprods">
         <input id="ap-search" class="adm-inp adm-search" type="text"
@@ -501,6 +562,21 @@
   </div>
 
   <div id="adm-toast"></div>
+
+  <div class="adm-slide-modal-overlay" id="adm-slide-overlay" onclick="if(event.target===this)closeAddSlideModal()">
+    <div class="adm-slide-modal">
+      <div class="adm-slide-modal-title">إضافة شريحة Main Hero</div>
+      <label class="adm-slide-label">معرّف المنتج (product_id)</label>
+      <input class="adm-inp" id="asl-product-id" type="text" placeholder="uuid المنتج الموجود" dir="ltr">
+      <label class="adm-slide-label">صورة الشريحة (اختياري)</label>
+      <input class="adm-inp" id="asl-image-input" type="file" accept="image/*">
+      <div class="adm-err" id="asl-err"></div>
+      <div class="adm-actions">
+        <button class="adm-toggle-btn" onclick="closeAddSlideModal()">إلغاء</button>
+        <button class="adm-approve" id="asl-save-btn" onclick="submitAddSlide()">حفظ</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="supabase-config.js"></script>
@@ -744,7 +820,7 @@
 
     // ── PRODUCTS ──
     async function loadProds() {
-      const el = document.getElementById('ptab-prods');
+      const el = document.getElementById('ptab-prods-queue');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
         const { data, error } = await sb.from('products')
@@ -776,6 +852,199 @@
         initAdmGalleries();
       } catch (e) {
         el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // ── MAIN HERO SUB-TABS ──
+    function switchProdsSubTab(sub) {
+      document.querySelectorAll('.adm-hero-subtab').forEach(b => b.classList.remove('active'));
+      document.getElementById('phtab-' + sub).classList.add('active');
+      document.querySelectorAll('.adm-hero-subpanel').forEach(p => p.classList.remove('active'));
+      document.getElementById(sub === 'queue' ? 'ptab-prods-queue' : 'ptab-prods-approved').classList.add('active');
+      if (sub === 'approved') loadApprovedHero();
+    }
+
+    // ── MAIN HERO — APPROVED SLIDES ──
+    async function loadApprovedHero() {
+      const el = document.getElementById('ptab-prods-approved-list');
+      el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
+      try {
+        const { data, error } = await sb.from('products')
+          .select('id,name,price,is_exclusive,image,images,cover_image,hero_order,hero_pinned,seller:sellers(store_name)')
+          .eq('slider_type', 'main_hero')
+          .eq('hero_status', 'approved')
+          .order('hero_pinned', { ascending: false })
+          .order('hero_order', { ascending: true });
+        if (error) throw error;
+        if (!data.length) {
+          el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">🖼</div>ما فيش شرائح موافق عليها</div>';
+          return;
+        }
+        const orders = data.map(p => p.hero_order || 0);
+        const needsNormalize = new Set(orders).size !== orders.length || orders.every(o => o === 0);
+        if (needsNormalize) {
+          await Promise.all(data.map((p, i) => {
+            p.hero_order = i + 1;
+            return sb.from('products').update({ hero_order: i + 1 }).eq('id', p.id);
+          }));
+        }
+        el.innerHTML = data.map(p => {
+          const imgUrl = p.cover_image || p.image || (Array.isArray(p.images) && p.images[0]) || '';
+          const thumb = imgUrl
+            ? `<img class="adm-thumb" src="${safeUrl(imgUrl)}" alt="${esc(p.name || '')}">`
+            : `<div class="adm-thumb-ph">👔</div>`;
+          return `
+          <div class="adm-card" id="ahc-${esc(p.id)}" data-id="${esc(p.id)}" draggable="true"
+               ondragstart="onHeroDragStart(event)" ondragend="onHeroDragEnd(event)"
+               ondragover="onHeroDragOver(event)" ondrop="onHeroDrop(event)"
+               ondragenter="onHeroDragEnter(event)" ondragleave="onHeroDragLeave(event)">
+            <div class="adm-card-row">
+              ${thumb}
+              <div class="adm-card-info">
+                <div class="adm-card-name">${esc(p.name || '—')}${p.hero_pinned ? ' 📌' : ''}</div>
+                <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
+                <div class="adm-card-price">${p.is_exclusive ? 'Exclusive' : `${Number(p.price || 0).toLocaleString()} DZD`}</div>
+                <div class="adm-card-detail">ترتيب: ${p.hero_order ?? 0}</div>
+              </div>
+            </div>
+            <div class="adm-actions">
+              <button class="adm-hero-order-btn" onclick="pinHeroSlide('${esc(p.id)}')">📌</button>
+              <button class="adm-reject" onclick="removeHeroSlide('${esc(p.id)}')">🗑</button>
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
+      }
+    }
+
+    // ── DRAG-AND-DROP REORDER ──
+    let _heroDragId = null;
+
+    function onHeroDragStart(e) {
+      _heroDragId = e.currentTarget.dataset.id;
+      e.currentTarget.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', _heroDragId);
+    }
+
+    function onHeroDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      document.querySelectorAll('.hero-drag-over').forEach(el => el.classList.remove('hero-drag-over'));
+      _heroDragId = null;
+    }
+
+    function onHeroDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = e.currentTarget.getBoundingClientRect();
+      const relY = (e.clientY - rect.top) / rect.height;
+      e.currentTarget.dataset.dropPos = relY <= 0.4 ? 'top' : (relY >= 0.6 ? 'bottom' : (relY < 0.5 ? 'top' : 'bottom'));
+    }
+
+    function onHeroDragEnter(e) {
+      e.currentTarget.classList.add('hero-drag-over');
+    }
+
+    function onHeroDragLeave(e) {
+      e.currentTarget.classList.remove('hero-drag-over');
+    }
+
+    async function onHeroDrop(e) {
+      e.preventDefault();
+      const targetId = e.currentTarget.dataset.id;
+      const draggedId = _heroDragId;
+      e.currentTarget.classList.remove('hero-drag-over');
+      if (!draggedId || draggedId === targetId) return;
+      try {
+        const { data: rows, error } = await sb.from('products')
+          .select('id,hero_order').in('id', [draggedId, targetId]);
+        if (error) throw error;
+        const draggedOrder = rows.find(r => r.id === draggedId)?.hero_order || 0;
+        const targetOrder = rows.find(r => r.id === targetId)?.hero_order || 0;
+        const { error: e1 } = await sb.from('products').update({ hero_order: targetOrder }).eq('id', draggedId);
+        if (e1) throw e1;
+        const { error: e2 } = await sb.from('products').update({ hero_order: draggedOrder }).eq('id', targetId);
+        if (e2) throw e2;
+        loadApprovedHero();
+      } catch (err) {
+        toast('خطأ: ' + err.message);
+      }
+    }
+
+    async function pinHeroSlide(id) {
+      const card = document.getElementById('ahc-' + id);
+      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const { error } = await sb.from('products').update({ hero_pinned: true, hero_order: 0 }).eq('id', id);
+        if (error) throw error;
+        toast('✓ تم التثبيت');
+        loadApprovedHero();
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    }
+
+    async function removeHeroSlide(id) {
+      if (!confirm('إزالة هذه الشريحة من Main Hero؟')) return;
+      const card = document.getElementById('ahc-' + id);
+      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const { error } = await sb.from('products').update({ hero_status: 'rejected' }).eq('id', id);
+        if (error) throw error;
+        toast('✓ تمت الإزالة');
+        loadApprovedHero();
+      } catch (e) {
+        toast('خطأ: ' + e.message);
+        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    }
+
+    // ── ADD SLIDE MODAL ──
+    function openAddSlideModal() {
+      document.getElementById('asl-product-id').value = '';
+      document.getElementById('asl-image-input').value = '';
+      document.getElementById('asl-err').textContent = '';
+      document.getElementById('adm-slide-overlay').classList.add('show');
+    }
+    function closeAddSlideModal() {
+      document.getElementById('adm-slide-overlay').classList.remove('show');
+    }
+    async function submitAddSlide() {
+      const pid = document.getElementById('asl-product-id').value.trim();
+      const file = document.getElementById('asl-image-input').files[0];
+      const errEl = document.getElementById('asl-err');
+      errEl.textContent = '';
+      if (!pid) { errEl.textContent = 'أدخل معرّف منتج موجود (product_id)'; return; }
+      const btn = document.getElementById('asl-save-btn');
+      btn.disabled = true;
+      try {
+        const { data: maxRow } = await sb.from('products')
+          .select('hero_order').eq('slider_type', 'main_hero').eq('hero_status', 'approved')
+          .order('hero_order', { ascending: false }).limit(1).maybeSingle();
+        const update = {
+          slider_type: 'main_hero',
+          hero_status: 'approved',
+          hero_pinned: false,
+          hero_order: (maxRow?.hero_order || 0) + 1
+        };
+        if (file) {
+          const path = `hero-slides/${pid}-${Date.now()}.jpg`;
+          const { error: upErr } = await sb.storage.from('product-images').upload(path, file, { upsert: true });
+          if (upErr) throw upErr;
+          const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+          update.cover_image = urlData.publicUrl;
+        }
+        const { error } = await sb.from('products').update(update).eq('id', pid);
+        if (error) throw error;
+        toast('✓ تمت الإضافة');
+        closeAddSlideModal();
+        loadApprovedHero();
+      } catch (e) {
+        errEl.textContent = 'خطأ: ' + e.message;
+      } finally {
+        btn.disabled = false;
       }
     }
 
