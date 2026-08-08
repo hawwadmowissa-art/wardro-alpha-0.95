@@ -2599,7 +2599,7 @@ async function saveItem(){
 }
 
 // ══ COLLECTIONS — public outfit grid + detail sheet (Show Mode + Guest Store View) ══
-let _colOutfits=[],_odCurrentId=null;
+let _colOutfits=[],_odCurrentId=null,_odSelection=[];
 
 function _colPriceLabel(o){
   if(o.is_exclusive)return 'حصري';
@@ -2620,7 +2620,7 @@ async function renderCollectionsPublic(){
   if(!sellerId){_colOutfits=[];_renderCollectionsGrid();return;}
   try{
     const{data,error}=await sb.from('outfits')
-      .select('*, outfit_items(id,product_id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type))')
+      .select('*, outfit_items(id,product_id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type,sizes,is_available))')
       .eq('seller_id',sellerId)
       .order('created_at',{ascending:false});
     if(error)throw error;
@@ -2686,6 +2686,52 @@ async function colToggleHeart(btn){
   }catch(e){toast(e.message||'خطأ في الحفظ');}
 }
 
+function _odPieceRowHtml(sel,idx){
+  const p=sel.product||{};
+  const img=sel.chosenImg;
+  const sizes=Array.isArray(p.sizes)?p.sizes:[];
+  return `<div class="od-piece-row">
+    ${img?`<img class="od-piece-img" src="${safeUrl(img)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
+    <div class="od-piece-body">
+      <div class="od-piece-name">${esc(p.name||'')}</div>
+      <div class="od-piece-price">${Number(p.price||0).toLocaleString()} دج</div>
+      ${sizes.length?`<div class="od-size-row">${sizes.map(s=>`<button type="button" class="od-size-pill" data-idx="${idx}" data-size="${esc(s)}" onclick="odSelectSize(${idx},this.dataset.size)">${esc(s)}</button>`).join('')}</div>`:''}
+      ${p.is_available?`<div class="od-stock-row"><span class="od-stock-dot"></span>متوفر</div>`:''}
+    </div>
+    <button type="button" class="od-check${sel.selected?' od-check--active':''}" data-idx="${idx}" onclick="odTogglePiece(${idx})" aria-label="اختر القطعة"></button>
+  </div>`;
+}
+
+function odTogglePiece(idx){
+  const sel=_odSelection[idx];if(!sel)return;
+  sel.selected=!sel.selected;
+  const chk=document.querySelector('.od-check[data-idx="'+idx+'"]');
+  if(chk)chk.classList.toggle('od-check--active',sel.selected);
+  _odUpdateTotal();
+}
+
+function odSelectSize(idx,size){
+  const sel=_odSelection[idx];if(!sel)return;
+  sel.chosenSize=size;
+  document.querySelectorAll('.od-size-pill[data-idx="'+idx+'"]').forEach(btn=>{
+    btn.classList.toggle('od-size-pill--active',btn.dataset.size===size);
+  });
+}
+
+function _odUpdateTotal(){
+  const selected=_odSelection.filter(s=>s.selected);
+  const total=selected.reduce((sum,s)=>sum+Number(s.product?.price||0),0);
+  const totalEl=document.getElementById('od-total-price');
+  if(totalEl)totalEl.textContent=total.toLocaleString()+' دج';
+  const disabled=!selected.length;
+  const wa=document.getElementById('od-wa-btn');
+  const cart=document.getElementById('od-cart-btn');
+  if(wa)wa.disabled=disabled;
+  if(cart)cart.disabled=disabled;
+}
+
+function odOpenCart(){toast('قريباً — طلب متعدد القطع');}
+
 function openOutfitDetailPublic(id){
   const o=_colOutfits.find(x=>x.id===id);if(!o)return;
   _odCurrentId=id;
@@ -2704,21 +2750,17 @@ function openOutfitDetailPublic(id){
   }
   document.getElementById('od-name').textContent=o.name||'';
   const note=o.note||'';
-  document.getElementById('od-about-text').textContent=note||'لا يوجد وصف لهذه التنسيقة.';
-  const priceTxt=_colPriceLabel(o);
-  const priceEl=document.getElementById('od-price');
-  if(priceEl){priceEl.textContent=priceTxt;priceEl.style.display=priceTxt?'':'none';}
-  const piecesEl=document.getElementById('od-pieces');
-  if(piecesEl){
-    piecesEl.innerHTML=o.items.map(it=>{
-      const p=it.product||{};
-      const img=it.chosen_image||p.image;
-      return `<div class="od-piece" onclick="closeOutfitDetailPublic();openProdDetail('${p.id}')">
-        ${img?`<img class="od-piece-img" src="${safeUrl(img)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
-        <div class="od-piece-name">${esc(p.name||'')}</div>
-      </div>`;
-    }).join('');
-  }
+  document.getElementById('od-about-text').textContent=note||'لا يوجد وصف';
+  _odSelection=o.items.map(it=>({
+    itemId:it.id,
+    product:it.product||{},
+    chosenImg:it.chosen_image||it.product?.image,
+    selected:true,
+    chosenSize:null
+  }));
+  const piecesEl=document.getElementById('od-pieces-list');
+  if(piecesEl)piecesEl.innerHTML=_odSelection.map((sel,idx)=>_odPieceRowHtml(sel,idx)).join('');
+  _odUpdateTotal();
   const h=document.getElementById('od-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
   const wa=document.getElementById('od-wa-btn');
   const phone=String(_storeShare.phone||'').replace(/\D/g,'');
@@ -2751,9 +2793,12 @@ function odOrderWhatsApp(){
   const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
   const phone=String(_storeShare.phone||'').replace(/\D/g,'');
   if(!phone)return;
-  const link=location.origin+location.pathname+'?outfit='+o.id;
-  const priceLine=o.is_exclusive?'السعر: (حصري)':Number(o.total_price||0).toLocaleString()+' DZD';
-  const msg='السلام عليكم\n\nمهتم بهذي التنسيقة من متجرك على Wardro:\n\n📌 '+(o.name||'')+'\n💰 '+priceLine+'\n\n'+link+'\n\n(استفسار أكثر...)';
+  const selected=_odSelection.filter(s=>s.selected);
+  if(!selected.length)return;
+  if(selected.some(s=>!s.chosenSize))return toast('اختر مقاس لكل قطعة');
+  const total=selected.reduce((sum,s)=>sum+Number(s.product?.price||0),0);
+  const lines=selected.map(s=>'- '+(s.product?.name||'')+' / مقاس: '+s.chosenSize+' — '+Number(s.product?.price||0).toLocaleString()+' دج').join('\n');
+  const msg='مرحباً، أريد طلب هذا التنسيق: '+(o.name||'')+'\n'+lines+'\n\nالمجموع: '+total.toLocaleString()+' دج';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
 }
 
