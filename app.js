@@ -2620,7 +2620,7 @@ async function renderCollectionsPublic(){
   if(!sellerId){_colOutfits=[];_renderCollectionsGrid();return;}
   try{
     const{data,error}=await sb.from('outfits')
-      .select('*, outfit_items(id,product_id,position,product:products(id,name,image,price,is_exclusive,product_type))')
+      .select('*, outfit_items(id,product_id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type))')
       .eq('seller_id',sellerId)
       .order('created_at',{ascending:false});
     if(error)throw error;
@@ -2635,8 +2635,9 @@ function _colCardHtml(o){
     ?`<img class="of-frame-img" src="${safeUrl(o.cover_image)}" alt="${esc(o.name)}" loading="lazy">`
     :`<div class="of-mini-stack">${o.items.slice(0,3).map(it=>{
         const p=it.product||{};
+        const img=it.chosen_image||p.image;
         return `<div class="of-mini">
-          ${p.image?`<img class="of-mini-img" src="${safeUrl(p.image)}" alt="" loading="lazy">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
+          ${img?`<img class="of-mini-img" src="${safeUrl(img)}" alt="" loading="lazy">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
           <span class="of-mini-type">${esc(_OF_TYPE_LABELS[p.product_type]||'Piece')}</span>
         </div>`;
       }).join('')}</div>`;
@@ -2694,8 +2695,9 @@ function openOutfitDetailPublic(id){
       ?`<img class="of-frame-img" src="${safeUrl(o.cover_image)}" alt="${esc(o.name)}">`
       :`<div class="of-mini-stack">${o.items.slice(0,3).map(it=>{
           const p=it.product||{};
+          const img=it.chosen_image||p.image;
           return `<div class="of-mini">
-            ${p.image?`<img class="of-mini-img" src="${safeUrl(p.image)}" alt="">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
+            ${img?`<img class="of-mini-img" src="${safeUrl(img)}" alt="">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
             <span class="of-mini-type">${esc(_OF_TYPE_LABELS[p.product_type]||'Piece')}</span>
           </div>`;
         }).join('')}</div>`;
@@ -2710,8 +2712,9 @@ function openOutfitDetailPublic(id){
   if(piecesEl){
     piecesEl.innerHTML=o.items.map(it=>{
       const p=it.product||{};
+      const img=it.chosen_image||p.image;
       return `<div class="od-piece" onclick="closeOutfitDetailPublic();openProdDetail('${p.id}')">
-        ${p.image?`<img class="od-piece-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
+        ${img?`<img class="od-piece-img" src="${safeUrl(img)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
         <div class="od-piece-name">${esc(p.name||'')}</div>
       </div>`;
     }).join('');
@@ -3476,7 +3479,7 @@ async function loadOutfits(){
   try{
     const{data:{user}}=await sb.auth.getUser();if(!user)return;
     const{data,error}=await sb.from('outfits')
-      .select('*, outfit_items(id,product_id,position,product:products(id,name,image,price,is_exclusive,product_type))')
+      .select('*, outfit_items(id,product_id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type))')
       .eq('seller_id',user.id)
       .order('created_at',{ascending:false});
     if(error)throw error;
@@ -3518,7 +3521,7 @@ function renderOutfits(){
 function openBuildCollection(id){
   _bcEditId=id||null;
   const o=id?_ofOutfits.find(x=>x.id===id):null;
-  _bcItems=o?o.items.map(it=>it.product).filter(Boolean):[];
+  _bcItems=o?o.items.map(it=>it.product?{...it.product,image:it.chosen_image||it.product.image}:null).filter(Boolean):[];
   _bcCoverFile=null;
   _bcCoverUrl=o?o.cover_image||null:null;
   _bcExclusive=o?o.is_exclusive===true:false;
@@ -3731,7 +3734,7 @@ async function saveOutfit(){
       if(error)throw error;
       outfitId=data.id;
     }
-    const rows=_bcItems.map((p,i)=>({outfit_id:outfitId,product_id:p.id,position:i,added_by:user.id}));
+    const rows=_bcItems.map((p,i)=>({outfit_id:outfitId,product_id:p.id,position:i,added_by:user.id,chosen_image:p.image||null}));
     const{error:itemsErr}=await sb.from('outfit_items').insert(rows);
     if(itemsErr)throw itemsErr;
     let coverUrl=_bcCoverUrl;
