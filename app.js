@@ -1344,7 +1344,7 @@ async function _compressImage(file,maxPx=1200,quality=0.82){
 // ══ SHOW MODE ══
 let _heroIdx=0,_heroTimer=null,_heroLen=1;
 let _guestSellerId=null; // set when a customer taps Top Store
-let _storeShare={id:null,name:'',city:'',phone:null}; // current store shown in #s-show
+let _storeShare={id:null,name:'',city:'',phone:null,whatsapp_enabled:false,cart_enabled:false}; // current store shown in #s-show
 
 function shareStore(){
   if(!_storeShare.id)return;
@@ -1431,7 +1431,7 @@ async function openStoreView(sellerId,storeName,storeImg){
     }catch(_){toast('متوفر يوم الإطلاق ✦');return;}
   }
   _guestSellerId=sellerId;
-  _storeShare={id:sellerId,name:storeName||'',city:'',phone:null};
+  _storeShare={id:sellerId,name:storeName||'',city:'',phone:null,whatsapp_enabled:false,cart_enabled:false};
   _setStoreWaBtn(false); // hidden until this store's phone is known
   _logEvent('store_visit',{sellerId});
   // Mark #s-show as guest mode (CSS hides sidebar/topbar, shows back bar)
@@ -1463,9 +1463,9 @@ function leaveGuestStore(){
 async function loadGuestStoreProducts(sellerId){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone,whatsapp_enabled').eq('id',sellerId).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone,whatsapp_enabled,cart_enabled').eq('id',sellerId).single();
     const guestName=document.getElementById('show-store-name')?.textContent||'?';
-    _storeShare={id:sellerId,name:guestName,city:seller?.city||'',phone:seller?.phone||null};
+    _storeShare={id:sellerId,name:guestName,city:seller?.city||'',phone:seller?.phone||null,whatsapp_enabled:seller?.whatsapp_enabled!==false,cart_enabled:!!seller?.cart_enabled};
     _setStoreWaBtn(!!(seller&&seller.phone)&&seller?.whatsapp_enabled!==false);
     const av=document.getElementById('show-avatar');
     const avAbout=document.getElementById('show-about-avatar');
@@ -2761,10 +2761,15 @@ function openOutfitDetailPublic(id){
   const piecesEl=document.getElementById('od-pieces-list');
   if(piecesEl)piecesEl.innerHTML=_odSelection.map((sel,idx)=>_odPieceRowHtml(sel,idx)).join('');
   _odUpdateTotal();
-  const h=document.getElementById('od-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
+  const h=document.getElementById('od-heart-btn');if(h){h.textContent='Save';h.classList.remove('active');}
+  const canWa=!!_storeShare.phone&&_storeShare.whatsapp_enabled!==false;
+  const canCart=!!_storeShare.cart_enabled;
   const wa=document.getElementById('od-wa-btn');
-  const phone=String(_storeShare.phone||'').replace(/\D/g,'');
-  if(wa)wa.style.display=phone?'flex':'none';
+  if(wa)wa.style.display=canWa?'flex':'none';
+  const cartBtn=document.getElementById('od-cart-btn');
+  if(cartBtn)cartBtn.style.display=canCart?'flex':'none';
+  const rowBtm=document.getElementById('od-footer-row-btm');
+  if(rowBtm)rowBtm.style.display=(canWa||canCart)?'flex':'none';
   const ov=document.getElementById('od-overlay');
   if(ov){
     ov.style.display='flex';
@@ -2785,12 +2790,16 @@ async function odToggleHeart(){
     const r=await _colSaveOutfit(_odCurrentId,willSave);
     if(!r.ok)return;
     h.classList.toggle('active',willSave);
-    h.textContent=willSave?'♥':'♡';
+    h.textContent=willSave?'Saved ✓':'Save';
   }catch(e){toast(e.message||'خطأ في الحفظ');}
 }
 
 function odOrderWhatsApp(){
   const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
+  if(_storeShare.whatsapp_enabled===false){
+    toast('البائع لا يدعم الطلب عبر واتساب حالياً');
+    return;
+  }
   const phone=String(_storeShare.phone||'').replace(/\D/g,'');
   if(!phone)return;
   const selected=_odSelection.filter(s=>s.selected);
