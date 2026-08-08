@@ -3501,8 +3501,9 @@ function renderOutfits(){
       ?`<img class="of-frame-img" src="${safeUrl(o.cover_image)}" alt="${esc(o.name)}" loading="lazy">`
       :`<div class="of-mini-stack">${o.items.slice(0,3).map(it=>{
           const p=it.product||{};
+          const img=it.chosen_image||p.image;
           return `<div class="of-mini">
-            ${p.image?`<img class="of-mini-img" src="${safeUrl(p.image)}" alt="" loading="lazy">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
+            ${img?`<img class="of-mini-img" src="${safeUrl(img)}" alt="" loading="lazy">`:`<div class="of-mini-img of-mini-img--ph"></div>`}
             <span class="of-mini-type">${esc(_OF_TYPE_LABELS[p.product_type]||'Piece')}</span>
           </div>`;
         }).join('')}</div>`;
