@@ -3454,7 +3454,7 @@ function updateCreateStoreButtonState(){
 
 
 // ══ OUTFITS — Editor tabs + My Outfits + Build Collection ══
-let _ofOutfits=[],_bcEditId=null,_bcItems=[],_bcCoverFile=null,_bcCoverUrl=null,_bcExclusive=false;
+let _ofOutfits=[],_bcEditId=null,_bcItems=[],_bcCoverFile=null,_bcCoverUrl=null,_bcExclusive=false,_bcImgPending=null;
 const _OF_TYPE_LABELS={shirt:'Shirt',pants:'Pants',jeans:'Jeans',shoes:'Shoes',jacket:'Jacket',accessory:'Accessory',ensemble:'Ensemble',sandals:'Sandals'};
 
 function edSwitchTab(tab){
@@ -3673,7 +3673,33 @@ function closeBcPicker(){
 
 function bcPickPiece(id){
   const p=_editorProds[id];if(!p)return;
+  if(p.images&&p.images.length>1)return openBcImgPicker(p);
   _bcItems.push(p);
+  closeBcPicker();
+  _bcRender();
+}
+
+// ── Piece image picker (multi-image products) ──
+function openBcImgPicker(product){
+  _bcImgPending=product;
+  const grid=document.getElementById('bc-img-grid');
+  if(!grid)return;
+  grid.innerHTML=(product.images||[]).map((url,i)=>`<img class="bc-img-opt" src="${safeUrl(url)}" alt="" loading="lazy" onclick="bcPickImg(${i})">`).join('');
+  const overlay=document.getElementById('bc-img-picker');
+  if(overlay)overlay.style.display='flex';
+}
+
+function closeBcImgPicker(){
+  const overlay=document.getElementById('bc-img-picker');
+  if(overlay)overlay.style.display='none';
+  _bcImgPending=null;
+}
+
+function bcPickImg(idx){
+  if(!_bcImgPending)return;
+  const url=(_bcImgPending.images||[])[idx];if(!url)return;
+  _bcItems.push({..._bcImgPending,image:url});
+  closeBcImgPicker();
   closeBcPicker();
   _bcRender();
 }
@@ -3692,7 +3718,7 @@ async function saveOutfit(){
     if(!user)throw new Error('سجّل الدخول أولاً');
     const match=_bcItems.length>=4?92:_bcItems.length===3?87:80;
     const priceRaw=(document.getElementById('bc-total')?.value||'').trim();
-    const total_price=_bcExclusive?null:(priceRaw!==''?parseFloat(priceRaw):null);
+    const total_price=_bcExclusive?0:(priceRaw!==''?parseFloat(priceRaw):0);
     const payload={name,state:'close',is_exclusive:_bcExclusive,note:note||null,total_price,match_pct:match};
     let outfitId=_bcEditId;
     if(outfitId){

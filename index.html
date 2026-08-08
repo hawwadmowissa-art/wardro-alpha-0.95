@@ -753,6 +753,14 @@
         <div class="bc-picker-list" id="bc-picker-list"></div>
       </div>
     </div>
+    <!-- Piece Image Picker -->
+    <div class="bc-img-picker" id="bc-img-picker" style="display:none">
+      <div class="bc-img-picker-sheet">
+        <div class="bc-img-picker-hd">اختر الصورة</div>
+        <div class="bc-img-grid" id="bc-img-grid"></div>
+        <button class="bc-img-picker-cancel" onclick="closeBcImgPicker()">إلغاء</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1913,7 +1921,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1001"></script>
+<script src="app.js?v=1002"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
