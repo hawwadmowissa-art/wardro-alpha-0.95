@@ -2690,16 +2690,22 @@ function _odPieceRowHtml(sel,idx){
   const p=sel.product||{};
   const img=sel.chosenImg;
   const sizes=Array.isArray(p.sizes)?p.sizes:[];
-  return `<div class="od-piece-row">
+  return `<div class="od-piece-row" onclick="odOpenPieceDetail(${idx})">
     ${img?`<img class="od-piece-img" src="${safeUrl(img)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
     <div class="od-piece-body">
       <div class="od-piece-name">${esc(p.name||'')}</div>
       <div class="od-piece-price">${Number(p.price||0).toLocaleString()} دج</div>
-      ${sizes.length?`<div class="od-size-row">${sizes.map(s=>`<button type="button" class="od-size-pill" data-idx="${idx}" data-size="${esc(s)}" onclick="odSelectSize(${idx},this.dataset.size)">${esc(s)}</button>`).join('')}</div>`:''}
+      ${sizes.length?`<div class="od-size-row">${sizes.map(s=>`<button type="button" class="od-size-pill" data-idx="${idx}" data-size="${esc(s)}" onclick="event.stopPropagation();odSelectSize(${idx},this.dataset.size)">${esc(s)}</button>`).join('')}</div>`:''}
       ${p.is_available?`<div class="od-stock-row"><span class="od-stock-dot"></span>متوفر</div>`:''}
     </div>
-    <button type="button" class="od-check${sel.selected?' od-check--active':''}" data-idx="${idx}" onclick="odTogglePiece(${idx})" aria-label="اختر القطعة"></button>
+    <button type="button" class="od-check${sel.selected?' od-check--active':''}" data-idx="${idx}" onclick="event.stopPropagation();odTogglePiece(${idx})" aria-label="اختر القطعة"></button>
   </div>`;
+}
+
+function odOpenPieceDetail(idx){
+  const sel=_odSelection[idx];if(!sel||!sel.product?.id)return;
+  closeOutfitDetailPublic();
+  openProdDetail(sel.product.id);
 }
 
 function odTogglePiece(idx){
@@ -2720,9 +2726,12 @@ function odSelectSize(idx,size){
 
 function _odUpdateTotal(){
   const selected=_odSelection.filter(s=>s.selected);
-  const total=selected.reduce((sum,s)=>sum+Number(s.product?.price||0),0);
+  const dynamicTotal=selected.reduce((sum,s)=>sum+Number(s.product?.price||0),0);
+  const o=_colOutfits.find(x=>x.id===_odCurrentId);
+  const fixedPrice=Number(o?.total_price||0);
+  const displayTotal=fixedPrice>0?fixedPrice:dynamicTotal;
   const totalEl=document.getElementById('od-total-price');
-  if(totalEl)totalEl.textContent=total.toLocaleString()+' دج';
+  if(totalEl)totalEl.textContent=displayTotal.toLocaleString()+' دج';
   const disabled=!selected.length;
   const wa=document.getElementById('od-wa-btn');
   const cart=document.getElementById('od-cart-btn');
