@@ -161,15 +161,30 @@ async function _openDeepLinkStore(storeId){
     openStoreView(storeId,seller.store_name||'',seller.profile_image||null);
   }catch(_){}
 }
+async function _openDeepLinkOutfit(storeId,outfitId){
+  if(!window.db)return;
+  try{
+    const{data:seller,error}=await window.db.from('sellers').select('store_name,profile_image').eq('id',storeId).single();
+    if(error||!seller)return;
+    openStoreView(storeId,seller.store_name||'',seller.profile_image||null);
+    switchShowTab('collections',document.querySelector('.show-tab[data-tab="collections"]'));
+    await renderCollectionsPublic();
+    if(_colOutfits.find(o=>o.id===outfitId))openOutfitDetailPublic(outfitId);
+  }catch(_){}
+}
 function _handleStoreDeepLink(){
-  const storeId=new URLSearchParams(location.search).get('store');
+  const params=new URLSearchParams(location.search);
+  const storeId=params.get('store');
   if(!storeId||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeId))return;
+  const outfitParam=params.get('outfit');
+  const outfitId=outfitParam&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(outfitParam)?outfitParam:null;
+  const open=()=>outfitId?_openDeepLinkOutfit(storeId,outfitId):_openDeepLinkStore(storeId);
   _waitIdle(()=>{
     if(document.getElementById('s-browse')?.classList.contains('active')){
-      _openDeepLinkStore(storeId);
+      open();
     }else{
       navigateTo('s-browse','z-axis');
-      _waitIdle(()=>_openDeepLinkStore(storeId));
+      _waitIdle(open);
     }
   });
 }
@@ -1344,7 +1359,7 @@ async function _compressImage(file,maxPx=1200,quality=0.82){
 // ══ SHOW MODE ══
 let _heroIdx=0,_heroTimer=null,_heroLen=1;
 let _guestSellerId=null; // set when a customer taps Top Store
-let _storeShare={id:null,name:'',city:'',phone:null,whatsapp_enabled:false,cart_enabled:false}; // current store shown in #s-show
+let _storeShare={id:null,name:'',city:'',phone:null,whatsapp_enabled:false,cart_enabled:false,sheet_url:null}; // current store shown in #s-show
 
 function shareStore(){
   if(!_storeShare.id)return;
@@ -1431,7 +1446,7 @@ async function openStoreView(sellerId,storeName,storeImg){
     }catch(_){toast('متوفر يوم الإطلاق ✦');return;}
   }
   _guestSellerId=sellerId;
-  _storeShare={id:sellerId,name:storeName||'',city:'',phone:null,whatsapp_enabled:false,cart_enabled:false};
+  _storeShare={id:sellerId,name:storeName||'',city:'',phone:null,whatsapp_enabled:false,cart_enabled:false,sheet_url:null};
   _setStoreWaBtn(false); // hidden until this store's phone is known
   _logEvent('store_visit',{sellerId});
   // Mark #s-show as guest mode (CSS hides sidebar/topbar, shows back bar)
@@ -1463,9 +1478,9 @@ function leaveGuestStore(){
 async function loadGuestStoreProducts(sellerId){
   const sb=getSb();if(!sb)return;
   try{
-    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone,whatsapp_enabled,cart_enabled').eq('id',sellerId).single();
+    const{data:seller}=await sb.from('sellers').select('profile_image,bio,city,phone,whatsapp_enabled,cart_enabled,sheet_url').eq('id',sellerId).single();
     const guestName=document.getElementById('show-store-name')?.textContent||'?';
-    _storeShare={id:sellerId,name:guestName,city:seller?.city||'',phone:seller?.phone||null,whatsapp_enabled:seller?.whatsapp_enabled!==false,cart_enabled:!!seller?.cart_enabled};
+    _storeShare={id:sellerId,name:guestName,city:seller?.city||'',phone:seller?.phone||null,whatsapp_enabled:seller?.whatsapp_enabled!==false,cart_enabled:!!seller?.cart_enabled,sheet_url:seller?.sheet_url||null};
     _setStoreWaBtn(!!(seller&&seller.phone)&&seller?.whatsapp_enabled!==false);
     const av=document.getElementById('show-avatar');
     const avAbout=document.getElementById('show-about-avatar');
@@ -2347,6 +2362,7 @@ function _dzCommunesFor(wilayaName){
 
 let _cfDelivery='home';
 let _cfQty=1;
+let _cfOutfitContext=null; // {outfitId,outfitName,pieces:[{productId,name,size,price,chosenImg}],total} — set by openOutfitOrderForm, cleared on close
 
 function cfChangeQty(delta){
   _cfQty=Math.max(1,_cfQty+delta);
@@ -2388,6 +2404,11 @@ function cfSetDelivery(mode){
 
 function openOrderForm(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  _cfOutfitContext=null;
+  const outfitHdr=document.getElementById('cf-outfit-header');if(outfitHdr)outfitHdr.style.display='none';
+  const outfitPieces=document.getElementById('cf-outfit-pieces');if(outfitPieces)outfitPieces.style.display='none';
+  const prodRow=document.getElementById('cf-prod-row');if(prodRow)prodRow.style.display='';
+  const colorSizeRow=document.getElementById('cf-color-size-row');if(colorSizeRow)colorSizeRow.style.display='';
   _cfPopulateWilayas();
   cfChangeQty(1-_cfQty);
   const nameEl=document.getElementById('cf-prod-name');if(nameEl)nameEl.textContent=p.name||'';
@@ -2426,11 +2447,55 @@ function closeOrderForm(){
   const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
   cfOv.classList.remove('cf-overlay--open');
   setTimeout(()=>{cfOv.style.display='none';},380);
-  const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='flex';
+  if(_cfOutfitContext){
+    const odOv=document.getElementById('od-overlay');if(odOv)odOv.style.display='flex';
+    _cfOutfitContext=null;
+  }else{
+    const pdOv=document.getElementById('pd-overlay');if(pdOv)pdOv.style.display='flex';
+  }
+}
+
+function openOutfitOrderForm(){
+  const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
+  const selected=_odSelection.filter(s=>s.selected);
+  if(!selected.length||selected.some(s=>!s.chosenSize)){toast('اختر مقاس لكل قطعة');return;}
+  const pieces=selected.map(s=>({
+    productId:s.product?.id||null,
+    name:s.product?.name||'',
+    size:s.chosenSize,
+    price:Number(s.product?.price||0),
+    chosenImg:s.chosenImg||s.product?.image||''
+  }));
+  const total=pieces.reduce((sum,pc)=>sum+pc.price,0);
+  _cfOutfitContext={outfitId:o.id,outfitName:o.name||'',pieces,total};
+  _cfPopulateWilayas();
+  ['cf-name','cf-phone','cf-address'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const wilayaSel=document.getElementById('cf-wilaya');if(wilayaSel)wilayaSel.value='';
+  cfWilayaChanged();
+  cfSetDelivery('home');
+  const prodRow=document.getElementById('cf-prod-row');if(prodRow)prodRow.style.display='none';
+  const colorSizeRow=document.getElementById('cf-color-size-row');if(colorSizeRow)colorSizeRow.style.display='none';
+  const outfitHdr=document.getElementById('cf-outfit-header');
+  if(outfitHdr){outfitHdr.textContent='طلب تنسيقة: '+(o.name||'')+' — '+pieces.length+' قطع';outfitHdr.style.display='';}
+  const piecesWrap=document.getElementById('cf-outfit-pieces');
+  if(piecesWrap){
+    piecesWrap.innerHTML=pieces.map(pc=>`<div class="cf-outfit-piece">
+      ${pc.chosenImg?`<img class="cf-outfit-piece-img" src="${safeUrl(pc.chosenImg)}" alt="${esc(pc.name)}">`:`<div class="cf-outfit-piece-img cf-outfit-piece-img--ph"></div>`}
+      <div class="cf-outfit-piece-info">
+        <div class="cf-outfit-piece-name">${esc(pc.name)}</div>
+        <div class="cf-outfit-piece-meta">مقاس: ${esc(pc.size)} — ${pc.price.toLocaleString()} دج</div>
+      </div>
+    </div>`).join('');
+    piecesWrap.style.display='';
+  }
+  const waBtn=document.getElementById('cf-wa-btn');if(waBtn)waBtn.style.display='none';
+  const odOv=document.getElementById('od-overlay');if(odOv)odOv.style.display='none';
+  const cfOv=document.getElementById('cf-overlay');if(!cfOv)return;
+  cfOv.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>cfOv.classList.add('cf-overlay--open')));
 }
 
 async function cfConfirmOrder(){
-  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
   const sb=getSb();if(!sb)return;
   const{data:{session}}=await sb.auth.getSession();
   if(!session){_pendingAction='form';openCustAuth();return;}
@@ -2441,7 +2506,60 @@ async function cfConfirmOrder(){
     toast('يرجى ملء جميع الحقول المطلوبة');
     return;
   }
+  const baladia=document.getElementById('cf-commune')?.value||'';
+  const address=document.getElementById('cf-address')?.value.trim()||'';
   const orderNumber='#WR-'+String(Math.floor(10000+Math.random()*90000));
+
+  if(_cfOutfitContext){
+    const ctx=_cfOutfitContext;
+    const sellerId=_storeShare.id;
+    const sheetUrl=_storeShare.sheet_url;
+    const orderGroupId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));
+    const timestamp=new Date().toISOString();
+    const outfitLink='https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?store='+sellerId+'&outfit='+ctx.outfitId;
+    const payloads=ctx.pieces.map((pc,i)=>({
+      orderNumber,
+      orderGroupId,
+      orderSource:'outfit',
+      outfitId:ctx.outfitId,
+      outfitName:ctx.outfitName,
+      pieceIndex:i+1,
+      pieceCount:ctx.pieces.length,
+      productName:pc.name,
+      size:pc.size,
+      quantity:1,
+      price:pc.price,
+      customerName:name,
+      customerPhone:phone,
+      wilaya,
+      baladia,
+      address,
+      deliveryMethod:_cfDelivery,
+      timestamp,
+      storeName:_storeShare.name||'',
+      imageUrl:pc.chosenImg||'',
+      productLink:pc.productId?('https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?product='+pc.productId):'',
+      outfitLink
+    }));
+    if(!sheetUrl){
+      ocStart(true,orderNumber);
+      _cfOutfitContext=null;
+      return;
+    }
+    ocStart(false,orderNumber);
+    Promise.all(payloads.map(payload=>fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})))
+      .then(results=>{
+        if(results.every(r=>r.ok)){
+          ocShowSuccess();
+          try{_logEvent('form_order',{productId:null,sellerId});}catch(_){}
+          _cfOutfitContext=null;
+        }else ocFail();
+      })
+      .catch(()=>ocFail());
+    return;
+  }
+
+  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
   const color=document.querySelector('#cf-prod-color .pd-color-circle--active')?.dataset.key||'';
   const images=p.images||[];
   const colorTags=p.color_tags||[];
@@ -2459,8 +2577,8 @@ async function cfConfirmOrder(){
     customerName:name,
     customerPhone:phone,
     wilaya,
-    baladia:document.getElementById('cf-commune')?.value||'',
-    address:document.getElementById('cf-address')?.value.trim()||'',
+    baladia,
+    address,
     deliveryMethod:_cfDelivery,
     timestamp:new Date().toISOString(),
     storeName:p.seller?.store_name||'',
@@ -2739,8 +2857,6 @@ function _odUpdateTotal(){
   if(cart)cart.disabled=disabled;
 }
 
-function odOpenCart(){toast('قريباً — طلب متعدد القطع');}
-
 function openOutfitDetailPublic(id){
   const o=_colOutfits.find(x=>x.id===id);if(!o)return;
   _odCurrentId=id;
@@ -2816,7 +2932,8 @@ function odOrderWhatsApp(){
   if(selected.some(s=>!s.chosenSize))return toast('اختر مقاس لكل قطعة');
   const total=selected.reduce((sum,s)=>sum+Number(s.product?.price||0),0);
   const lines=selected.map(s=>'- '+(s.product?.name||'')+' / مقاس: '+s.chosenSize+' — '+Number(s.product?.price||0).toLocaleString()+' دج').join('\n');
-  const msg='مرحباً، أريد طلب هذا التنسيق: '+(o.name||'')+'\n'+lines+'\n\nالمجموع: '+total.toLocaleString()+' دج';
+  const link=window.location.origin+location.pathname+'?store='+(_guestSellerId||_storeShare.id)+'&outfit='+o.id;
+  const msg='مرحباً، أريد طلب هذا التنسيق: '+(o.name||'')+'\n'+lines+'\n\nالمجموع: '+total.toLocaleString()+' دج'+'\n\nالرابط: '+link;
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
 }
 

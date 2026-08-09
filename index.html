@@ -1312,7 +1312,9 @@
 
     <div class="cf-body">
 
-      <div class="cf-prod-row">
+      <div class="cf-outfit-header" id="cf-outfit-header" style="display:none"></div>
+
+      <div class="cf-prod-row" id="cf-prod-row">
         <div class="cf-prod-img-wrap">
           <img id="cf-prod-img" class="cf-prod-img" src="" alt="">
         </div>
@@ -1327,7 +1329,7 @@
         </div>
       </div>
 
-      <div class="cf-field-row">
+      <div class="cf-field-row" id="cf-color-size-row">
         <div class="cf-field-half">
           <div class="cf-field-lbl">اللون</div>
           <div class="cf-field-val cf-color-row" id="cf-prod-color">—</div>
@@ -1337,6 +1339,8 @@
           <div class="cf-field-val" id="cf-prod-size">—</div>
         </div>
       </div>
+
+      <div class="cf-outfit-pieces" id="cf-outfit-pieces" style="display:none"></div>
 
       <div class="cf-sec-title">معلوماتك</div>
 
@@ -1499,7 +1503,7 @@
     <div class="od-footer">
       <button class="od-save-btn" id="od-heart-btn" onclick="odToggleHeart()" aria-label="احفظ">Save</button>
       <div class="od-footer-row-btm" id="od-footer-row-btm">
-        <button class="od-cart-btn" id="od-cart-btn" onclick="odOpenCart()">
+        <button class="od-cart-btn" id="od-cart-btn" onclick="openOutfitOrderForm()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           أضف إلى السلة
         </button>
@@ -1928,7 +1932,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1008"></script>
+<script src="app.js?v=1009"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
