@@ -2263,7 +2263,7 @@ function pdSelectColor(btn){
   _pdSyncAvailability();
 }
 
-let _pendingAction=null; // 'whatsapp' | 'form' — resumed by doCustAuth/doCustGoogleAuth after a login prompted mid-checkout
+let _pendingAction=null; // 'whatsapp' | 'form' | 'outfit-save' | 'outfit-whatsapp' — resumed by doCustAuth/doCustGoogleAuth after a login prompted mid-checkout
 
 async function pdOrderWhatsApp(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
@@ -2911,6 +2911,9 @@ function closeOutfitDetailPublic(){
 
 async function odToggleHeart(){
   const h=document.getElementById('od-heart-btn');if(!h||!_odCurrentId)return;
+  const sb=getSb();if(!sb)return;
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){_pendingAction='outfit-save';openCustAuth();return;}
   const willSave=!h.classList.contains('active');
   try{
     const r=await _colSaveOutfit(_odCurrentId,willSave);
@@ -2920,8 +2923,11 @@ async function odToggleHeart(){
   }catch(e){toast(e.message||'خطأ في الحفظ');}
 }
 
-function odOrderWhatsApp(){
+async function odOrderWhatsApp(){
   const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
+  const sb=getSb();if(!sb)return;
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){_pendingAction='outfit-whatsapp';openCustAuth();return;}
   if(_storeShare.whatsapp_enabled===false){
     toast('البائع لا يدعم الطلب عبر واتساب حالياً');
     return;
@@ -2980,6 +2986,8 @@ async function doCustAuth(){
       setTimeout(()=>{
         if(pending==='whatsapp')pdOrderWhatsApp();
         else if(pending==='form')cfConfirmOrder();
+        else if(pending==='outfit-save')odToggleHeart();
+        else if(pending==='outfit-whatsapp')odOrderWhatsApp();
         else saveItem();
       },420);
     }else{
@@ -2999,6 +3007,8 @@ async function doCustGoogleAuth(){
   const pending=_pendingAction;_pendingAction=null;
   if(pending==='whatsapp')pdOrderWhatsApp();
   else if(pending==='form')cfConfirmOrder();
+  else if(pending==='outfit-save')odToggleHeart();
+  else if(pending==='outfit-whatsapp')odOrderWhatsApp();
 }
 
 // ══ SAVED SCREEN ══
