@@ -1932,7 +1932,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1011"></script>
+<script src="app.js?v=1012"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
@@ -2035,10 +2035,16 @@
     textSpan.id = 'pwa-banner-text';
     textSpan.textContent = text;
 
-    var acceptBtn = document.createElement('button');
-    acceptBtn.id = 'pwa-banner-accept';
-    acceptBtn.setAttribute('aria-label', acceptLabel || 'تثبيت');
-    acceptBtn.textContent = acceptLabel || 'تثبيت';
+    // Install button only makes sense when there's an actual accept action
+    // (e.g. beforeinstallprompt on Android/Chrome). iOS has no such API, so
+    // the plain "Add to Home Screen" hint banner must never render it.
+    var acceptBtn = null;
+    if (onAccept) {
+      acceptBtn = document.createElement('button');
+      acceptBtn.id = 'pwa-banner-accept';
+      acceptBtn.setAttribute('aria-label', acceptLabel || 'تثبيت');
+      acceptBtn.textContent = acceptLabel || 'تثبيت';
+    }
 
     var closeBtn = document.createElement('button');
     closeBtn.id = 'pwa-banner-close';
@@ -2046,7 +2052,7 @@
     closeBtn.textContent = '✕';
 
     banner.appendChild(textSpan);
-    banner.appendChild(acceptBtn);
+    if (acceptBtn) banner.appendChild(acceptBtn);
     banner.appendChild(closeBtn);
     document.body.appendChild(banner);
 
@@ -2057,9 +2063,11 @@
       });
     });
 
-    acceptBtn.addEventListener('click', function () {
-      _slideBannerOut(banner, function () { if (onAccept) onAccept(); });
-    });
+    if (acceptBtn) {
+      acceptBtn.addEventListener('click', function () {
+        _slideBannerOut(banner, function () { onAccept(); });
+      });
+    }
 
     closeBtn.addEventListener('click', function () {
       localStorage.setItem(DISMISSED_KEY, '1');
@@ -2076,11 +2084,14 @@
   }
 
   // ── Android/Chrome install prompt ────────────────────────────────────────
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   var deferredPrompt = null;
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
-    if (isInAppBrowser) return;
+    // beforeinstallprompt is not fired on iOS Safari, but guard explicitly
+    // so the Android-only install button can never appear there.
+    if (isIOS || isInAppBrowser) return;
     _showBannerDelayed(
       'ثبّت تطبيق Wardro',
       function () {
@@ -2094,7 +2105,6 @@
   });
 
   // ── iOS Safari hint ──────────────────────────────────────────────────────
-  var isIOS = /iPhone|iPad/.test(navigator.userAgent);
   var isStandalone = window.navigator.standalone === true;
   var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   if (isIOS && isSafari && !isStandalone && !isInAppBrowser) {
