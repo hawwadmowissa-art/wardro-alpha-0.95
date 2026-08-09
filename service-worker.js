@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'wardro-v1';
+const CACHE_VERSION = 'wardro-v1009';
 
 // Core app shell — paths only (no query params); icons rarely change
 const SHELL = [
@@ -30,6 +30,7 @@ function isBypassed(url) {
 
 // install: pre-cache shell
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_VERSION).then(cache => cache.addAll(SHELL))
   );

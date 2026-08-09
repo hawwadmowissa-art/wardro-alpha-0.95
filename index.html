@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Wardro">
 <link href="https://fonts.googleapis.com/css2?family=Cherish&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260627carousel">
+<link rel="stylesheet" href="style.css?v=1000">
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
@@ -474,6 +474,8 @@
       </div>
     </div>
 
+    <div class="demo-mode-banner" id="editor-demo-banner" style="display:none">التطبيق في وضع الاختبار — ستظهر نتائجك عند الإطلاق</div>
+
     <!-- Editor Tabs: Catalog | المخزون | Outfits -->
     <div class="ed-tabs">
       <button class="ed-tab ed-tab--active" id="ed-tab-btn-catalog" onclick="edSwitchTab('catalog')">
@@ -751,6 +753,14 @@
         <div class="bc-picker-list" id="bc-picker-list"></div>
       </div>
     </div>
+    <!-- Piece Image Picker -->
+    <div class="bc-img-picker" id="bc-img-picker" style="display:none">
+      <div class="bc-img-picker-sheet">
+        <div class="bc-img-picker-hd">اختر الصورة</div>
+        <div class="bc-img-grid" id="bc-img-grid"></div>
+        <button class="bc-img-picker-cancel" onclick="closeBcImgPicker()">إلغاء</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -821,6 +831,8 @@
         </button>
       </div>
     </div>
+
+    <div class="demo-mode-banner" id="show-demo-banner" style="display:none">التطبيق في وضع الاختبار — ستظهر نتائجك عند الإطلاق</div>
 
     <!-- Scrollable Body -->
     <div class="show-body">
@@ -1147,6 +1159,21 @@
     </button>
   </nav>
 
+  <!-- View All overlay — full vertical grid for a strip's viewAllKey, stays inside Browse -->
+  <div id="br-viewall-overlay" class="br-viewall-overlay" style="display:none">
+    <div class="br-viewall-head">
+      <button class="br-viewall-back" onclick="_brCloseViewAll()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="br-viewall-title" id="br-viewall-title"></span>
+    </div>
+    <div class="br-viewall-body">
+      <div class="br-section" id="br-viewall-sec">
+        <div class="br-prod-grid" id="br-viewall-grid"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- CUSTOMER SAVED -->
@@ -1285,7 +1312,9 @@
 
     <div class="cf-body">
 
-      <div class="cf-prod-row">
+      <div class="cf-outfit-header" id="cf-outfit-header" style="display:none"></div>
+
+      <div class="cf-prod-row" id="cf-prod-row">
         <div class="cf-prod-img-wrap">
           <img id="cf-prod-img" class="cf-prod-img" src="" alt="">
         </div>
@@ -1300,7 +1329,7 @@
         </div>
       </div>
 
-      <div class="cf-field-row">
+      <div class="cf-field-row" id="cf-color-size-row">
         <div class="cf-field-half">
           <div class="cf-field-lbl">اللون</div>
           <div class="cf-field-val cf-color-row" id="cf-prod-color">—</div>
@@ -1310,6 +1339,8 @@
           <div class="cf-field-val" id="cf-prod-size">—</div>
         </div>
       </div>
+
+      <div class="cf-outfit-pieces" id="cf-outfit-pieces" style="display:none"></div>
 
       <div class="cf-sec-title">معلوماتك</div>
 
@@ -1459,22 +1490,29 @@
       <button class="od-back-btn" onclick="closeOutfitDetailPublic()" aria-label="رجوع">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <button class="od-heart-btn" id="od-heart-btn" onclick="odToggleHeart()" aria-label="احفظ">♡</button>
       <div id="od-cover"></div>
     </div>
     <div class="od-info">
       <div class="od-name" id="od-name"></div>
-      <div class="od-price" id="od-price"></div>
+      <div class="od-price"><span id="od-total-price"></span></div>
       <div class="od-about-hd">عن التنسيقة</div>
       <div class="od-about-text" id="od-about-text"></div>
-      <div class="od-pieces-hd">القطع</div>
-      <div class="od-pieces-row" id="od-pieces"></div>
+      <div class="od-section-title">مكونات التنسيقة</div>
+      <div class="od-pieces-list" id="od-pieces-list"></div>
     </div>
-    <div class="od-actions">
-      <button class="pd-wa-btn" id="od-wa-btn" onclick="odOrderWhatsApp()" style="display:none" aria-label="اطلب عبر واتساب">
-        <svg class="pd-wa-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#0B0A08" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        أطلب عبر واتساب
-      </button>
+    <div class="od-footer">
+      <button class="od-save-btn" id="od-heart-btn" onclick="odToggleHeart()" aria-label="احفظ">Save</button>
+      <div class="od-footer-row-btm" id="od-footer-row-btm">
+        <button class="od-cart-btn" id="od-cart-btn" onclick="openOutfitOrderForm()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          أضف إلى السلة
+        </button>
+        <button class="od-wa-btn" id="od-wa-btn" onclick="odOrderWhatsApp()" aria-label="اطلب عبر واتساب">
+          <svg class="pd-wa-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#0B0A08" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span class="od-wa-btn-main">اطلب عبر واتساب</span>
+          <span class="od-wa-btn-sub">تواصل مباشر مع المتجر</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -1514,6 +1552,7 @@
       </button>
     </div>
     <div class="cust-auth-note">أنت بائع؟ <span onclick="closeCustAuth();navigateTo('s-seller-signin','slide')">وضع البائع</span></div>
+    <button type="button" id="ca-skip-btn" class="ca-skip-btn" style="display:none" onclick="custAuthSkip()">تخطي</button>
   </div>
 </div>
 
@@ -1893,7 +1932,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=20260627exclusive"></script>
+<script src="app.js?v=1009"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
@@ -1926,6 +1965,27 @@
   // ── Install prompt helpers ───────────────────────────────────────────────
   var DISMISSED_KEY = 'wardro_pwa_dismissed';
   var _bannerTimer = null;
+  var isInAppBrowser = /Instagram|FBAN|FBAV|Telegram|TikTok/i.test(navigator.userAgent);
+
+  function _copyLinkFallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function _copyLink() {
+    var url = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).catch(function () { _copyLinkFallback(url); });
+    } else {
+      _copyLinkFallback(url);
+    }
+  }
 
   function _injectBannerStyles() {
     if (document.getElementById('pwa-banner-style')) return;
@@ -1937,6 +1997,7 @@
       'padding:12px 16px;background:#1C1915;border-bottom:1px solid rgba(210,175,105,.25);' +
       'font-family:Tajawal,sans-serif;font-size:14px;color:#D8CFBA;direction:rtl;' +
       'transform:translateY(-100%);transition:transform 400ms ease-out;}' +
+      '#pwa-banner-icon{flex-shrink:0;display:flex;align-items:center;color:#D2AF69;}' +
       '#pwa-banner-text{flex:1;line-height:1.4;}' +
       '#pwa-banner-accept{background:#D2AF69;color:#0B0A08;border:none;border-radius:8px;' +
       'padding:8px 14px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;' +
@@ -1955,7 +2016,7 @@
     }, { once: true });
   }
 
-  function createBanner(text, onAccept, onDismiss) {
+  function createBanner(text, onAccept, onDismiss, acceptLabel, iconSvg) {
     if (localStorage.getItem(DISMISSED_KEY)) return;
     _injectBannerStyles();
 
@@ -1963,14 +2024,21 @@
     banner.id = 'pwa-banner';
     banner.setAttribute('role', 'banner');
 
+    if (iconSvg) {
+      var iconSpan = document.createElement('span');
+      iconSpan.id = 'pwa-banner-icon';
+      iconSpan.innerHTML = iconSvg;
+      banner.appendChild(iconSpan);
+    }
+
     var textSpan = document.createElement('span');
     textSpan.id = 'pwa-banner-text';
     textSpan.textContent = text;
 
     var acceptBtn = document.createElement('button');
     acceptBtn.id = 'pwa-banner-accept';
-    acceptBtn.setAttribute('aria-label', 'تثبيت');
-    acceptBtn.textContent = 'تثبيت';
+    acceptBtn.setAttribute('aria-label', acceptLabel || 'تثبيت');
+    acceptBtn.textContent = acceptLabel || 'تثبيت';
 
     var closeBtn = document.createElement('button');
     closeBtn.id = 'pwa-banner-close';
@@ -1999,12 +2067,12 @@
     });
   }
 
-  function _showBannerDelayed(text, onAccept, onDismiss) {
+  function _showBannerDelayed(text, onAccept, onDismiss, delay, acceptLabel, iconSvg) {
     if (localStorage.getItem(DISMISSED_KEY)) return;
     clearTimeout(_bannerTimer);
     _bannerTimer = setTimeout(function () {
-      createBanner(text, onAccept, onDismiss);
-    }, 30000);
+      createBanner(text, onAccept, onDismiss, acceptLabel, iconSvg);
+    }, delay || 15000);
   }
 
   // ── Android/Chrome install prompt ────────────────────────────────────────
@@ -2012,6 +2080,7 @@
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
+    if (isInAppBrowser) return;
     _showBannerDelayed(
       'ثبّت تطبيق Wardro',
       function () {
@@ -2025,14 +2094,28 @@
   });
 
   // ── iOS Safari hint ──────────────────────────────────────────────────────
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isIOS = /iPhone|iPad/.test(navigator.userAgent);
   var isStandalone = window.navigator.standalone === true;
   var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  if (isIOS && isSafari && !isStandalone) {
+  if (isIOS && isSafari && !isStandalone && !isInAppBrowser) {
     _showBannerDelayed(
-      'أضف Wardro إلى الشاشة الرئيسية من زر المشاركة ⬆️',
+      'اضغط على زر المشاركة ثم إضافة إلى الشاشة الرئيسية',
       null,
-      null
+      null,
+      5000,
+      null,
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v13M7 7l5-5 5 5"/><path d="M3 15v4a2 2 0 002 2h14a2 2 0 002-2v-4"/></svg>'
+    );
+  }
+
+  // ── In-app browser hint (Instagram/Facebook/Telegram/TikTok) ────────────
+  if (isInAppBrowser) {
+    _showBannerDelayed(
+      isIOS ? 'افتح في Safari لتثبيت التطبيق' : 'افتح في Chrome لتثبيت التطبيق',
+      function () { _copyLink(); },
+      null,
+      10000,
+      'نسخ الرابط'
     );
   }
 }());
