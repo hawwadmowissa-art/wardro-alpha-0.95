@@ -166,7 +166,8 @@ async function _openDeepLinkOutfit(storeId,outfitId){
   try{
     const{data:seller,error}=await window.db.from('sellers').select('store_name,profile_image').eq('id',storeId).single();
     if(error||!seller)return;
-    openStoreView(storeId,seller.store_name||'',seller.profile_image||null);
+    await openStoreView(storeId,seller.store_name||'',seller.profile_image||null);
+    if(_guestSellerId!==storeId)return; // store view was blocked (e.g. demo-mode gate) — nothing to open
     switchShowTab('collections',document.querySelector('.show-tab[data-tab="collections"]'));
     await renderCollectionsPublic();
     if(_colOutfits.find(o=>o.id===outfitId))openOutfitDetailPublic(outfitId);
