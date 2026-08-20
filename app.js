@@ -1639,6 +1639,7 @@ function skipOnboard(){
 // ══ CUSTOMER BROWSE ══
 let _brHeroIdx=0,_brHeroTimer=null;
 let _brProds=[];
+let _browseOutfits=[]; // global cross-seller outfits for the Home #br-sec-outfits strip
 let _pdCurrentId=null;
 let _pdImages=[],_pdCarouselIdx=0,_pdCoverOffset=0;
 let _pdStockMap={},_pdHasStock=false,_pdCurrentColorKey=null,_pdCurrentSizeKey=null;
@@ -1799,6 +1800,8 @@ function _renderBrowseSections(prods){
       _hideSec(secId);
     }
   }
+  const ensembleProds=prods.filter(p=>p.product_type==='ensemble');
+  _renderHStrip('br-strip-ensemble','br-sec-ensemble',ensembleProds,{minCount:2,viewAllKey:null});
   // vgrid-close belongs to color interleaving (Part 2) — stays hidden for now
   const closeEl=document.getElementById('br-vgrid-close');if(closeEl)closeEl.innerHTML='';
   _hideSec('br-sec-vgrid-close');
@@ -1814,8 +1817,8 @@ function _renderBrowseSections(prods){
 
   _renderCatSlot('casual'); // slot 1 — always the anchor
   _renderHStrip('br-strip-new','br-sec-new',newStrip,{minCount:4,totalCount:newStripFull.length,viewAllKey:'new'});
+  _renderBrowseOutfitsStrip();
   _renderCatSlot('sport'); // slot 2
-  _renderCatSlot('streetwear'); // slot 3
 
   // Top Stores — R2: always show if 1+ sellers, hide only when 0 sellers
   const stores=[],seen=new Set();
@@ -1825,6 +1828,7 @@ function _renderBrowseSections(prods){
   else{if(storesSec)storesSec.style.display='none';}
 
   _renderCatSlot('classic'); // slot 4
+  _renderCatSlot('streetwear'); // moved from slot 3 to here
   _renderCatSlot('old_money'); // slot 5
 
   // Color sections — dormant until Part 2
@@ -1927,6 +1931,70 @@ function _exploreLoadMore(){
   });
 }
 
+// ══ GLOBAL COLLECTIONS STRIP (Home #br-sec-outfits — cross-seller, not scoped to _guestSellerId) ══
+async function _loadBrowseOutfits(){
+  const sb=getSb();if(!sb)return;
+  try{
+    // Extended past the minimal {cover,name,store,price} card fields so a tap can open the existing
+    // outfit detail sheet (openOutfitDetailPublic) without a second round-trip — see report for why:
+    // that sheet reads from _colOutfits and needs item id/position + full product fields to render.
+    const{data,error}=await sb.from('outfits')
+      .select(`
+        id, name, cover_image, total_price, is_exclusive, note, seller_id,
+        seller:sellers(store_name, phone, whatsapp_enabled, cart_enabled, profile_image),
+        outfit_items(id, position, chosen_image, product:products(id, name, image, price, is_exclusive, product_type, sizes, is_available))
+      `)
+      .order('created_at',{ascending:false})
+      .limit(20);
+    if(error)throw error;
+    _browseOutfits=(data||[]).map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+    // Merge into _colOutfits/_brProds (same shape renderCollectionsPublic produces) so
+    // openOutfitDetailPublic/odOpenPieceDetail work immediately when a card is tapped.
+    _browseOutfits.forEach(o=>{
+      if(!_colOutfits.find(x=>x.id===o.id))_colOutfits.push(o);
+      o.items.forEach(it=>{const p=it.product;if(p&&!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+    });
+  }catch(e){console.error('_loadBrowseOutfits:',e);}
+}
+
+function _renderBrowseOutfitsStrip(){
+  const sec=document.getElementById('br-sec-outfits');
+  const el=document.getElementById('br-strip-outfits');
+  if(!sec||!el)return;
+  if(_browseOutfits.length<2){sec.style.display='none';return;}
+  sec.style.display='';
+  const list=_browseOutfits.slice(0,6);
+  el.innerHTML=list.map(o=>{
+    const fallbackImg=o.items.map(it=>it.chosen_image||it.product?.image).find(Boolean);
+    const thumb=o.cover_image||fallbackImg;
+    const priceTxt=o.total_price?Number(o.total_price).toLocaleString()+' DZD':'Exclusive';
+    return `
+    <div class="br-strip-card" data-outfit-id="${esc(o.id)}">
+      ${thumb?`<img class="br-strip-img" src="${safeUrl(thumb)}" alt="${esc(o.name||'')}" loading="lazy">`:`<div class="br-strip-img br-strip-img--ph"></div>`}
+      <div class="br-strip-info">
+        <div class="br-strip-name">${esc(o.name||'')}</div>
+        <div class="br-strip-store">${esc(o.seller?.store_name||'')}</div>
+        <div class="br-strip-price">${esc(priceTxt)}</div>
+      </div>
+    </div>`;}).join('');
+  el.querySelectorAll('.br-strip-card[data-outfit-id]').forEach(card=>{
+    const o=list.find(x=>x.id===card.dataset.outfitId);
+    if(!o)return;
+    card.onclick=()=>{
+      _guestSellerId=o.seller_id;
+      _storeShare={
+        id:o.seller_id,
+        name:o.seller?.store_name||'',
+        city:'',
+        phone:o.seller?.phone||null,
+        whatsapp_enabled:o.seller?.whatsapp_enabled!==false,
+        cart_enabled:!!o.seller?.cart_enabled
+      };
+      openOutfitDetailPublic(o.id);
+    };
+  });
+}
+
 async function loadBrowse(){
   const sb=getSb();if(!sb)return;
   try{
@@ -1941,6 +2009,7 @@ async function loadBrowse(){
     if(_launchMode==='demo')filtered=filtered.filter(p=>p.seller?.is_demo===true);
     else if(_launchMode==='production')filtered=filtered.filter(p=>p.seller?.is_demo!==true);
     _brProds=filtered;
+    _loadBrowseOutfits().then(_renderBrowseOutfitsStrip);
     buildBrowseHero(_brProds);
     _renderBrowseSections(_brProds);
     // Demo mode: Top Stores shows ALL approved sellers (demo = clickable, real = teaser-only)
