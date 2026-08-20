@@ -2216,7 +2216,7 @@ function brNavSwitch(tab,btn){
   else if(tab==='looks'){
     const panel=document.getElementById('br-panel-looks'),body=document.getElementById('br-body');
     if(body)body.style.display='none';
-    if(panel)panel.style.display='flex';
+    if(panel)panel.style.display='block';
     renderLooksTab();
   }
   else if(tab==='home'){_brShowHomeFeed();}
