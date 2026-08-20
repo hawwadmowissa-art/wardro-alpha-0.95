@@ -796,6 +796,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .br-icon-btn:hover{border-color:var(--gold);color:var(--gold)}
 .br-body{flex:1;overflow-y:auto;-ms-overflow-style:none;scrollbar-width:none;padding-bottom:4px}
 .br-body::-webkit-scrollbar{display:none}
+#br-panel-looks{padding:14px 14px 4px}
 
 /* Hero */
 .br-hero{position:relative;overflow:hidden;margin-bottom:28px}
@@ -881,6 +882,8 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   background:transparent;border:none;cursor:pointer;color:var(--muted);padding:4px 0;
   transition:color .3s var(--spring)}
 .br-nav-btn svg{width:20px;height:20px}
+.br-nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;color:currentColor}
+.br-nav-icon--looks{font-size:24px}
 .br-nav-btn span{font-family:'Tajawal',sans-serif;font-size:9px;letter-spacing:.2px}
 .br-nav-btn--active{color:var(--gold)!important}
 .br-nav-btn:hover:not(.br-nav-btn--active){color:var(--txtD)}

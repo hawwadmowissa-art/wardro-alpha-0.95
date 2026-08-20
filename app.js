@@ -1704,7 +1704,29 @@ function _renderHStrip(stripId,secId,prods,opts={}){
   }
 }
 
+// Appends/removes a "View All" link in a section's head that jumps straight to the Looks tab.
+// Used by the Ensemble and Collections strips — unlike _renderHStrip's viewAllKey (which opens
+// the generic single-category overlay), these two strips mix into the Looks grid instead.
+function _brWireLooksViewAll(secId,show){
+  const sec=document.getElementById(secId);if(!sec)return;
+  const head=sec.querySelector('.br-sec-head');if(!head)return;
+  let btn=head.querySelector('.br-view-all');
+  if(!show){if(btn)btn.remove();return;}
+  if(!btn){
+    btn=document.createElement('div');
+    btn.className='br-view-all';
+    head.appendChild(btn);
+  }
+  btn.textContent='عرض الكل';
+  btn.onclick=()=>_brOpenViewAll('looks');
+}
+
 function _brOpenViewAll(key){
+  if(key==='looks'){
+    const btn=document.querySelector('#s-browse .br-nav-btn[onclick*="looks"]');
+    if(btn)btn.click();
+    return;
+  }
   let list;
   if(key==='new'){
     const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
@@ -1802,6 +1824,7 @@ function _renderBrowseSections(prods){
   }
   const ensembleProds=prods.filter(p=>p.product_type==='ensemble');
   _renderHStrip('br-strip-ensemble','br-sec-ensemble',ensembleProds,{minCount:2,viewAllKey:null});
+  _brWireLooksViewAll('br-sec-ensemble',ensembleProds.length>=2);
   // vgrid-close belongs to color interleaving (Part 2) — stays hidden for now
   const closeEl=document.getElementById('br-vgrid-close');if(closeEl)closeEl.innerHTML='';
   _hideSec('br-sec-vgrid-close');
@@ -1961,8 +1984,9 @@ function _renderBrowseOutfitsStrip(){
   const sec=document.getElementById('br-sec-outfits');
   const el=document.getElementById('br-strip-outfits');
   if(!sec||!el)return;
-  if(_browseOutfits.length<2){sec.style.display='none';return;}
+  if(_browseOutfits.length<2){sec.style.display='none';_brWireLooksViewAll('br-sec-outfits',false);return;}
   sec.style.display='';
+  _brWireLooksViewAll('br-sec-outfits',true);
   const list=_browseOutfits.slice(0,6);
   el.innerHTML=list.map(o=>{
     const fallbackImg=o.items.map(it=>it.chosen_image||it.product?.image).find(Boolean);
@@ -1993,6 +2017,67 @@ function _renderBrowseOutfitsStrip(){
       openOutfitDetailPublic(o.id);
     };
   });
+}
+
+// ══ LOOKS TAB — mixed grid of Collections (outfits) + Ensemble products ══
+function renderLooksTab(){
+  const outfitItems=(_browseOutfits||[]).map(o=>({_type:'outfit',data:o}));
+  const ensembleItems=(_brProds||[]).filter(p=>p.product_type==='ensemble').map(p=>({_type:'product',data:p}));
+  const mixed=_fyshuffle([...outfitItems,...ensembleItems]);
+
+  const grid=document.getElementById('br-looks-grid');
+  const empty=document.getElementById('br-looks-empty');
+  if(!grid)return;
+
+  if(!mixed.length){
+    grid.innerHTML='';
+    if(empty)empty.style.display='block';
+    return;
+  }
+  if(empty)empty.style.display='none';
+
+  grid.innerHTML=mixed.map(item=>{
+    if(item._type==='outfit'){
+      const o=item.data;
+      const fallbackImg=(o.items||[]).map(it=>it.chosen_image||it.product?.image).find(Boolean);
+      const thumb=o.cover_image||fallbackImg;
+      const priceTxt=o.total_price?Number(o.total_price).toLocaleString()+' DZD':'Exclusive';
+      return `<div class="br-prod-card" onclick="_looksOpenOutfit('${esc(o.id)}')">
+        ${thumb?`<img class="br-prod-img" src="${safeUrl(thumb)}" alt="${esc(o.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+        <div class="br-prod-info"><div class="br-prod-name">${esc(o.name||'')}</div><div class="br-prod-price">${esc(priceTxt)}</div></div>
+      </div>`;
+    }else{
+      const p=item.data;
+      const thumb=p.cover_image||p.image;
+      return `<div class="br-prod-card" onclick="openProdDetail('${p.id}')">
+        ${thumb?`<img class="br-prod-img" src="${safeUrl(thumb)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+        <div class="br-prod-info"><div class="br-prod-name">${esc(p.name||'')}</div><div class="br-prod-price">${_priceLabel(p)}</div></div>
+      </div>`;
+    }
+  }).join('');
+}
+
+// Outfit tap handler inside Looks grid — same seller-context setup as the Collections strip click handler
+function _looksOpenOutfit(outfitId){
+  const o=(_browseOutfits||[]).find(x=>x.id===outfitId);
+  if(!o)return;
+  _guestSellerId=o.seller_id;
+  _storeShare={
+    id:o.seller_id,
+    name:o.seller?.store_name||'',
+    city:'',
+    phone:o.seller?.phone||null,
+    whatsapp_enabled:o.seller?.whatsapp_enabled!==false,
+    cart_enabled:!!o.seller?.cart_enabled
+  };
+  openOutfitDetailPublic(o.id);
+}
+
+// Shows the Home feed and hides the Looks panel — called whenever browse returns to its default tab
+function _brShowHomeFeed(){
+  const body=document.getElementById('br-body'),panel=document.getElementById('br-panel-looks');
+  if(body)body.style.display='';
+  if(panel)panel.style.display='none';
 }
 
 async function loadBrowse(){
@@ -2128,7 +2213,13 @@ function brNavSwitch(tab,btn){
   if(tab==='saved'){navigateTo('s-saved','slide');}
   else if(tab==='discover'){navigateTo('s-discover','slide');}
   else if(tab==='profile'){openCustomerProfile();}
-  else if(tab!=='home')toast(tab+' — قريباً');
+  else if(tab==='looks'){
+    const panel=document.getElementById('br-panel-looks'),body=document.getElementById('br-body');
+    if(body)body.style.display='none';
+    if(panel)panel.style.display='flex';
+    renderLooksTab();
+  }
+  else if(tab==='home'){_brShowHomeFeed();}
 }
 
 // ── Product Detail ──
@@ -3085,8 +3176,9 @@ function svNavSwitch(tab){
   if(tab==='home'){
     navigateTo('s-browse','z-axis');
     document.querySelectorAll('#s-browse .br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
-    const homeBtn=document.querySelector('#s-browse .br-nav-btn');
+    const homeBtn=document.querySelector('#s-browse .br-nav-btn[data-tab="home"]');
     if(homeBtn)homeBtn.classList.add('br-nav-btn--active');
+    _brShowHomeFeed();
   }else if(tab==='discover'){navigateTo('s-discover','slide');}
   else if(tab==='profile'){openCustomerProfile();}
   else toast(tab+' — قريباً');
@@ -3505,7 +3597,8 @@ function dcNavSwitch(tab){
   if(tab==='home'){
     navigateTo('s-browse','z-axis');
     document.querySelectorAll('#s-browse .br-nav-btn').forEach(b=>b.classList.remove('br-nav-btn--active'));
-    const h=document.querySelector('#s-browse .br-nav-btn');if(h)h.classList.add('br-nav-btn--active');
+    const h=document.querySelector('#s-browse .br-nav-btn[data-tab="home"]');if(h)h.classList.add('br-nav-btn--active');
+    _brShowHomeFeed();
   }else if(tab==='saved'){navigateTo('s-saved','slide');}
   else if(tab==='profile'){openCustomerProfile();}
   else toast(tab+' — قريباً');

@@ -988,7 +988,7 @@
   </div>
 
   <!-- Scrollable Body -->
-  <div class="br-body">
+  <div class="br-body" id="br-body">
 
     <!-- Hero Slider -->
     <div class="br-hero">
@@ -1153,12 +1153,14 @@
 
   </div>
 
+  <!-- Looks tab panel — mixed grid of Collections (outfits) + Ensemble products, sibling of .br-body -->
+  <div class="br-body" id="br-panel-looks" style="display:none">
+    <div class="br-prod-grid" id="br-looks-grid"></div>
+    <div id="br-looks-empty" class="br-explore-empty" style="display:none">لا يوجد محتوى بعد — عد لاحقاً</div>
+  </div>
+
   <!-- Bottom Nav -->
   <nav class="br-nav">
-    <button class="br-nav-btn br-nav-btn--active" onclick="brNavSwitch('home',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
     <button class="br-nav-btn" onclick="brNavSwitch('saved',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span>Saved</span>
@@ -1166,6 +1168,14 @@
     <button class="br-nav-btn" onclick="brNavSwitch('discover',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span>Discover</span>
+    </button>
+    <button class="br-nav-btn br-nav-btn--active" data-tab="home" onclick="brNavSwitch('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="br-nav-btn" onclick="brNavSwitch('looks',this)">
+      <span class="br-nav-icon br-nav-icon--looks">✦</span>
+      <span>Looks</span>
     </button>
     <button class="br-nav-btn" onclick="brNavSwitch('profile',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1219,10 +1229,6 @@
 
   <!-- Bottom Nav — Saved active -->
   <nav class="br-nav">
-    <button class="br-nav-btn" onclick="svNavSwitch('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
     <button class="br-nav-btn br-nav-btn--active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span>Saved</span>
@@ -1230,6 +1236,14 @@
     <button class="br-nav-btn" onclick="svNavSwitch('discover')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span>Discover</span>
+    </button>
+    <button class="br-nav-btn" onclick="svNavSwitch('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-browse','slide');setTimeout(()=>brNavSwitch('looks',this),500)">
+      <span class="br-nav-icon br-nav-icon--looks">✦</span>
+      <span>Looks</span>
     </button>
     <button class="br-nav-btn" onclick="svNavSwitch('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1709,10 +1723,6 @@
 
   <!-- Bottom Nav — Discover active -->
   <nav class="br-nav">
-    <button class="br-nav-btn" onclick="dcNavSwitch('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
     <button class="br-nav-btn" onclick="dcNavSwitch('saved')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span>Saved</span>
@@ -1720,6 +1730,14 @@
     <button class="br-nav-btn br-nav-btn--active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span>Discover</span>
+    </button>
+    <button class="br-nav-btn" onclick="dcNavSwitch('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-browse','slide');setTimeout(()=>brNavSwitch('looks',this),500)">
+      <span class="br-nav-icon br-nav-icon--looks">✦</span>
+      <span>Looks</span>
     </button>
     <button class="br-nav-btn" onclick="dcNavSwitch('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1797,10 +1815,6 @@
 
   <!-- Bottom Nav — Discover active -->
   <nav class="br-nav">
-    <button class="br-nav-btn" onclick="dcNavSwitch('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
     <button class="br-nav-btn" onclick="dcNavSwitch('saved')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span>Saved</span>
@@ -1808,6 +1822,14 @@
     <button class="br-nav-btn br-nav-btn--active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span>Discover</span>
+    </button>
+    <button class="br-nav-btn" onclick="dcNavSwitch('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-browse','slide');setTimeout(()=>brNavSwitch('looks',this),500)">
+      <span class="br-nav-icon br-nav-icon--looks">✦</span>
+      <span>Looks</span>
     </button>
     <button class="br-nav-btn" onclick="dcNavSwitch('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1850,10 +1872,6 @@
     </div>
   </div>
   <nav class="br-nav">
-    <button class="br-nav-btn" onclick="navigateTo('s-browse','z-axis')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
     <button class="br-nav-btn" onclick="navigateTo('s-saved','slide')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       <span>Saved</span>
@@ -1861,6 +1879,14 @@
     <button class="br-nav-btn" onclick="navigateTo('s-discover','slide')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
       <span>Discover</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-browse','z-axis')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="br-nav-btn" onclick="navigateTo('s-browse','slide');setTimeout(()=>brNavSwitch('looks',this),500)">
+      <span class="br-nav-icon br-nav-icon--looks">✦</span>
+      <span>Looks</span>
     </button>
     <button class="br-nav-btn br-nav-btn--active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1946,7 +1972,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1014"></script>
+<script src="app.js?v=1017"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
