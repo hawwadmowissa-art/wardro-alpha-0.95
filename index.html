@@ -1972,7 +1972,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1021"></script>
+<script src="app.js?v=1022"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
@@ -2056,7 +2056,7 @@
     }, { once: true });
   }
 
-  function createBanner(text, onAccept, onDismiss, acceptLabel, iconSvg) {
+  function createBanner(text, onAccept, onDismiss, acceptLabel, iconSvg, hideClose) {
     if (localStorage.getItem(DISMISSED_KEY)) return;
     _injectBannerStyles();
 
@@ -2086,14 +2086,17 @@
       acceptBtn.textContent = acceptLabel || 'تثبيت';
     }
 
-    var closeBtn = document.createElement('button');
-    closeBtn.id = 'pwa-banner-close';
-    closeBtn.setAttribute('aria-label', 'إغلاق');
-    closeBtn.textContent = '✕';
+    var closeBtn = null;
+    if (!hideClose) {
+      closeBtn = document.createElement('button');
+      closeBtn.id = 'pwa-banner-close';
+      closeBtn.setAttribute('aria-label', 'إغلاق');
+      closeBtn.textContent = '✕';
+    }
 
     banner.appendChild(textSpan);
     if (acceptBtn) banner.appendChild(acceptBtn);
-    banner.appendChild(closeBtn);
+    if (closeBtn) banner.appendChild(closeBtn);
     document.body.appendChild(banner);
 
     // Trigger slide-in after two frames so CSS transition fires
@@ -2103,23 +2106,37 @@
       });
     });
 
-    if (acceptBtn) {
+    if (acceptBtn && !hideClose) {
       acceptBtn.addEventListener('click', function () {
         _slideBannerOut(banner, function () { onAccept(); });
       });
     }
 
-    closeBtn.addEventListener('click', function () {
-      localStorage.setItem(DISMISSED_KEY, '1');
-      _slideBannerOut(banner, function () { if (onDismiss) onDismiss(); });
-    });
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        localStorage.setItem(DISMISSED_KEY, '1');
+        _slideBannerOut(banner, function () { if (onDismiss) onDismiss(); });
+      });
+    }
   }
 
-  function _showBannerDelayed(text, onAccept, onDismiss, delay, acceptLabel, iconSvg) {
+  function _showBannerDelayed(text, onAccept, onDismiss, delay, acceptLabel, iconSvg, hideClose) {
     if (localStorage.getItem(DISMISSED_KEY)) return;
     clearTimeout(_bannerTimer);
     _bannerTimer = setTimeout(function () {
-      createBanner(text, onAccept, onDismiss, acceptLabel, iconSvg);
+      createBanner(text, onAccept, onDismiss, acceptLabel, iconSvg, hideClose);
+      if (hideClose) {
+        var copyBtn = document.getElementById('pwa-banner-accept');
+        if (copyBtn) {
+          copyBtn.onclick = function (e) {
+            e.stopPropagation();
+            _copyLink();
+            var orig = copyBtn.textContent;
+            copyBtn.textContent = '✓ تم النسخ';
+            setTimeout(function () { copyBtn.textContent = orig; }, 2000);
+          };
+        }
+      }
     }, delay || 15000);
   }
 
@@ -2164,8 +2181,10 @@
       isIOS ? 'افتح في Safari لتثبيت التطبيق' : 'افتح في Chrome لتثبيت التطبيق',
       function () { _copyLink(); },
       null,
-      10000,
-      'نسخ الرابط'
+      6000,
+      'نسخ الرابط',
+      null,
+      true
     );
   }
 }());
