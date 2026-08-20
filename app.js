@@ -1704,6 +1704,11 @@ function _renderHStrip(stripId,secId,prods,opts={}){
   }
 }
 
+function _goToLooksTab(){
+  const looksBtn=document.querySelector('#s-browse .br-nav-btn[onclick*="looks"]');
+  if(looksBtn)brNavSwitch('looks',looksBtn);
+}
+
 // Appends/removes a "View All" link in a section's head that jumps straight to the Looks tab.
 // Used by the Ensemble and Collections strips — unlike _renderHStrip's viewAllKey (which opens
 // the generic single-category overlay), these two strips mix into the Looks grid instead.
@@ -1717,8 +1722,8 @@ function _brWireLooksViewAll(secId,show){
     btn.className='br-view-all';
     head.appendChild(btn);
   }
-  btn.textContent='عرض الكل';
-  btn.onclick=()=>_brOpenViewAll('looks');
+  btn.textContent='كل التنسيقات';
+  btn.onclick=_goToLooksTab;
 }
 
 function _brOpenViewAll(key){
@@ -1824,7 +1829,7 @@ function _renderBrowseSections(prods){
   }
   const ensembleProds=prods.filter(p=>p.product_type==='ensemble');
   _renderHStrip('br-strip-ensemble','br-sec-ensemble',ensembleProds,{minCount:2,viewAllKey:null});
-  _brWireLooksViewAll('br-sec-ensemble',ensembleProds.length>=2);
+  _brWireLooksViewAll('br-sec-ensemble',ensembleProds.length>=4);
   // vgrid-close belongs to color interleaving (Part 2) — stays hidden for now
   const closeEl=document.getElementById('br-vgrid-close');if(closeEl)closeEl.innerHTML='';
   _hideSec('br-sec-vgrid-close');
@@ -1986,7 +1991,7 @@ function _renderBrowseOutfitsStrip(){
   if(!sec||!el)return;
   if(_browseOutfits.length<2){sec.style.display='none';_brWireLooksViewAll('br-sec-outfits',false);return;}
   sec.style.display='';
-  _brWireLooksViewAll('br-sec-outfits',true);
+  _brWireLooksViewAll('br-sec-outfits',_browseOutfits.length>=4);
   const list=_browseOutfits.slice(0,6);
   el.innerHTML=list.map(o=>{
     const fallbackImg=o.items.map(it=>it.chosen_image||it.product?.image).find(Boolean);
