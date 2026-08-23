@@ -1523,6 +1523,7 @@
     <div class="od-info">
       <div class="od-name" id="od-name"></div>
       <div class="od-price"><span id="od-total-price"></span></div>
+      <div class="od-store-name" id="od-store-name"></div>
       <div class="od-about-hd">عن التنسيقة</div>
       <div class="od-about-text" id="od-about-text"></div>
       <div class="od-section-title">مكونات التنسيقة</div>
@@ -1692,6 +1693,13 @@
     <div class="dc-footer">
       <button class="dc-results-btn" id="dc-results-btn" onclick="dcShowResults()">✦ أظهر النتائج</button>
     </div>
+
+    <!-- Store search — NEW -->
+    <div class="dc-store-search-wrap">
+      <input type="text" id="dc-store-input" class="dc-search-input"
+        placeholder="ابحث عن متجر..." oninput="dcOnStoreInput()">
+    </div>
+    <div id="dc-store-results" class="dc-store-results" style="display:none"></div>
 
     <!-- Search field — NEW -->
     <div class="dc-search-wrap">
@@ -1972,7 +1980,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1022"></script>
+<script src="app.js?v=1032"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>

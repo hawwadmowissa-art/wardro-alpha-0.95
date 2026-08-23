@@ -3052,6 +3052,22 @@ function openOutfitDetailPublic(id){
   const piecesEl=document.getElementById('od-pieces-list');
   if(piecesEl)piecesEl.innerHTML=_odSelection.map((sel,idx)=>_odPieceRowHtml(sel,idx)).join('');
   _odUpdateTotal();
+  const _odSn=document.getElementById('od-store-name');
+  if(_odSn){
+    const _nm=esc(_storeShare.name);
+    if(_nm){
+      _odSn.textContent='من متجر '+_nm;
+      _odSn.style.display='';
+      _odSn.onclick=()=>{
+        closeOutfitDetailPublic();
+        openStoreView(_storeShare.id,_storeShare.name,null);
+      };
+    }else{
+      _odSn.textContent='';
+      _odSn.style.display='none';
+      _odSn.onclick=null;
+    }
+  }
   const h=document.getElementById('od-heart-btn');if(h){h.textContent='Save';h.classList.remove('active');}
   const canWa=!!_storeShare.phone&&_storeShare.whatsapp_enabled!==false;
   const canCart=!!_storeShare.cart_enabled;
@@ -3416,6 +3432,80 @@ function dcOnSearchInput(){
   _dcRunLiveFilter();
 }
 
+async function dcOnStoreInput(){
+  const q=(document.getElementById('dc-store-input')?.value||'').trim();
+  const res=document.getElementById('dc-store-results');
+  if(!res)return;
+  if(q.length<1){res.style.display='none';res.innerHTML='';return;}
+  const sb=getSb();if(!sb)return;
+  try{
+    const{data,error}=await sb.from('sellers')
+      .select('id,store_name,profile_image,city')
+      .ilike('store_name','%'+q+'%')
+      .eq('approval_status','approved')
+      .limit(8);
+    if(error||!data||!data.length){
+      res.innerHTML='<div class="dc-store-empty">لا يوجد متجر بهذا الاسم</div>';
+      const _inputRect=document.getElementById('dc-store-input').getBoundingClientRect();
+      res.style.position='fixed';
+      res.style.top=(_inputRect.bottom+4)+'px';
+      res.style.left=_inputRect.left+'px';
+      res.style.width=_inputRect.width+'px';
+      res.style.zIndex='9999';
+      res.style.maxHeight='250px';
+      res.style.overflowY='auto';
+      res.style.display='block';
+      const dcBody=document.querySelector('.dc-body')||document.querySelector('#s-discover');
+      const _hideStoreResults=()=>{
+        res.style.display='none';
+        dcBody?.removeEventListener('scroll',_hideStoreResults);
+        document.removeEventListener('click',_outsideClick);
+      };
+      const _outsideClick=(e)=>{
+        if(!res.contains(e.target)&&e.target.id!=='dc-store-input')_hideStoreResults();
+      };
+      setTimeout(()=>document.addEventListener('click',_outsideClick),100);
+      dcBody?.addEventListener('scroll',_hideStoreResults,{once:true});
+      return;
+    }
+    res.innerHTML=data.map(s=>`
+      <div class="dc-store-item" onclick="dcOpenStore('${esc(s.id)}','${esc(s.store_name||'')}','${esc(s.profile_image||'')}')">
+        <div class="dc-store-avatar"${s.profile_image?` style="background-image:url('${safeUrl(s.profile_image)}')"`:''}>${!s.profile_image?`<span>${esc((s.store_name||'?')[0].toUpperCase())}</span>`:''}</div>
+        <div class="dc-store-info">
+          <div class="dc-store-name">${esc(s.store_name||'')}</div>
+          ${s.city?`<div class="dc-store-city">${esc(s.city)}</div>`:''}
+        </div>
+        <div class="dc-store-arrow">←</div>
+      </div>`).join('');
+    const _inputRect=document.getElementById('dc-store-input').getBoundingClientRect();
+    res.style.position='fixed';
+    res.style.top=(_inputRect.bottom+4)+'px';
+    res.style.left=_inputRect.left+'px';
+    res.style.width=_inputRect.width+'px';
+    res.style.zIndex='9999';
+    res.style.maxHeight='250px';
+    res.style.overflowY='auto';
+    res.style.display='block';
+    const dcBody=document.querySelector('.dc-body')||document.querySelector('#s-discover');
+    const _hideStoreResults=()=>{
+      res.style.display='none';
+      dcBody?.removeEventListener('scroll',_hideStoreResults);
+      document.removeEventListener('click',_outsideClick);
+    };
+    const _outsideClick=(e)=>{
+      if(!res.contains(e.target)&&e.target.id!=='dc-store-input')_hideStoreResults();
+    };
+    setTimeout(()=>document.addEventListener('click',_outsideClick),100);
+    dcBody?.addEventListener('scroll',_hideStoreResults,{once:true});
+  }catch(e){}
+}
+
+function dcOpenStore(id,name,img){
+  document.getElementById('dc-store-results').style.display='none';
+  document.getElementById('dc-store-input').value='';
+  openStoreView(id,name,img||null);
+}
+
 function _dcRenderGrid(prods){
   const el=document.getElementById('dc-grid');
   if(!el)return;
@@ -3551,11 +3641,30 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
     if(_launchMode==='demo')results=results.filter(p=>p.seller?.is_demo===true);
     else if(_launchMode==='production')results=results.filter(p=>p.seller?.is_demo!==true);
 
-    if(!results.length){if(empty)empty.style.display='flex';return;}
-
     // Merge into _brProds so openProdDetail works
     results.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
 
+    // When type is ensemble, also include outfits (collections)
+    let _discoverOutfits=[];
+    if(_dcType==='ensemble'&&_browseOutfits&&_browseOutfits.length){
+      _discoverOutfits=_browseOutfits.filter(o=>{
+        const pr=o.total_price||0;
+        return pr>=minPrice&&pr<=maxPrice;
+      });
+    }
+
+    if(!results.length&&!_discoverOutfits.length){if(empty)empty.style.display='flex';return;}
+
+    const _outfitCards=_discoverOutfits.map(o=>{
+      const img=o.cover_image||(o.outfit_items&&o.outfit_items[0]?.product?.image)||(o.outfit_items&&o.outfit_items[0]?.chosen_image)||'';
+      return `<div class="br-prod-card" onclick="_looksOpenOutfit('${esc(o.id)}','${esc(o.seller_id||'')}')">
+        ${img?`<img class="br-prod-img" src="${safeUrl(img)}" alt="${esc(o.name||'تنسيق')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
+        <div class="br-prod-info">
+          <div class="br-prod-name">${esc(o.name||'تنسيق')}</div>
+          <div class="br-prod-price">${o.total_price?o.total_price.toLocaleString()+' دج':''}</div>
+        </div>
+      </div>`;
+    }).join('');
     grid.innerHTML=results.map(p=>`
       <div class="br-prod-card" onclick="openProdDetail('${p.id}')">
         ${p.image?`<img class="br-prod-img" src="${safeUrl(p.image)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-prod-img br-prod-img--ph"></div>`}
@@ -3563,7 +3672,7 @@ async function runDiscover(minPrice,maxPrice,selectedColors){
           <div class="br-prod-name">${esc(p.name||'')}</div>
           <div class="br-prod-price">${_priceLabel(p)}</div>
         </div>
-      </div>`).join('');
+      </div>`).join('')+_outfitCards;
 
     // Complementary — different piece types, structural only (AI not wired)
     const otherTypes=['shirt','pants','jeans','shoes','accessory','sandals'].filter(t=>!pieceTypes.includes(t));

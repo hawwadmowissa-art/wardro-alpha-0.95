@@ -917,9 +917,11 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pd-info{overflow-y:auto;flex:1;padding:14px 18px 20px;display:flex;flex-direction:column;gap:9px;min-height:0}
 .pd-name{font-family:'Fraunces',serif;font-size:19px;font-weight:700;color:var(--cream);line-height:1.25;text-align:right}
 .pd-price{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--gold);text-align:right}
-.pd-store-name{font-family:'Tajawal',sans-serif;font-size:13px;color:rgba(210,175,105,.7);
-  cursor:pointer;text-align:right;transition:color .2s var(--spring)}
-.pd-store-name:hover{color:var(--gold)}
+.pd-store-name,.od-store-name{display:inline-flex;align-items:center;gap:4px;
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:500;color:var(--gold);
+  cursor:pointer;border:1px solid rgba(200,168,100,.35);border-radius:20px;
+  padding:3px 10px;transition:all .2s var(--spring)}
+.pd-store-name:hover,.od-store-name:hover{background:rgba(200,168,100,.08)}
 .pd-field-block{display:flex;flex-direction:column;gap:5px}
 .pd-field-label{font-size:8px;letter-spacing:2px;color:var(--goldD);text-transform:uppercase;font-weight:700;text-align:right}
 .pd-colors-wrap{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -1514,6 +1516,24 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 }
 .dc-search-input::placeholder{color:var(--muted)}
 .dc-search-input:focus{border-color:var(--gold)}
+
+/* Store search results (Zone 2) */
+.dc-store-search-wrap{position:relative}
+.dc-store-results{
+  display:none;
+  background:#1a1a1a;
+  border:1px solid #444;
+  border-radius:12px;
+  padding:4px 0;
+}
+.dc-store-item{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;transition:background .2s}
+.dc-store-item:hover{background:rgba(255,255,255,.04)}
+.dc-store-avatar{width:40px;height:40px;border-radius:50%;background:var(--dim);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:var(--gold)}
+.dc-store-info{flex:1;min-width:0}
+.dc-store-name{font-size:14px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-store-city{font-size:12px;color:var(--txtD);margin-top:2px}
+.dc-store-arrow{color:var(--goldD);font-size:16px}
+.dc-store-empty{padding:16px;text-align:center;color:var(--txtD);font-size:13px}
 
 /* Live grid empty state (Zone 3) */
 .dc-grid-empty{
