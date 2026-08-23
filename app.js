@@ -30,8 +30,11 @@ function navigateTo(targetId,type='z-axis',fromHistory){
 }
 
 window.addEventListener('popstate',e=>{
+  if(document.getElementById('pd-overlay')?.classList.contains('pd-overlay--open')){
+    closeProdDetail();
+    return;
+  }
   const screen=e.state&&e.state.screen;
-  if(screen==='pd-sheet'){closeProdDetail();return;}
   if(screen)navigateTo(screen,'z-axis',true);
   else history.pushState({screen:'s-splash'},'','');
 });
