@@ -828,6 +828,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 /* Product grid — 3 per row */
 .br-prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-items:start}
 #br-looks-grid{grid-template-columns:repeat(2,1fr)}
+#br-looks-grid .br-prod-img{height:auto;aspect-ratio:3/4;width:100%;object-fit:cover;display:block}
 .br-prod-card{background:var(--card);border-radius:10px;overflow:hidden;
   border:1px solid var(--brd);cursor:pointer;transition:all .3s var(--spring)}
 .br-prod-card:hover{border-color:var(--brd2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
