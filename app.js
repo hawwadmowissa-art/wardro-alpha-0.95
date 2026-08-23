@@ -31,6 +31,7 @@ function navigateTo(targetId,type='z-axis',fromHistory){
 
 window.addEventListener('popstate',e=>{
   const screen=e.state&&e.state.screen;
+  if(screen==='pd-sheet'){closeProdDetail();return;}
   if(screen)navigateTo(screen,'z-axis',true);
   else history.pushState({screen:'s-splash'},'','');
 });
@@ -2290,6 +2291,7 @@ function openProdDetail(id,initialColorIdx){
   const actionsWrap=document.getElementById('pd-actions');
   if(actionsWrap)actionsWrap.classList.toggle('pd-actions--split',canWa&&canCart);
   const h=document.getElementById('pd-heart-btn');if(h){h.textContent='♡';h.classList.remove('active');}
+  history.pushState({screen:'pd-sheet'},'','');
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('pd-overlay--open')));
   _pdCarouselTouch();
 }
@@ -2338,6 +2340,7 @@ function pdToggleHeart(){
   const h=document.getElementById('pd-heart-btn');if(!h)return;
   const on=h.classList.toggle('active');
   h.textContent=on?'♥':'♡';
+  if(on)saveItem();
 }
 
 function pdSelectSize(btn){

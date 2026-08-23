@@ -909,8 +909,8 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pd-close-btn,.pd-heart-btn{position:absolute;top:10px;width:32px;height:32px;border-radius:50%;
   background:rgba(11,10,8,.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(8px);z-index:2;color:rgba(216,207,186,.85);transition:all .25s var(--spring)}
-.pd-close-btn{left:12px;font-size:14px}
-.pd-heart-btn{right:12px;font-size:20px;line-height:1}
+.pd-close-btn{right:12px;font-size:14px}
+.pd-heart-btn{left:12px;font-size:20px;line-height:1}
 .pd-heart-btn.active{color:var(--gold)}
 .pd-close-btn:hover,.pd-heart-btn:hover{background:rgba(11,10,8,.8)}
 /* Info card */
