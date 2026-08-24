@@ -507,6 +507,7 @@
       <button class="adm-tab" id="stab-analytics" onclick="switchTab('analytics')">
         📊 الإحصاء
       </button>
+      <button id="stab-notifs" class="adm-tab" onclick="switchTab('notifs')">📣 إشعارات</button>
     </div>
     <div class="adm-content">
       <div class="adm-panel-tab active" id="ptab-sellers">
@@ -610,6 +611,14 @@
 
         <div class="adm-an-section-title">مشاهدات بدون طلبات</div>
         <div id="an-no-orders"><div class="adm-loading">جاري التحميل...</div></div>
+      </div>
+      <div id="ptab-notifs" class="adm-panel-tab" style="padding:24px;max-width:480px">
+        <h2 style="color:var(--gold);margin-bottom:20px">إرسال إشعار</h2>
+        <input id="notif-title" type="text" placeholder="العنوان" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:12px;font-size:15px">
+        <textarea id="notif-body" placeholder="الرسالة" rows="3" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:12px;font-size:15px;resize:vertical"></textarea>
+        <input id="notif-url" type="text" placeholder="رابط (اختياري) مثلاً: /" value="/" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:16px;font-size:15px">
+        <button onclick="adminSendPush()" style="width:100%;padding:14px;background:var(--gold);color:#000;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer">إرسال للجميع</button>
+        <div id="notif-result" style="margin-top:12px;color:var(--gold);font-size:14px"></div>
       </div>
     </div>
   </div>
@@ -743,6 +752,24 @@
       // Re-measure gallery widths now that the prods tab is visible
       if (tab === 'prods') initAdmGalleries();
       if (tab === 'analytics' && !_anLoaded) loadAnalytics();
+    }
+
+    async function adminSendPush(){
+      const title=document.getElementById('notif-title').value.trim();
+      const body=document.getElementById('notif-body').value.trim();
+      const url=document.getElementById('notif-url').value.trim()||'/';
+      const res=document.getElementById('notif-result');
+      if(!title||!body){res.textContent='العنوان والرسالة مطلوبان';return;}
+      res.textContent='جاري الإرسال...';
+      try{
+        const r=await fetch('https://koprvpdmdktyorzymeud.supabase.co/functions/v1/send-push',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_ANON_KEY},
+          body:JSON.stringify({title,body,url})
+        });
+        const d=await r.json();
+        res.textContent=d.sent!=null?'✓ أرسل لـ '+d.sent+' مستخدم':(d.error||'خطأ');
+      }catch(e){res.textContent='خطأ: '+e.message;}
     }
 
     // ── COPY EMAIL ──

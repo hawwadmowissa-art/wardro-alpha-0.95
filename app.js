@@ -4268,3 +4268,25 @@ function closeEdSidebar(btn){
   screen?.querySelector('.ed-sidebar')?.classList.remove('ed-sidebar--open');
   screen?.querySelector('.ed-sidebar-backdrop')?.classList.remove('ed-sidebar-backdrop--open');
 }
+
+const _VAPID_PUBLIC='BGTVNObJK-_VoJCPbqijbSerT_QGGareUNS50GeC-soYa6oLx3XMVomTEmnYtBEwNx1-CrMqAjeBdTFKPwhXhYI';
+async function _registerPush(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted')return;
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_VAPID_PUBLIC});
+    const sb=getSb();if(!sb)return;
+    const{data:{session}}=await sb.auth.getSession();
+    const j=sub.toJSON();
+    await sb.from('push_subscriptions').upsert({
+      user_id:session?.user?.id||null,
+      endpoint:j.endpoint,
+      p256dh:j.keys.p256dh,
+      auth:j.keys.auth
+    },{onConflict:'endpoint'});
+  }catch(e){console.warn('push reg:',e);}
+}
+const _isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+setTimeout(_registerPush, _isStandalone ? 30000 : 35000);

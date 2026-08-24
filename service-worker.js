@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'wardro-v1040';
+const CACHE_VERSION = 'wardro-v1042';
 
 // Core app shell — paths only (no query params); icons rarely change
 const SHELL = [
@@ -91,4 +91,19 @@ self.addEventListener('fetch', event => {
       });
     })
   );
+});
+
+self.addEventListener('push',e=>{
+  const d=e.data?.json()||{};
+  e.waitUntil(self.registration.showNotification(d.title||'Wardro',{
+    body:d.body||'',
+    icon:'/icons/icon-192.png',
+    badge:'/icons/icon-192.png',
+    data:{url:d.url||'/'}
+  }));
+});
+
+self.addEventListener('notificationclick',e=>{
+  e.notification.close();
+  e.waitUntil(clients.openWindow(e.notification.data?.url||'/'));
 });
