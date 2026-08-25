@@ -1781,6 +1781,45 @@ function _repeatAppearances(count){
 function _showSec(id){const el=document.getElementById(id);if(el)el.style.display='';}
 function _hideSec(id){const el=document.getElementById(id);if(el)el.style.display='none';}
 
+function _renderColorSections(prods){
+  const HIDE=['br-sec-color-black','br-sec-color-white','br-sec-color-brown','br-sec-color-wild1','br-sec-color-wild2'];
+  if(prods.length<75){HIDE.forEach(_hideSec);return;}
+  const _colorCount=(key)=>prods.filter(p=>{
+    const tags=Array.isArray(p.color_tags)?p.color_tags:(p.color?[p.color]:[]);
+    if(!tags.includes(key))return false;
+    const imgs=Array.isArray(p.images)?p.images:(p.image?[p.image]:[]);
+    const idx=tags.indexOf(key);
+    return !!imgs[idx];
+  });
+  const _stripSize=(n)=>n>=23?8:n>=15?6:n>=9?4:n>=5?2:0;
+  const _renderColorStrip=(secId,stripId,colorKey,titleOverride)=>{
+    const sec=document.getElementById(secId);const el=document.getElementById(stripId);
+    if(!sec||!el){return;}
+    const list=_colorCount(colorKey);
+    const size=_stripSize(list.length);
+    if(size===0){sec.style.display='none';return;}
+    const picks=_fyshuffle([...list]).slice(0,size);
+    if(titleOverride){const t=sec.querySelector('.br-sec-title');if(t)t.textContent=titleOverride;}
+    sec.style.display='';
+    el.innerHTML=picks.map(p=>{
+      const tags=Array.isArray(p.color_tags)?p.color_tags:(p.color?[p.color]:[]);
+      const imgs=Array.isArray(p.images)?p.images:(p.image?[p.image]:[]);
+      const thumb=imgs[tags.indexOf(colorKey)]||p.cover_image||p.image;
+      return `<div class="br-strip-card" onclick="openProdDetail('${p.id}')">${thumb?`<img class="br-strip-img" src="${safeUrl(thumb)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="br-strip-img br-strip-img--ph"></div>`}<div class="br-strip-info"><div class="br-strip-name">${esc(p.name||'')}</div><div class="br-strip-price">${_priceLabel(p)}</div></div></div>`;
+    }).join('');
+  };
+  // Fixed colors
+  _renderColorStrip('br-sec-color-black','br-strip-color-black','black');
+  _renderColorStrip('br-sec-color-white','br-strip-color-white','white');
+  _renderColorStrip('br-sec-color-brown','br-strip-color-brown','brown');
+  // Dynamic wild colors — top 2 remaining keys with >=10 pieces
+  const FIXED=new Set(['black','white','brown']);
+  const scored=_AP_COLORS.filter(c=>!FIXED.has(c.key)).map(c=>({key:c.key,ar:c.ar,count:_colorCount(c.key).length})).filter(x=>x.count>=10).sort((a,b)=>b.count-a.count);
+  const w1=scored[0],w2=scored[1];
+  if(w1){_renderColorStrip('br-sec-color-wild1','br-strip-color-wild1',w1.key,w1.ar);}else{_hideSec('br-sec-color-wild1');}
+  if(w2){_renderColorStrip('br-sec-color-wild2','br-strip-color-wild2',w2.key,w2.ar);}else{_hideSec('br-sec-color-wild2');}
+}
+
 function _renderBrowseSections(prods){
   const MIN_ANCHOR_COUNT=4;
   const sevenDaysAgo=new Date(Date.now()-7*24*60*60*1000);
@@ -1871,10 +1910,7 @@ function _renderBrowseSections(prods){
   _renderCatSlot('streetwear'); // moved from slot 3 to here
   _renderCatSlot('old_money'); // slot 5
 
-  // Color sections — dormant until Part 2
-  _hideSec('br-sec-color-black');_hideSec('br-sec-color-white');
-  _hideSec('br-sec-color-brown');_hideSec('br-sec-color-wild1');
-  _hideSec('br-sec-color-wild2');
+  _renderColorSections(prods);
 
   // Repeat appearances (dormant today — no category reaches the 8-item threshold yet).
   // Auto-activates: extra chunks render into #br-sec-repeats, right before Explore.
