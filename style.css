@@ -1934,6 +1934,10 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
   background:rgba(11,10,8,.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(8px);z-index:2;color:rgba(216,207,186,.85);font-size:14px;transition:all .25s var(--spring)}
 .od-back-btn:hover{background:rgba(11,10,8,.8)}
+.od-close-btn,.od-heart-frame-btn{position:absolute;top:10px;width:32px;height:32px;border-radius:50%;background:rgba(11,10,8,.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);z-index:2;color:rgba(216,207,186,.85);transition:all .25s var(--spring)}
+.od-close-btn{right:12px;font-size:14px}
+.od-heart-frame-btn{left:12px;font-size:20px;line-height:1}
+.od-heart-frame-btn.active{color:var(--gold)}
 .od-info{flex-shrink:0;padding:14px 18px 6px;display:flex;flex-direction:column;gap:9px}
 .od-name{font-family:'Fraunces',serif;font-size:19px;font-weight:700;color:var(--gold);line-height:1.25;text-align:right}
 .od-price{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--gold);text-align:right}

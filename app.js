@@ -30,6 +30,10 @@ function navigateTo(targetId,type='z-axis',fromHistory){
 }
 
 window.addEventListener('popstate',e=>{
+  if(document.getElementById('od-overlay')?.classList.contains('od-overlay--open')){
+    closeOutfitDetailPublic();
+    return;
+  }
   if(document.getElementById('pd-overlay')?.classList.contains('pd-overlay--open')){
     closeProdDetail();
     return;
@@ -3090,6 +3094,7 @@ function openOutfitDetailPublic(id){
   const ov=document.getElementById('od-overlay');
   if(ov){
     ov.style.display='flex';
+    history.pushState({screen:'od-sheet'},'','');
     requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('od-overlay--open')));
   }
 }
@@ -3111,6 +3116,8 @@ async function odToggleHeart(){
     if(!r.ok)return;
     h.classList.toggle('active',willSave);
     h.textContent=willSave?'Saved ✓':'Save';
+    const hf=document.getElementById('od-heart-frame-btn');
+    if(hf){hf.classList.toggle('active',willSave);hf.textContent=willSave?'♥':'♡';}
   }catch(e){toast(e.message||'خطأ في الحفظ');}
 }
 

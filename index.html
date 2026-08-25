@@ -1515,9 +1515,8 @@
   <div class="od-sheet" onclick="event.stopPropagation()">
     <div class="od-frame" id="od-frame">
       <div class="pd-handle"></div>
-      <button class="od-back-btn" onclick="closeOutfitDetailPublic()" aria-label="رجوع">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
+      <button class="od-close-btn" onclick="closeOutfitDetailPublic()" aria-label="إغلاق">✕</button>
+      <button class="od-heart-frame-btn" id="od-heart-frame-btn" onclick="odToggleHeart()" aria-label="احفظ">♡</button>
       <div id="od-cover"></div>
     </div>
     <div class="od-info">
@@ -1980,7 +1979,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?v=1042"></script>
+<script src="app.js?v=1043"></script>
 
 <!-- PWA: service worker + install prompt -->
 <script>
