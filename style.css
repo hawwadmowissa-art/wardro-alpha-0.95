@@ -933,6 +933,7 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pd-color-circle--light{box-shadow:0 2px 6px rgba(0,0,0,.35),inset 0 0 0 1px rgba(138,138,138,.45),0 0 0 1.5px rgba(237,227,204,.25)}
 .pd-color-circle--active{outline-color:var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.35),0 0 0 2px #D2AF69}
 .pd-color-circle--sm{width:24px;height:24px;outline-width:2px;outline-offset:2px}
+.pd-color-name-label{display:block;text-align:center;font-size:12px;color:var(--txtD);margin-top:4px;min-height:16px;direction:rtl;}
 .pd-size-pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .pd-size-pill{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--brd);
   color:var(--txt);font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;

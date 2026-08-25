@@ -492,26 +492,26 @@ window.addEventListener('DOMContentLoaded',()=>{
 });
 
 const _AP_COLORS=[
-  {key:'black',ar:'أسود',hex:'#0A0A0A'},
-  {key:'white',ar:'أبيض',hex:'#FAFAFA',border:true},
-  {key:'off-white',ar:'أبيض مكسور',hex:'#EDE3CC',border:true},
-  {key:'grey',ar:'رمادي',hex:'#8A8A8A'},
-  {key:'navy',ar:'كحلي',hex:'#1F2A44'},
-  {key:'brown',ar:'بني',hex:'#5C3A1E'},
-  {key:'camel',ar:'جملي',hex:'#C19A6B'},
-  {key:'beige',ar:'بيج',hex:'#D9C6A5',border:true},
-  {key:'olive',ar:'زيتوني',hex:'#6B7A5E'},
-  {key:'dark-green',ar:'أخضر غامق',hex:'#2E4A33'},
-  {key:'burgundy',ar:'نبيذي',hex:'#7A3B3B'},
-  {key:'rust',ar:'طوباقي',hex:'#B4513A'},
-  {key:'blue',ar:'أزرق',hex:'#1F4E8C'},
-  {key:'sky-blue',ar:'أزرق سماوي',hex:'#5BAFD6'},
-  {key:'mustard',ar:'خردلي',hex:'#C8A832'},
-  {key:'pink',ar:'وردي',hex:'#E8A0B0'},
-  {key:'red',ar:'أحمر',hex:'#C0392B'},
-  {key:'orange',ar:'برتقالي',hex:'#D2691E'},
-  {key:'purple',ar:'بنفسجي',hex:'#6B3FA0'},
-  {key:'teal',ar:'تركواز',hex:'#2A7F7F'},
+  {key:'black',ar:'أسود',hex:'#0A0A0A',circle:'⚫'},
+  {key:'white',ar:'أبيض',hex:'#FAFAFA',border:true,circle:'⚪'},
+  {key:'off-white',ar:'أبيض مكسور',hex:'#EDE3CC',border:true,circle:'⚪'},
+  {key:'grey',ar:'رمادي',hex:'#8A8A8A',circle:'🩶'},
+  {key:'navy',ar:'كحلي',hex:'#1F2A44',circle:'🔵'},
+  {key:'brown',ar:'بني',hex:'#5C3A1E',circle:'🟤'},
+  {key:'camel',ar:'جملي',hex:'#C19A6B',circle:'🟤'},
+  {key:'beige',ar:'بيج',hex:'#D9C6A5',border:true,circle:'🟡'},
+  {key:'olive',ar:'زيتوني',hex:'#6B7A5E',circle:'🟢'},
+  {key:'dark-green',ar:'أخضر غامق',hex:'#2E4A33',circle:'🟢'},
+  {key:'burgundy',ar:'نبيذي',hex:'#7A3B3B',circle:'🔴'},
+  {key:'rust',ar:'طوباقي',hex:'#B4513A',circle:'🟠'},
+  {key:'blue',ar:'أزرق',hex:'#1F4E8C',circle:'🔵'},
+  {key:'sky-blue',ar:'أزرق سماوي',hex:'#5BAFD6',circle:'🩵'},
+  {key:'mustard',ar:'خردلي',hex:'#C8A832',circle:'🟡'},
+  {key:'pink',ar:'وردي',hex:'#E8A0B0',circle:'🩷'},
+  {key:'red',ar:'أحمر',hex:'#C0392B',circle:'🔴'},
+  {key:'orange',ar:'برتقالي',hex:'#D2691E',circle:'🟠'},
+  {key:'purple',ar:'بنفسجي',hex:'#6B3FA0',circle:'🟣'},
+  {key:'teal',ar:'تركواز',hex:'#2A7F7F',circle:'🩵'},
 ];
 
 const _AP_TYPE_SIZES={shirt:['S','M','L','XL','XXL'],jacket:['S','M','L','XL','XXL'],pants:['S','M','L','XL','XXL'],jeans:['28','29','30','31','32','33','34','36','38','40'],shoes:['39','40','41','42','43','44','45','46'],accessory:['one-size'],ensemble:['S','M','L','XL','XXL'],sandals:['39','40','41','42','43','44','45','46']};
@@ -2281,14 +2281,15 @@ function openProdDetail(id,initialColorIdx){
   const _banner=document.getElementById('pd-oos-banner');if(_banner)_banner.style.display='none';
   _pdStockMap={};_pdHasStock=false;_pdCurrentSizeKey=null;
   const _pdColorKeysList=_pdColorKeys(p);
-  _pdCurrentColorKey=(_pdColorKeysList.length&&!p.cover_image)?_pdColorKeysList[0]:null;
-  _renderColorCircles('pd-colors-wrap',_pdColorKeys(p),null,'pdSelectColor',null,!!p.cover_image);
+  _pdCurrentColorKey=null;
+  _renderColorCircles('pd-colors-wrap',_pdColorKeys(p),null,'pdSelectColor',null,true);
+  const _clLabel=document.getElementById('pd-color-name-label');if(_clLabel)_clLabel.textContent='';
   if(typeof initialColorIdx==='number'&&initialColorIdx>=0){
     const initChip=document.querySelector(`#pd-colors-wrap .pd-color-circle[data-idx="${initialColorIdx}"]`);
     if(initChip)pdSelectColor(initChip);
   }
   const sPills=document.getElementById('pd-size-pills');
-  sPills.innerHTML=(p.sizes||[]).map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" data-size="${esc(s)}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
+  sPills.innerHTML=(p.sizes||[]).map(s=>`<button class="pd-size-pill" data-size="${esc(s)}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
   _pdLoadStock(p);
   const btn=document.getElementById('pd-save-btn');
   btn.textContent='Save';btn.disabled=false;btn.classList.remove('pd-save-btn--saved');
@@ -2385,7 +2386,7 @@ async function _pdLoadStock(p){
 function _pdRenderSizePills(p){
   const sPills=document.getElementById('pd-size-pills');if(!sPills)return;
   const sizes=p.sizes||[];
-  sPills.innerHTML=sizes.map((s,i)=>`<button class="pd-size-pill${i===0?' pd-size-pill--active':''}" data-size="${esc(s)}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
+  sPills.innerHTML=sizes.map(s=>`<button class="pd-size-pill" data-size="${esc(s)}" onclick="pdSelectSize(this)">${esc(s)}</button>`).join('');
 }
 
 function _pdSyncAvailability(){
@@ -2436,9 +2437,10 @@ function pdSelectColor(btn){
   const idx=parseInt(btn.dataset.idx,10);
   if(!isNaN(idx))pdGoSlide(Math.min(idx+_pdCoverOffset,_pdImages.length-1));
   _pdCurrentColorKey=btn.dataset.key||null;
+  const _ci=_AP_COLORS.find(c=>c.key===_pdCurrentColorKey);const _cl=document.getElementById('pd-color-name-label');if(_cl)_cl.textContent=(_ci?.ar||_pdCurrentColorKey||'');
   const _pdProd=_brProds.find(x=>x.id===_pdCurrentId);
   if(_pdProd)_pdRenderSizePills(_pdProd);
-  _pdCurrentSizeKey=_pdProd?.sizes?.[0]??null;
+  _pdCurrentSizeKey=null;
   _pdSyncAvailability();
 }
 
@@ -2449,11 +2451,16 @@ async function pdOrderWhatsApp(){
   const sb=getSb();if(!sb)return;
   const{data:{session}}=await sb.auth.getSession();
   if(!session){_pendingAction='whatsapp';openCustAuth();return;}
+  if(!_pdCurrentColorKey){alert('اختر لون القطعة أولاً');return;}
+  if(!_pdCurrentSizeKey){alert('اختر مقاس القطعة أولاً');return;}
   const phone=String(p.seller?.phone||'').replace(/\D/g,'');
   if(!phone)return;
   const link=location.origin+location.pathname+'?product='+p.id+'&ref=wa';
-  const priceLine=p.is_exclusive?'السعر: (حصري)':Number(p.price||0).toLocaleString()+' DZD';
-  const msg='السلام عليكم\n\nمهتم بهذي القطعة من متجرك على Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: (..)\n📞 رقم هاتفي: .... \n🎨 اللون: (..)\n\n'+link+'\n\n(استفسار أكثر...)';
+  const priceLine=p.is_exclusive?'السعر: (يُصرَّح)':Number(p.price||0).toLocaleString()+' DZD';
+  const colorInfo=_AP_COLORS.find(c=>c.key===_pdCurrentColorKey);
+  const colorCircle=colorInfo?.circle||'';
+  const colorAr=colorInfo?.ar||_pdCurrentColorKey||'';
+  const msg=link+'\n\nاكتشف Wardro 👗\n\nالسلام عليكم\n\nمهتم بهذه القطعة من متجر Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: '+_pdCurrentSizeKey+'\n🔢 رقم المنتج: \n🎨 اللون: '+colorCircle+' '+colorAr+'\n📞 رقم هاتفي: ....';
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
   try{_logEvent('whatsapp_order',{productId:p.id,sellerId:p.seller_id});}catch(_){}
 }
