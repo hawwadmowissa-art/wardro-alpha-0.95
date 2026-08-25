@@ -2451,8 +2451,8 @@ async function pdOrderWhatsApp(){
   const sb=getSb();if(!sb)return;
   const{data:{session}}=await sb.auth.getSession();
   if(!session){_pendingAction='whatsapp';openCustAuth();return;}
-  if(!_pdCurrentColorKey){alert('اختر لون القطعة أولاً');return;}
-  if(!_pdCurrentSizeKey){alert('اختر مقاس القطعة أولاً');return;}
+  if(!_pdCurrentColorKey){toast('اختر لون القطعة أولاً');return;}
+  if(!_pdCurrentSizeKey){toast('اختر مقاس القطعة أولاً');return;}
   const phone=String(p.seller?.phone||'').replace(/\D/g,'');
   if(!phone)return;
   const link=location.origin+location.pathname+'?product='+p.id+'&ref=wa';
