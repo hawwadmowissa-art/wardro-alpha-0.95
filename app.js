@@ -2940,7 +2940,7 @@ async function saveItem(){
 }
 
 // ══ COLLECTIONS — public outfit grid + detail sheet (Show Mode + Guest Store View) ══
-let _colOutfits=[],_odCurrentId=null,_odSelection=[];
+let _colOutfits=[],_colEnsembleProds=[],_odCurrentId=null,_odSelection=[];
 
 function _colPriceLabel(o){
   if(o.is_exclusive)return 'حصري';
@@ -2967,6 +2967,18 @@ async function renderCollectionsPublic(){
     if(error)throw error;
     _colOutfits=(data||[]).map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
     _colOutfits.forEach(o=>o.items.forEach(it=>{const p=it.product;if(p&&!_brProds.find(x=>x.id===p.id))_brProds.push(p);}));
+    // Also fetch ensemble products from same seller
+    try{
+      const{data:ensData}=await sb.from('products')
+        .select('*')
+        .eq('seller_id',sellerId)
+        .eq('product_type','ensemble')
+        .order('created_at',{ascending:false});
+      if(ensData&&ensData.length){
+        _colEnsembleProds=ensData;
+        ensData.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+      }else{_colEnsembleProds=[];}
+    }catch(_){_colEnsembleProds=[];}
     _renderCollectionsGrid();
   }catch(e){console.error('renderCollectionsPublic:',e);}
 }
@@ -2997,9 +3009,23 @@ function _renderCollectionsGrid(){
   const empty=document.getElementById('show-collections-empty');
   const grid=document.getElementById('show-collections-grid');
   if(!empty||!grid)return;
-  if(!_colOutfits.length){empty.style.display='flex';grid.style.display='none';grid.innerHTML='';return;}
+  const hasOutfits=_colOutfits.length>0;
+  const hasEnsemble=_colEnsembleProds.length>0;
+  if(!hasOutfits&&!hasEnsemble){empty.style.display='flex';grid.style.display='none';grid.innerHTML='';return;}
   empty.style.display='none';grid.style.display='grid';
-  grid.innerHTML=_colOutfits.map(_colCardHtml).join('');
+  const outfitHtml=_colOutfits.map(_colCardHtml).join('');
+  const ensembleHtml=_colEnsembleProds.map(p=>{
+    const thumb=p.cover_image||p.image;
+    const priceTxt=p.is_exclusive?'يُصرَّح':p.price?Number(p.price).toLocaleString()+' جد':'';
+    return `<div class="of-card" onclick="openProdDetail('${p.id}')">
+      <div class="of-frame">
+        ${thumb?`<img class="of-frame-img" src="${safeUrl(thumb)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="of-frame-img of-frame-img--ph"></div>`}
+      </div>
+      <div class="of-name">${esc(p.name||'')}</div>
+      ${priceTxt?`<div class="col-price">${esc(priceTxt)}</div>`:''}
+    </div>`;
+  }).join('');
+  grid.innerHTML=outfitHtml+ensembleHtml;
 }
 
 async function _colSaveOutfit(outfitId,saveOn){
