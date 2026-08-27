@@ -1853,7 +1853,7 @@ function _hideSec(id){const el=document.getElementById(id);if(el)el.style.displa
 
 function _renderColorSections(prods){
   const HIDE=['br-sec-color-black','br-sec-color-white','br-sec-color-brown','br-sec-color-wild1','br-sec-color-wild2'];
-  if(prods.length<75){HIDE.forEach(_hideSec);return;}
+  if(prods.length<65){HIDE.forEach(_hideSec);return;}
   const _colorCount=(key)=>prods.filter(p=>{
     const tags=Array.isArray(p.color_tags)?p.color_tags:(p.color?[p.color]:[]);
     if(!tags.includes(key))return false;
