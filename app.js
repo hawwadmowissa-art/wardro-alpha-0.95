@@ -4434,5 +4434,70 @@ async function _registerPush(){
     },{onConflict:'endpoint'});
   }catch(e){console.warn('push reg:',e);}
 }
-const _isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-setTimeout(_registerPush, _isStandalone ? 30000 : 35000);
+
+// ── Notification pre-prompt banner ──
+function _showNotifBanner(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  if(Notification.permission==='granted'||Notification.permission==='denied')return;
+  const state=JSON.parse(localStorage.getItem('wardro_notif_state')||'{}');
+  if(state.dismissed)return;
+  if(state.skipped){
+    const count=state.skipCount||0;
+    if(count<3)return;
+  }
+  const isInApp=/Instagram|FBAN|FBAV|Telegram|TikTok|Snapchat|Twitter|Line\/|Pinterest|LinkedIn|WhatsApp|MicroMessenger|WeChat|Musical|BytedanceWebview|GSA\/|KAKAOTALK/i.test(navigator.userAgent);
+  if(isInApp)return;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||(navigator.standalone===true);
+  if(isIOS&&!isStandalone)return;
+  const delay=isIOS?20000:25000;
+  setTimeout(()=>{
+    if(document.getElementById('notif-banner'))return;
+    const banner=document.createElement('div');
+    banner.id='notif-banner';
+    banner.className='notif-banner';
+    banner.innerHTML=`
+      <div class="notif-bn-content">
+        <div class="notif-bn-icon">🔔</div>
+        <div class="notif-bn-text">
+          <div class="notif-bn-title">لا تفوّت العروض والمنتجات الجديدة</div>
+          <div class="notif-bn-sub">فعّل الإشعارات لتصلك أحدث التنسيقات والعروض الحصرية</div>
+        </div>
+      </div>
+      <div class="notif-bn-actions">
+        <button class="notif-bn-activate" onclick="_activateNotif()">فعّل الإشعارات</button>
+        <button class="notif-bn-skip" onclick="_skipNotif()">تخطي</button>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>banner.classList.add('notif-banner--show')));
+  },delay);
+}
+
+function _activateNotif(){
+  const banner=document.getElementById('notif-banner');
+  if(banner){banner.classList.remove('notif-banner--show');setTimeout(()=>banner.remove(),400);}
+  _registerPush().then(()=>{
+    if(Notification.permission==='granted'){
+      localStorage.setItem('wardro_notif_state',JSON.stringify({dismissed:true}));
+    }else if(Notification.permission==='default'){
+      localStorage.setItem('wardro_notif_state',JSON.stringify({skipped:true,skipCount:0}));
+    }
+  });
+}
+
+function _skipNotif(){
+  const banner=document.getElementById('notif-banner');
+  if(banner){banner.classList.remove('notif-banner--show');setTimeout(()=>banner.remove(),400);}
+  localStorage.setItem('wardro_notif_state',JSON.stringify({skipped:true,skipCount:0}));
+}
+
+(function(){
+  const state=JSON.parse(localStorage.getItem('wardro_notif_state')||'{}');
+  if(state.skipped&&!state.dismissed){
+    state.skipCount=(state.skipCount||0)+1;
+    if(state.skipCount>=3){state.skipped=false;state.skipCount=0;}
+    localStorage.setItem('wardro_notif_state',JSON.stringify(state));
+  }
+  _showNotifBanner();
+})();
