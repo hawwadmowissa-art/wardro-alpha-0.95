@@ -1000,20 +1000,30 @@ function _updateAllProdToggle(){
   if(!wrap)return;
   const counts={};
   _showProds.forEach(p=>{const t=p.type||'other';counts[t]=(counts[t]||0)+1;});
+  const ptCounts={};
+  _showProds.forEach(p=>{const t=p.product_type||'other';ptCounts[t]=(ptCounts[t]||0)+1;});
   const canFilter=Object.values(counts).some(n=>n>=3);
-  wrap.style.display=canFilter?'flex':'none';
+  const canPtype=Object.keys(ptCounts).length>=2;
+  const bPtype=document.getElementById('ap-mode-ptype');
+  if(bPtype)bPtype.style.display=canPtype?'':'none';
+  wrap.style.display=(canFilter||canPtype)?'flex':'none';
   setAllProdMode('all');
 }
 function setAllProdMode(mode){
   const bAll=document.getElementById('ap-mode-all');
   const bFilter=document.getElementById('ap-mode-filter');
+  const bPtype=document.getElementById('ap-mode-ptype');
   if(bAll)bAll.classList.toggle('show-ap-mode--active',mode==='all');
   if(bFilter)bFilter.classList.toggle('show-ap-mode--active',mode==='filter');
+  if(bPtype)bPtype.classList.toggle('show-ap-mode--active',mode==='piece-type');
   const grid=document.getElementById('show-all-prod-grid');
   const cats=document.getElementById('show-all-prod-cats');
   if(mode==='filter'){
     if(grid)grid.style.display='none';
     if(cats){cats.innerHTML=_buildAllProdCats();cats.style.display='block';}
+  }else if(mode==='piece-type'){
+    if(grid)grid.style.display='none';
+    if(cats){cats.style.display='block';cats.innerHTML='<div style="text-align:center;padding:20px;color:var(--txtD)">...</div>';_buildAllProdByPieceType().then(html=>{cats.innerHTML=html;});}
   }else{
     if(cats){cats.style.display='none';cats.innerHTML='';}
     if(grid)grid.style.display=_showProds.length?'grid':'none';
@@ -1039,6 +1049,66 @@ function _buildAllProdCats(){
     return `<div class="show-ap-cat">
       <div class="show-section-hd"><span class="show-section-title">${icon} ${esc(label)}</span></div>
       <div class="show-ap-strip">${groups[t].map(_showProdCardHtml).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+const _showPtypeIcons={
+  shirt:_showCatSvg('<path d="M16 4l4.5 3-2.5 3.5L16.5 9V20h-9V9l-1.5 1.5L3.5 7 8 4c0 2.2 8 2.2 8 0z"/>'),
+  pants:_showCatSvg('<path d="M7 4h10v4l-2 12H9L7 8z"/><path d="M12 8v6"/>'),
+  shoes:_showCatSvg('<path d="M3 16h18l-2-4H9l-2 4z"/><path d="M7 12l-4 4"/>'),
+  jacket:_showCatSvg('<path d="M6 4l-3 6v10h6V10h6v10h6V10l-3-6"/><path d="M9 4h6"/>'),
+  accessory:_showCatSvg('<path d="M4 4.5h6.5l9 9-6.5 6.5-9-9z"/><circle cx="8.2" cy="8.7" r="1.3"/>'),
+  ensemble:_showCatSvg('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'),
+  sandals:_showCatSvg('<path d="M6 20c0-6 2-10 6-10s6 4 6 10"/><path d="M9 14h6"/>')
+};
+const _ptypeLabels={shirt:'Shirt',pants:'Pants',shoes:'Shoes',jacket:'Jacket',accessory:'Accessory',ensemble:'Ensemble',sandals:'Sandals',jeans:'Jeans'};
+async function _buildAllProdByPieceType(){
+  // If _colOutfits not loaded yet, fetch them
+  if(!_colOutfits.length){
+    const sb=getSb();
+    if(sb){
+      let sellerId=_guestSellerId;
+      if(!sellerId){const{data:{user}}=await sb.auth.getUser();sellerId=user?.id||null;}
+      if(sellerId){
+        try{
+          const{data}=await sb.from('outfits')
+            .select('*, outfit_items(id,product_id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type,sizes,is_available))')
+            .eq('seller_id',sellerId)
+            .order('created_at',{ascending:false});
+          if(data){
+            _colOutfits=data.map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+          }
+        }catch(_){}
+      }
+    }
+  }
+  const groups={};
+  _showProds.forEach(p=>{const t=p.product_type||'other';(groups[t]=groups[t]||[]).push(p);});
+  // Add outfits into the ensemble group
+  if(_colOutfits.length){
+    if(!groups['ensemble'])groups['ensemble']=[];
+    // Mark outfits to distinguish them from products
+    _colOutfits.forEach(o=>{groups['ensemble'].push({_isOutfit:true,...o});});
+  }
+  const order=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length);
+  return order.map(t=>{
+    const label=_ptypeLabels[t]||(t.charAt(0).toUpperCase()+t.slice(1));
+    const icon=_showPtypeIcons[t]||_showCatIconOther;
+    const cards=groups[t].map(item=>{
+      if(item._isOutfit){
+        const thumb=item.cover_image||(item.items&&item.items[0]&&(item.items[0].chosen_image||(item.items[0].product&&item.items[0].product.image)))||'';
+        const priceTxt=item.is_exclusive?'Exclusive':item.total_price?Number(item.total_price).toLocaleString()+' DZD':'';
+        return `<div class="show-prod-card" onclick="openOutfitDetailPublic('${item.id}')">
+          ${thumb?`<img class="show-prod-img" src="${safeUrl(thumb)}" alt="${esc(item.name||'')}" loading="lazy">`:`<div class="show-prod-img" style="display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3">👔</div>`}
+          <div class="show-prod-info"><div class="show-prod-name">${esc(item.name||'')}</div><div class="show-prod-price">${esc(priceTxt)}</div><div class="show-prod-cat">Collection</div></div>
+        </div>`;
+      }
+      return _showProdCardHtml(item);
+    }).join('');
+    return `<div class="show-ap-cat">
+      <div class="show-section-hd"><span class="show-section-title">${icon} ${esc(label)}</span></div>
+      <div class="show-ap-strip">${cards}</div>
     </div>`;
   }).join('');
 }
