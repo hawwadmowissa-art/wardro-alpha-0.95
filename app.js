@@ -2309,7 +2309,7 @@ async function buildBrowseHero(prods){
   }
 
   track.innerHTML=slides.map((s,i)=>`
-    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}" data-link-type="${s.linkType||''}" data-link-target="${esc(s.linkTarget||'')}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}" data-link-type="${esc(s.linkType||'')}" data-link-target="${esc(s.linkTarget||'')}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
       <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
         ${s.label?`<div class="br-hero-label">${esc(s.label)}</div>`:''}

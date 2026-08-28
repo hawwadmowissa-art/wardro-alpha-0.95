@@ -862,7 +862,7 @@
               <div class="adm-thumb-ph">🏪</div>
               <div class="adm-card-info">
                 <div class="adm-card-name">${esc(s.store_name || '—')}</div>
-                <div class="adm-card-email" onclick="copyEmail('${esc(s.email || '')}')">${esc(s.email || '—')}</div>
+                <div class="adm-card-email" data-email="${esc(s.email || '')}">${esc(s.email || '—')}</div>
                 <div class="adm-card-date">${fmtDate(s.created_at)}</div>
                 ${_sellerDemoPillHtml(s.id, !!demoMap[s.id])}
               </div>
@@ -872,6 +872,9 @@
               <button class="adm-reject"  onclick="doAction('seller','${s.id}','rejected')">✕ رفض</button>
             </div>
           </div>`).join('');
+        el.querySelectorAll('.adm-card-email[data-email]').forEach(item => {
+          item.onclick = () => copyEmail(item.dataset.email);
+        });
       } catch (e) {
         el.innerHTML = `<div class="adm-empty">خطأ في التحميل: ${esc(e.message)}</div>`;
       }
