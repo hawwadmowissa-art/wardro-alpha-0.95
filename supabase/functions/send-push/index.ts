@@ -8,6 +8,18 @@ serve(async (req) => {
   }
   try {
     const { title, body, url } = await req.json();
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) return new Response(JSON.stringify({error:'Unauthorized'}), {status:401, headers:{"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}});
+    const token = authHeader.replace('Bearer ', '');
+
+    const authClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+    const { data: { user }, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !user) return new Response(JSON.stringify({error:'Invalid token'}), {status:401, headers:{"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}});
+
+    const ADMIN_EMAIL = Deno.env.get("ADMIN_EMAIL");
+    if (!ADMIN_EMAIL || user.email !== ADMIN_EMAIL) return new Response(JSON.stringify({error:'Forbidden - admin only'}), {status:403, headers:{"Content-Type":"application/json","Access-Control-Allow-Origin":"*"}});
+
     webpush.setVapidDetails(
       Deno.env.get("VAPID_SUBJECT")!,
       Deno.env.get("VAPID_PUBLIC_KEY")!,

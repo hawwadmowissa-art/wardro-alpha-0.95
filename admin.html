@@ -760,11 +760,13 @@
       const url=document.getElementById('notif-url').value.trim()||'/wardro-alpha-0.95/';
       const res=document.getElementById('notif-result');
       if(!title||!body){res.textContent='العنوان والرسالة مطلوبان';return;}
+      const {data:{session}} = await sb.auth.getSession();
+      if(!session){res.textContent='يجب تسجيل الدخول';return;}
       res.textContent='جاري الإرسال...';
       try{
         const r=await fetch('https://koprvpdmdktyorzymeud.supabase.co/functions/v1/send-push',{
           method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_ANON_KEY},
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
           body:JSON.stringify({title,body,url})
         });
         const d=await r.json();
