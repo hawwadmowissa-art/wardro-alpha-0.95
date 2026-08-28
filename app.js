@@ -3625,7 +3625,7 @@ async function dcOnStoreInput(){
       return;
     }
     res.innerHTML=data.map(s=>`
-      <div class="dc-store-item" onclick="dcOpenStore('${esc(s.id)}','${esc(s.store_name||'')}','${esc(s.profile_image||'')}')">
+      <div class="dc-store-item" data-sid="${esc(s.id)}" data-sname="${esc(s.store_name||'')}" data-simg="${esc(safeUrl(s.profile_image||''))}">
         <div class="dc-store-avatar"${s.profile_image?` style="background-image:url('${safeUrl(s.profile_image)}')"`:''}>${!s.profile_image?`<span>${esc((s.store_name||'?')[0].toUpperCase())}</span>`:''}</div>
         <div class="dc-store-info">
           <div class="dc-store-name">${esc(s.store_name||'')}</div>
@@ -3633,6 +3633,9 @@ async function dcOnStoreInput(){
         </div>
         <div class="dc-store-arrow">←</div>
       </div>`).join('');
+    res.querySelectorAll('.dc-store-item[data-sid]').forEach(item=>{
+      item.onclick=()=>dcOpenStore(item.dataset.sid,item.dataset.sname,item.dataset.simg);
+    });
     const _inputRect=document.getElementById('dc-store-input').getBoundingClientRect();
     res.style.position='fixed';
     res.style.top=(_inputRect.bottom+4)+'px';
