@@ -616,7 +616,7 @@
         <h2 style="color:var(--gold);margin-bottom:20px">إرسال إشعار</h2>
         <input id="notif-title" type="text" placeholder="العنوان" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:12px;font-size:15px">
         <textarea id="notif-body" placeholder="الرسالة" rows="3" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:12px;font-size:15px;resize:vertical"></textarea>
-        <input id="notif-url" type="text" placeholder="رابط (اختياري) مثلاً: /" value="/" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:16px;font-size:15px">
+        <input id="notif-url" type="text" placeholder="رابط (اختياري) مثلاً: /" value="/wardro-alpha-0.95/" style="width:100%;padding:12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:16px;font-size:15px">
         <button onclick="adminSendPush()" style="width:100%;padding:14px;background:var(--gold);color:#000;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer">إرسال للجميع</button>
         <div id="notif-result" style="margin-top:12px;color:var(--gold);font-size:14px"></div>
       </div>
@@ -757,7 +757,7 @@
     async function adminSendPush(){
       const title=document.getElementById('notif-title').value.trim();
       const body=document.getElementById('notif-body').value.trim();
-      const url=document.getElementById('notif-url').value.trim()||'/';
+      const url=document.getElementById('notif-url').value.trim()||'/wardro-alpha-0.95/';
       const res=document.getElementById('notif-result');
       if(!title||!body){res.textContent='العنوان والرسالة مطلوبان';return;}
       res.textContent='جاري الإرسال...';
