@@ -47,7 +47,7 @@ let _authContext=null; // 'revisit' — set when a returning anonymous visitor t
 function goCustomer(){
   const count=parseInt(localStorage.getItem('wardro_visit_count')||'0',10);
   const sb=getSb();
-  if(count>=2&&sb){
+  if(count>=2 && (count-2)%3===0 && sb){
     sb.auth.getSession().then(({data:{session}})=>{
       if(session)navigateTo('s-browse','slide');
       else{_authContext='revisit';openCustAuth();}
@@ -2555,8 +2555,6 @@ let _pendingAction=null; // 'whatsapp' | 'form' | 'outfit-save' | 'outfit-whatsa
 async function pdOrderWhatsApp(){
   const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
   const sb=getSb();if(!sb)return;
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){_pendingAction='whatsapp';openCustAuth();return;}
   if(!_pdCurrentColorKey){toast('اختر لون القطعة أولاً');return;}
   if(!_pdCurrentSizeKey){toast('اختر مقاس القطعة أولاً');return;}
   const phone=String(p.seller?.phone||'').replace(/\D/g,'');
@@ -2790,8 +2788,6 @@ function openOutfitOrderForm(){
 
 async function cfConfirmOrder(){
   const sb=getSb();if(!sb)return;
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){_pendingAction='form';openCustAuth();return;}
   const name=document.getElementById('cf-name')?.value.trim()||'';
   const phone=document.getElementById('cf-phone')?.value.trim()||'';
   const wilaya=document.getElementById('cf-wilaya')?.value||'';
@@ -3263,8 +3259,6 @@ async function odToggleHeart(){
 async function odOrderWhatsApp(){
   const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
   const sb=getSb();if(!sb)return;
-  const{data:{session}}=await sb.auth.getSession();
-  if(!session){_pendingAction='outfit-whatsapp';openCustAuth();return;}
   if(_storeShare.whatsapp_enabled===false){
     toast('البائع لا يدعم الطلب عبر واتساب حالياً');
     return;
