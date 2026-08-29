@@ -3131,7 +3131,7 @@ function _odPieceRowHtml(sel,idx){
     ${img?`<img class="od-piece-img" src="${safeUrl(img)}" alt="${esc(p.name||'')}" loading="lazy">`:`<div class="od-piece-img od-piece-img--ph">👔</div>`}
     <div class="od-piece-body">
       <div class="od-piece-name">${esc(p.name||'')}</div>
-      <div class="od-piece-price">${Number(p.price||0).toLocaleString()} دج</div>
+      <div class="od-piece-price">${p.is_exclusive?'حصري':Number(p.price||0).toLocaleString()+' دج'}</div>
       ${sizes.length?`<div class="od-size-row">${sizes.map(s=>`<button type="button" class="od-size-pill" data-idx="${idx}" data-size="${esc(s)}" onclick="event.stopPropagation();odSelectSize(${idx},this.dataset.size)">${esc(s)}</button>`).join('')}</div>`:''}
       ${p.is_available?`<div class="od-stock-row"><span class="od-stock-dot"></span>متوفر</div>`:''}
     </div>
