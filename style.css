@@ -952,8 +952,22 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pd-actions{display:flex;gap:10px;margin-top:auto;flex-shrink:0}
 .pd-row2{display:contents}
 .pd-actions--split{flex-direction:column}
-.pd-actions--split .pd-save-btn{flex:0 0 auto;width:100%}
+.pd-actions--split .pd-save-share-row{width:100%;}
 .pd-actions--split .pd-row2{display:flex;flex-direction:row;gap:10px;width:100%}
+.pd-save-share-row{display:flex;gap:10px;width:100%;}
+.pd-save-share-row .pd-save-btn{flex:1;}
+.pd-share-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  gap:8px;height:44px;border-radius:12px;
+  background:var(--gold);border:none;cursor:pointer;
+  font-size:13px;font-weight:600;flex-direction:row;
+}
+.od-share-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  gap:8px;height:44px;border-radius:12px;padding:10px 12px;
+  background:var(--gold);border:none;cursor:pointer;
+  color:#0B0A08;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
+}
 .pd-save-btn{padding:14px;border-radius:14px;background:rgba(210,175,105,.08);
   border:1px solid rgba(210,175,105,.35);color:var(--gold);
   font-family:'Fraunces',serif;font-size:15px;font-weight:700;
@@ -1966,6 +1980,9 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .od-save-btn{width:100%;padding:13px;border:1px solid var(--gold);border-radius:12px;background:transparent;
   color:var(--gold);font-family:'Fraunces',serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s var(--spring)}
 .od-save-btn.active{background:rgba(210,175,105,.12)}
+.od-save-share-row{display:flex;gap:8px;width:100%;}
+.od-save-share-row .od-save-btn{flex:1;}
+.od-save-share-row .od-share-btn{flex:1;}
 .od-footer-row-btm{display:flex;flex-direction:row;gap:8px}
 .od-cart-btn{flex:1;padding:12px;border:1px solid var(--gold);border-radius:12px;background:transparent;
   color:var(--gold);font-family:'Tajawal',sans-serif;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
