@@ -2348,6 +2348,20 @@ async function pdOrderWhatsApp(){
   try{_logEvent('whatsapp_order',{productId:p.id,sellerId:p.seller_id});}catch(_){}
 }
 
+function shareProduct(){
+  const p=_brProds.find(x=>x.id===_pdCurrentId);if(!p)return;
+  const url=location.origin+location.pathname+'?product='+p.id;
+  if(navigator.share){navigator.share({title:p.name||'Wardro',url}).catch(()=>{});}
+  else{navigator.clipboard.writeText(url).then(()=>toast('تم نسخ الرابط ✓')).catch(()=>toast('تعذّر النسخ'));}
+}
+
+function shareOutfit(){
+  const o=_colOutfits.find(x=>x.id===_odCurrentId);if(!o)return;
+  const url=location.origin+location.pathname+'?store='+(_guestSellerId||_storeShare.id)+'&outfit='+o.id;
+  if(navigator.share){navigator.share({title:o.name||'Wardro',url}).catch(()=>{});}
+  else{navigator.clipboard.writeText(url).then(()=>toast('تم نسخ الرابط ✓')).catch(()=>toast('تعذّر النسخ'));}
+}
+
 // ══ ORDER FORM (cart checkout UI — no data sent yet) ══
 const _DZ_WILAYAS=[
   ['01','أدرار'],['02','الشلف'],['03','الأغواط'],['04','أم البواقي'],['05','باتنة'],
