@@ -1460,7 +1460,7 @@ function storeWhatsApp(){
   if(!phone)return;
   const url=location.origin+location.pathname+'?store='+_storeShare.id;
   const msg='السلام عليكم\n\nمهتم بمتجرك على Wardro:\n\n🏪 '+(_storeShare.name||'')+'\n📍 '+(_storeShare.city||'ورقلة')+', الجزائر\n\n'+url+'\n\n(استفسار أكثر...)';
-  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+  window.open('https://api.whatsapp.com/send?phone='+phone+'&text='+encodeURIComponent(msg),'_blank','noopener');
   try{_logEvent('whatsapp_store',{sellerId:_storeShare.id});}catch(_){}
 }
 
@@ -2565,7 +2565,7 @@ async function pdOrderWhatsApp(){
   const colorCircle=colorInfo?.circle||'';
   const colorAr=colorInfo?.ar||_pdCurrentColorKey||'';
   const msg=link+'\n\nاكتشف Wardro 👗\n\nالسلام عليكم\n\nمهتم بهذه القطعة من متجر Wardro:\n\n📌 '+(p.name||'')+'\n💰 '+priceLine+'\n📏 المقاس: '+_pdCurrentSizeKey+'\n🔢 رقم المنتج: \n🎨 اللون: '+colorCircle+' '+colorAr+'\n📞 رقم هاتفي: ....';
-  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+  window.open('https://api.whatsapp.com/send?phone='+phone+'&text='+encodeURIComponent(msg),'_blank','noopener');
   try{_logEvent('whatsapp_order',{productId:p.id,sellerId:p.seller_id});}catch(_){}
 }
 
@@ -3268,11 +3268,21 @@ async function odOrderWhatsApp(){
   const selected=_odSelection.filter(s=>s.selected);
   if(!selected.length)return;
   if(selected.some(s=>!s.chosenSize))return toast('اختر مقاس لكل قطعة');
-  const total=selected.reduce((sum,s)=>sum+Number(s.product?.price||0),0);
-  const lines=selected.map(s=>'- '+(s.product?.name||'')+' / مقاس: '+s.chosenSize+' — '+Number(s.product?.price||0).toLocaleString()+' دج').join('\n');
+  const allSelected=selected.length===_odSelection.length;
+  const hasExclusive=selected.some(s=>s.product?.is_exclusive);
+  const nonExclusiveSum=selected.reduce((sum,s)=>s.product?.is_exclusive?sum:sum+Number(s.product?.price||0),0);
+  let totalStr;
+  if(allSelected&&Number(o.total_price||0)>0){
+    totalStr=Number(o.total_price).toLocaleString()+' دج';
+  }else if(hasExclusive){
+    totalStr='أكثر من '+nonExclusiveSum.toLocaleString()+' دج';
+  }else{
+    totalStr=nonExclusiveSum.toLocaleString()+' دج';
+  }
+  const lines=selected.map(s=>'- '+(s.product?.name||'')+' / مقاس: '+s.chosenSize+' — '+(s.product?.is_exclusive?'حصري':Number(s.product?.price||0).toLocaleString()+' دج')).join('\n');
   const link=window.location.origin+location.pathname+'?store='+(_guestSellerId||_storeShare.id)+'&outfit='+o.id;
-  const msg='مرحباً، أريد طلب هذا التنسيق: '+(o.name||'')+'\n'+lines+'\n\nالمجموع: '+total.toLocaleString()+' دج'+'\n\nالرابط: '+link;
-  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank','noopener');
+  const msg='مرحباً، أريد طلب هذا التنسيق: '+(o.name||'')+'\n'+lines+'\n\nالمجموع: '+totalStr+'\n\nالرابط: '+link;
+  window.open('https://api.whatsapp.com/send?phone='+phone+'&text='+encodeURIComponent(msg),'_blank','noopener');
 }
 
 // ── Customer Auth ──
