@@ -948,11 +948,11 @@ input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #EDE3CC inset !impo
 .pd-stock-dot--ok{background:rgba(107,122,94,.8)}
 .pd-stock-dot--oos{background:rgba(122,59,59,.85)}
 .pd-stock-lbl{font-size:12px;font-family:'Tajawal',sans-serif;font-weight:600}
-.pd-actions{display:flex;gap:10px;margin-top:auto;flex-shrink:0}
+.pd-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:auto;flex-shrink:0}
 .pd-row2{display:contents}
 .pd-actions--split{flex-direction:column}
 .pd-actions--split .pd-save-share-row{width:100%;}
-.pd-actions--split .pd-row2{display:flex;flex-direction:row;gap:10px;width:100%}
+.pd-row2{display:flex;flex-direction:row;gap:10px;width:100%;}
 .pd-save-share-row{display:flex;gap:10px;width:100%;}
 .pd-save-share-row .pd-save-btn{flex:1;}
 .pd-share-btn{
