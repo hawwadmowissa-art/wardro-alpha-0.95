@@ -895,6 +895,18 @@ async function loadEditorProducts(){
     _computeSellerNumber(user.id).then(_setSellerNumber);
     const{data:prods}=await sb.from('products').select('*').eq('seller_id',user.id).order('created_at',{ascending:false});
     renderEditorProducts(prods||[]);
+    // Own outfits, fetched with the same shape _loadBrowseOutfits uses, so a hero-slide tap on an
+    // outfit (_looksOpenOutfit → openOutfitDetailPublic) resolves without a second round-trip.
+    const{data:outfits}=await sb.from('outfits')
+      .select('id,name,cover_image,total_price,is_exclusive,note,slider_type,hero_status,hero_pinned,hero_order,seller_id,outfit_items(id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type,sizes,is_available))')
+      .eq('seller_id',user.id);
+    window._sellerOutfits=(outfits||[]).map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+    window._sellerOutfits.forEach(o=>{
+      const withSeller={...o,seller:{store_name:localStorage.getItem('wardro_store_name')||'',phone:null,whatsapp_enabled:false,cart_enabled:false}};
+      if(!_browseOutfits.find(x=>x.id===o.id))_browseOutfits.push(withSeller);
+      if(!_colOutfits.find(x=>x.id===o.id))_colOutfits.push(withSeller);
+      o.items.forEach(it=>{const p=it.product;if(p&&!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+    });
     renderShowProducts(prods||[]);
     _syncDemoBanner();
   }catch(e){}
@@ -1581,6 +1593,17 @@ async function loadGuestStoreProducts(sellerId){
     _computeSellerNumber(sellerId).then(_setSellerNumber);
     const{data:prods}=await sb.from('products').select('*,seller:sellers(store_name,profile_image,phone,cart_enabled,whatsapp_enabled)').eq('seller_id',sellerId).eq('is_hidden',false).order('created_at',{ascending:false});
     const visProds=(prods||[]).filter(p=>p.slider_type!=='main_hero'||p.hero_status==='approved');
+    // This store's outfits, same shape as _loadBrowseOutfits so a hero-slide tap resolves via _looksOpenOutfit.
+    const{data:outfits}=await sb.from('outfits')
+      .select('id,name,cover_image,total_price,is_exclusive,note,slider_type,hero_status,hero_pinned,hero_order,seller_id,outfit_items(id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type,sizes,is_available))')
+      .eq('seller_id',sellerId);
+    window._sellerOutfits=(outfits||[]).map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+    window._sellerOutfits.forEach(o=>{
+      const withSeller={...o,seller:{store_name:_storeShare.name,phone:_storeShare.phone,whatsapp_enabled:_storeShare.whatsapp_enabled,cart_enabled:_storeShare.cart_enabled}};
+      if(!_browseOutfits.find(x=>x.id===o.id))_browseOutfits.push(withSeller);
+      if(!_colOutfits.find(x=>x.id===o.id))_colOutfits.push(withSeller);
+      o.items.forEach(it=>{const p=it.product;if(p&&!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+    });
     renderShowProducts(visProds);
     // Merge into _brProds so openProdDetail works
     visProds.forEach(p=>{if(!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
@@ -1625,7 +1648,9 @@ function _handleHeroSlideClick(slide){
   if(linkType==='store'){if(linkTarget)_openHeroStoreLink(linkTarget);return;}
   if(linkType==='url'){if(linkTarget)window.open(linkTarget,'_blank');return;}
   const id=slide.dataset.id;
-  if(id)openProdDetail(id);
+  if(!id)return;
+  if(slide.dataset.type==='outfit'){_looksOpenOutfit(id);return;}
+  openProdDetail(id);
 }
 
 async function _openHeroStoreLink(sellerId){
@@ -1646,15 +1671,34 @@ function buildHeroSlider(prods){
   heroProds.sort((a,b)=>(b.hero_pinned?1:0)-(a.hero_pinned?1:0)||(a.hero_order||0)-(b.hero_order||0));
   if(!heroProds.length)heroProds=prods.filter(p=>_heroThumb(p)).slice(0,20);
   else heroProds=heroProds.slice(0,20);
+  // Outfits eligible for this store's hero (owner preview: window._sellerOutfits set in loadEditorProducts;
+  // guest view: set in loadGuestStoreProducts) — same slider_type/hero_status gate as products.
+  const heroOutfits=(window._sellerOutfits||[]).filter(o=>{
+    const thumb=o.cover_image||(o.items||[]).map(it=>it.chosen_image||it.product?.image).find(Boolean);
+    return thumb&&(o.slider_type==='hero'||(o.slider_type==='main_hero'&&o.hero_status==='approved'));
+  });
+  const outfitSlides=heroOutfits.map(o=>({
+    _type:'outfit',
+    bg:o.cover_image||(o.items||[]).map(it=>it.chosen_image||it.product?.image).find(Boolean),
+    id:o.id,
+    label:'OUTFIT',
+    title:o.name||'',
+    sub:'',
+    cta:o.total_price?Number(o.total_price).toLocaleString()+' DZD':'Exclusive'
+  }));
   let slides;
   if(!heroProds.length){
-    slides=[{bg:null,id:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
+    slides=[];
   }else{
-    slides=heroProds.map(p=>({bg:_heroThumb(p),id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:_priceLabel(p),approval_status:p.approval_status}));
+    slides=heroProds.map(p=>({_type:'product',bg:_heroThumb(p),id:p.id,label:(p.type||'FEATURED').toUpperCase(),title:p.name,sub:p.description||'Premium quality clothing',cta:_priceLabel(p),approval_status:p.approval_status}));
+  }
+  slides=slides.concat(outfitSlides);
+  if(!slides.length){
+    slides=[{bg:null,id:null,label:'NEW COLLECTION',title:'SUMMER 2026',sub:'Timeless style, elevated for you',cta:'SHOP NOW'}];
   }
   _heroLen=slides.length;
   track.innerHTML=slides.map((s,i)=>`
-    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
+    <div class="show-hero-slide${!s.bg?' show-hero-slide--ph':''}${i===0?' active':''}" data-type="${esc(s._type||'product')}" data-id="${s.id||''}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
       <div class="show-hero-overlay"></div>
       ${s.approval_status==='pending'?'<div class="show-hero-appr-badge">قيد المراجعة</div>':s.approval_status==='rejected'?'<div class="show-hero-appr-badge show-hero-appr-badge--rejected">تم الرفض</div>':''}
       <div class="show-hero-content">
@@ -2280,14 +2324,31 @@ async function buildBrowseHero(prods){
   if(prods&&prods.length){
     let heroProds=prods.filter(p=>p.slider_type==='main_hero'&&p.hero_status==='approved'&&(p.cover_image||p.image));
     let editSlides=[];
+    let heroOutfits=[];
     const sb=getSb();
     if(sb){
       try{const{data}=await sb.from('hero_editorial_slides').select('*');editSlides=data||[];}
       catch(e){console.error('hero editorial slides load:',e);}
+      try{
+        // Full shape (seller relation + full item/product fields), not just the hero-card fields, so a
+        // slide tap resolves via _looksOpenOutfit/openOutfitDetailPublic without a second round-trip —
+        // same reasoning as _loadBrowseOutfits.
+        const{data}=await sb.from('outfits')
+          .select('id,name,cover_image,total_price,is_exclusive,note,hero_pinned,hero_order,seller_id,seller:sellers(store_name,phone,whatsapp_enabled,cart_enabled,profile_image),outfit_items(id,position,chosen_image,product:products(id,name,image,price,is_exclusive,product_type,sizes,is_available))')
+          .eq('slider_type','main_hero').eq('hero_status','approved');
+        heroOutfits=(data||[]).filter(o=>o.cover_image||(o.outfit_items||[]).some(it=>it.chosen_image||it.product?.image))
+          .map(o=>({...o,items:(o.outfit_items||[]).slice().sort((a,b)=>a.position-b.position)}));
+      }catch(e){console.error('hero outfits load:',e);}
     }
+    heroOutfits.forEach(o=>{
+      if(!_browseOutfits.find(x=>x.id===o.id))_browseOutfits.push(o);
+      if(!_colOutfits.find(x=>x.id===o.id))_colOutfits.push(o);
+      o.items.forEach(it=>{const p=it.product;if(p&&!_brProds.find(x=>x.id===p.id))_brProds.push(p);});
+    });
     let items=[
       ...heroProds.map(p=>({kind:'product',hero_order:p.hero_order||0,hero_pinned:!!p.hero_pinned,data:p})),
-      ...editSlides.map(s=>({kind:'editorial',hero_order:s.hero_order||0,hero_pinned:false,data:s}))
+      ...editSlides.map(s=>({kind:'editorial',hero_order:s.hero_order||0,hero_pinned:false,data:s})),
+      ...heroOutfits.map(o=>({kind:'outfit',hero_order:o.hero_order||0,hero_pinned:!!o.hero_pinned,data:o}))
     ];
     items.sort((a,b)=>(b.hero_pinned?1:0)-(a.hero_pinned?1:0)||a.hero_order-b.hero_order);
     if(!items.length){
@@ -2295,10 +2356,15 @@ async function buildBrowseHero(prods){
     }
     if(items.length){
       slides=items.slice(0,20).map(it=>it.kind==='editorial'?{
-        bg:it.data.image_url,id:'',linkType:it.data.link_type||'',linkTarget:it.data.link_target||'',
+        _type:'editorial',bg:it.data.image_url,id:'',linkType:it.data.link_type||'',linkTarget:it.data.link_target||'',
         label:'',title:it.data.title||'',sub:'',cta:null
+      }:it.kind==='outfit'?{
+        _type:'outfit',bg:it.data.cover_image||(it.data.items||[]).map(x=>x.chosen_image||x.product?.image).find(Boolean),
+        id:it.data.id,linkType:'',linkTarget:'',
+        label:'OUTFIT',title:it.data.name||'',sub:'',
+        cta:it.data.total_price?Number(it.data.total_price).toLocaleString()+' DZD':'Exclusive'
       }:{
-        bg:it.data.cover_image||it.data.image,id:it.data.id,linkType:'',linkTarget:'',
+        _type:'product',bg:it.data.cover_image||it.data.image,id:it.data.id,linkType:'',linkTarget:'',
         label:(it.data.type||'FEATURED').toUpperCase(),title:it.data.name,
         sub:it.data.description||'Premium quality clothing',cta:_priceLabel(it.data)
       });
@@ -2309,7 +2375,7 @@ async function buildBrowseHero(prods){
   }
 
   track.innerHTML=slides.map((s,i)=>`
-    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-id="${s.id||''}" data-link-type="${esc(s.linkType||'')}" data-link-target="${esc(s.linkTarget||'')}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
+    <div class="br-hero-slide${!s.bg?' br-hero-slide--'+(s.idx??i):''}${i===0?' active':''}" data-type="${esc(s._type||'product')}" data-id="${s.id||''}" data-link-type="${esc(s.linkType||'')}" data-link-target="${esc(s.linkTarget||'')}"${s.bg?` style="background-image:url('${safeUrl(s.bg)}')"`:''}>
       <div class="br-hero-overlay"></div>
       <div class="br-hero-content">
         ${s.label?`<div class="br-hero-label">${esc(s.label)}</div>`:''}
@@ -4160,6 +4226,7 @@ function updateCreateStoreButtonState(){
 
 // ══ OUTFITS — Editor tabs + My Outfits + Build Collection ══
 let _ofOutfits=[],_bcEditId=null,_bcItems=[],_bcCoverFile=null,_bcCoverUrl=null,_bcExclusive=false,_bcImgPending=null;
+let _odEdSliderType='none';
 const _OF_TYPE_LABELS={shirt:'Shirt',pants:'Pants',jeans:'Jeans',shoes:'Shoes',jacket:'Jacket',accessory:'Accessory',ensemble:'Ensemble',sandals:'Sandals'};
 
 function edSwitchTab(tab){
@@ -4221,6 +4288,18 @@ function renderOutfits(){
 }
 
 // ── Build Collection modal ──
+function odSetSliderType(val,btn){
+  _odEdSliderType=val;
+  document.querySelectorAll('#od-slidertype-btns .slidertype-btn').forEach(b=>b.classList.remove('slidertype-btn--active'));
+  btn.classList.add('slidertype-btn--active');
+  const hint=document.getElementById('od-slidertype-hint');
+  if(hint){
+    if(val==='main_hero')hint.textContent='سيُعرض في الصفحة الرئيسية بعد موافقة الإدارة';
+    else if(val==='hero')hint.textContent='سيُعرض في سلايدر متجرك مباشرة';
+    else hint.textContent='';
+  }
+}
+
 function openBuildCollection(id){
   _bcEditId=id||null;
   const o=id?_ofOutfits.find(x=>x.id===id):null;
@@ -4234,6 +4313,13 @@ function openBuildCollection(id){
   const priceEl=document.getElementById('bc-total');
   if(priceEl){priceEl.value=(o&&o.total_price!=null)?o.total_price:'';priceEl.disabled=_bcExclusive;}
   const del=document.getElementById('bc-delete');if(del)del.style.display=id?'':'none';
+  _odEdSliderType=o?.slider_type||'none';
+  document.querySelectorAll('#od-slidertype-btns .slidertype-btn').forEach(b=>{
+    b.classList.toggle('slidertype-btn--active',b.dataset.val===_odEdSliderType);
+  });
+  const odSliderGroup=document.getElementById('od-slidertype-group');
+  if(odSliderGroup)odSliderGroup.style.display='';
+  odSetSliderType(_odEdSliderType,document.querySelector(`#od-slidertype-btns .slidertype-btn[data-val="${_odEdSliderType}"]`)||document.querySelector('#od-slidertype-btns .slidertype-btn'));
   _bcRenderCover();
   _bcRender();
   const m=document.getElementById('bc-modal');
@@ -4425,7 +4511,7 @@ async function saveOutfit(){
     const match=_bcItems.length>=4?92:_bcItems.length===3?87:80;
     const priceRaw=(document.getElementById('bc-total')?.value||'').trim();
     const total_price=_bcExclusive?0:(priceRaw!==''?parseFloat(priceRaw):0);
-    const payload={name,state:'close',is_exclusive:_bcExclusive,note:note||null,total_price,match_pct:match};
+    const payload={name,state:'close',is_exclusive:_bcExclusive,note:note||null,total_price,match_pct:match,slider_type:_odEdSliderType||'none',hero_status:_odEdSliderType==='main_hero'?'pending':'none'};
     let outfitId=_bcEditId;
     if(outfitId){
       const{error}=await sb.from('outfits').update(payload).eq('id',outfitId);

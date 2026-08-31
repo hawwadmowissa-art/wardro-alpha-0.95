@@ -903,35 +903,67 @@
       }
     }
 
-    // ── PRODUCTS ──
+    // ── PRODUCTS + OUTFITS (shared Main Hero pending queue) ──
+    function _admOutfitQueueCardHtml(o) {
+      const thumb = o.cover_image
+        ? `<img class="adm-thumb" src="${safeUrl(o.cover_image)}" alt="${esc(o.name || '')}">`
+        : `<div class="adm-thumb-ph">🗂</div>`;
+      return `
+      <div class="adm-card" id="oc-${esc(o.id)}">
+        <div class="adm-card-row">
+          ${thumb}
+          <div class="adm-card-info">
+            <div class="adm-card-name">${esc(o.name || '—')} <span class="adm-hidden-tag" style="background:rgba(210,175,105,.12);border-color:rgba(210,175,105,.22);color:var(--gold)">تنسيقة</span></div>
+            <div class="adm-card-detail">المتجر: ${esc(o.sellers?.store_name || '—')}</div>
+            <div class="adm-card-price">${o.total_price ? `${Number(o.total_price).toLocaleString()} DZD` : 'Exclusive'}</div>
+            <div class="adm-card-date">${fmtDate(o.created_at)}</div>
+          </div>
+        </div>
+        <div class="adm-actions">
+          <button class="adm-approve" onclick="doAction('outfit','${esc(o.id)}','approved')">✓ موافقة</button>
+          <button class="adm-reject"  onclick="doAction('outfit','${esc(o.id)}','rejected')">✕ رفض</button>
+        </div>
+      </div>`;
+    }
+
     async function loadProds() {
       const el = document.getElementById('ptab-prods-queue');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
-        const { data, error } = await sb.from('products')
+        const { data: prodData, error: prodErr } = await sb.from('products')
           .select('id,name,price,is_exclusive,image,images,type,description,created_at,seller:sellers(store_name)')
           .eq('slider_type', 'main_hero')
           .eq('hero_status', 'pending')
           .order('created_at', { ascending: true });
-        if (error) throw error;
-        const count = data?.length ?? 0;
+        if (prodErr) throw prodErr;
+        const { data: outfitData, error: outfitErr } = await sb.from('outfits')
+          .select('id,name,cover_image,total_price,slider_type,hero_status,seller_id,created_at,sellers(store_name)')
+          .eq('slider_type', 'main_hero')
+          .eq('hero_status', 'pending')
+          .order('created_at', { ascending: true });
+        if (outfitErr) throw outfitErr;
+        const queue = [
+          ...(prodData || []).map(p => ({ kind: 'product', created_at: p.created_at, data: p })),
+          ...(outfitData || []).map(o => ({ kind: 'outfit', created_at: o.created_at, data: o }))
+        ].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const count = queue.length;
         document.getElementById('cnt-prods').textContent = count > 0 ? count : '';
         if (!count) {
           el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">✓</div>ما عندك حتى منتج قيد المراجعة</div>';
           return;
         }
-        el.innerHTML = data.map(p => `
-          <div class="adm-card" id="pc-${p.id}">
-            ${buildAdmGallery(p)}
+        el.innerHTML = queue.map(it => it.kind === 'outfit' ? _admOutfitQueueCardHtml(it.data) : `
+          <div class="adm-card" id="pc-${it.data.id}">
+            ${buildAdmGallery(it.data)}
             <div class="adm-card-info">
-              <div class="adm-card-name">${esc(p.name || '—')}</div>
-              <div class="adm-card-detail">المتجر: ${esc(p.seller?.store_name || '—')}</div>
-              <div class="adm-card-price">${p.is_exclusive ? 'Exclusive' : `${Number(p.price || 0).toLocaleString()} DZD`}</div>
-              <div class="adm-card-date">${fmtDate(p.created_at)}</div>
+              <div class="adm-card-name">${esc(it.data.name || '—')}</div>
+              <div class="adm-card-detail">المتجر: ${esc(it.data.seller?.store_name || '—')}</div>
+              <div class="adm-card-price">${it.data.is_exclusive ? 'Exclusive' : `${Number(it.data.price || 0).toLocaleString()} DZD`}</div>
+              <div class="adm-card-date">${fmtDate(it.data.created_at)}</div>
             </div>
             <div class="adm-actions">
-              <button class="adm-approve" onclick="doAction('product','${p.id}','approved')">✓ موافقة</button>
-              <button class="adm-reject"  onclick="doAction('product','${p.id}','rejected')">✕ رفض</button>
+              <button class="adm-approve" onclick="doAction('product','${it.data.id}','approved')">✓ موافقة</button>
+              <button class="adm-reject"  onclick="doAction('product','${it.data.id}','rejected')">✕ رفض</button>
             </div>
           </div>`).join('');
         initAdmGalleries();
@@ -1005,38 +1037,71 @@
       </div>`;
     }
 
+    function _heroOutfitCardHtml(o) {
+      const thumb = o.cover_image ? `<img src="${safeUrl(o.cover_image)}" class="adm-thumb">` : `<div class="adm-thumb-ph">🗂</div>`;
+      const price = o.total_price ? `${Number(o.total_price).toLocaleString()} DZD` : 'Exclusive';
+      return `<div class="adm-card" id="ahc-${esc(o.id)}" data-id="${esc(o.id)}" data-kind="outfit" draggable="true"
+        ondragstart="onHeroDragStart(event)" ondragend="onHeroDragEnd(event)"
+        ondragover="onHeroDragOver(event)" ondrop="onHeroDrop(event)"
+        ondragenter="onHeroDragEnter(event)" ondragleave="onHeroDragLeave(event)">
+        <div class="adm-card-row">
+          ${thumb}
+          <div class="adm-card-info">
+            <div class="adm-card-name">${esc(o.name || '—')}${o.hero_pinned ? ' 📌' : ''}</div>
+            <div class="adm-card-detail">المتجر: ${esc(o.sellers?.store_name || '—')}</div>
+            <div class="adm-card-detail"><span class="adm-hidden-tag" style="background:var(--gold);color:#0B0A08">تنسيقة</span></div>
+            <div class="adm-card-price">${price}</div>
+            <div class="adm-card-detail">ترتيب: ${o.hero_order ?? 0}</div>
+          </div>
+        </div>
+        <div class="adm-actions">
+          <button class="adm-hero-order-btn" onclick="pinHeroSlide('${esc(o.id)}','outfit')">📌</button>
+          <button class="adm-reject" onclick="removeHeroSlide('${esc(o.id)}','outfit')">🗑</button>
+        </div>
+      </div>`;
+    }
+
+    async function _normalizeHeroOrder(items) {
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].hero_order !== i) {
+          const table = items[i].kind === 'editorial' ? 'hero_editorial_slides' : items[i].kind === 'outfit' ? 'outfits' : 'products';
+          await sb.from(table).update({ hero_order: i }).eq('id', items[i].id);
+        }
+      }
+    }
+
     async function loadApprovedHero() {
       const el = document.getElementById('ptab-prods-approved-list');
       el.innerHTML = '<div class="adm-loading">جاري التحميل...</div>';
       try {
-        const [{ data: prods, error: prodErr }, { data: slides, error: slideErr }] = await Promise.all([
+        const [{ data: prods, error: prodErr }, { data: slides, error: slideErr }, { data: approvedOutfits, error: outfitErr }] = await Promise.all([
           sb.from('products')
             .select('id,name,price,is_exclusive,image,images,cover_image,hero_order,hero_pinned,seller:sellers(store_name)')
             .eq('slider_type', 'main_hero').eq('hero_status', 'approved'),
-          sb.from('hero_editorial_slides').select('*')
+          sb.from('hero_editorial_slides').select('*'),
+          sb.from('outfits')
+            .select('id,name,cover_image,total_price,hero_pinned,hero_order,seller_id,sellers(store_name)')
+            .eq('slider_type', 'main_hero').eq('hero_status', 'approved')
+            .order('hero_order', { ascending: true })
         ]);
         if (prodErr) throw prodErr;
         if (slideErr) throw slideErr;
+        if (outfitErr) throw outfitErr;
         const items = [
           ...(prods || []).map(p => ({ kind: 'product', id: p.id, hero_order: p.hero_order || 0, hero_pinned: !!p.hero_pinned, data: p })),
-          ...(slides || []).map(s => ({ kind: 'editorial', id: s.id, hero_order: s.hero_order || 0, hero_pinned: false, data: s }))
+          ...(slides || []).map(s => ({ kind: 'editorial', id: s.id, hero_order: s.hero_order || 0, hero_pinned: false, data: s })),
+          ...(approvedOutfits || []).map(o => ({ kind: 'outfit', id: o.id, hero_order: o.hero_order || 0, hero_pinned: !!o.hero_pinned, data: o }))
         ];
         if (!items.length) {
           el.innerHTML = '<div class="adm-empty"><div class="adm-empty-ico">🖼</div>ما فيش شرائح موافق عليها</div>';
           return;
         }
         items.sort((a, b) => (b.hero_pinned ? 1 : 0) - (a.hero_pinned ? 1 : 0) || a.hero_order - b.hero_order);
-        const orders = items.map(it => it.hero_order);
-        const needsNormalize = new Set(orders).size !== orders.length || orders.every(o => o === 0);
-        if (needsNormalize) {
-          await Promise.all(items.map((it, i) => {
-            it.hero_order = i + 1;
-            const table = it.kind === 'editorial' ? 'hero_editorial_slides' : 'products';
-            return sb.from(table).update({ hero_order: i + 1 }).eq('id', it.id);
-          }));
-        }
+        await _normalizeHeroOrder(items);
         el.innerHTML = items.map(it => it.kind === 'editorial'
           ? _heroEditorialCardHtml(it.data)
+          : it.kind === 'outfit'
+          ? _heroOutfitCardHtml(it.data)
           : _heroProductCardHtml(it.data)
         ).join('');
       } catch (e) {
@@ -1088,8 +1153,8 @@
       e.currentTarget.classList.remove('hero-drag-over');
       if (!draggedId || draggedId === targetId) return;
       try {
-        const draggedTable = draggedKind === 'editorial' ? 'hero_editorial_slides' : 'products';
-        const targetTable = targetKind === 'editorial' ? 'hero_editorial_slides' : 'products';
+        const draggedTable = draggedKind === 'editorial' ? 'hero_editorial_slides' : draggedKind === 'outfit' ? 'outfits' : 'products';
+        const targetTable = targetKind === 'editorial' ? 'hero_editorial_slides' : targetKind === 'outfit' ? 'outfits' : 'products';
         const { data: draggedRow, error: e1 } = await sb.from(draggedTable).select('hero_order').eq('id', draggedId).single();
         if (e1) throw e1;
         const { data: targetRow, error: e2 } = await sb.from(targetTable).select('hero_order').eq('id', targetId).single();
@@ -1104,33 +1169,16 @@
       }
     }
 
-    async function pinHeroSlide(id) {
-      const card = document.getElementById('ahc-' + id);
-      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
-      try {
-        const { error } = await sb.from('products').update({ hero_pinned: true, hero_order: 0 }).eq('id', id);
-        if (error) throw error;
-        toast('✓ تم التثبيت');
-        loadApprovedHero();
-      } catch (e) {
-        toast('خطأ: ' + e.message);
-        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
-      }
+    function pinHeroSlide(id, type='product') {
+      const table=type==='outfit'?'outfits':type==='editorial'?'hero_editorial_slides':'products';
+      sb.from(table).update({hero_pinned:true,hero_order:0}).eq('id',id).then(()=>loadApprovedHero());
     }
 
-    async function removeHeroSlide(id) {
+    function removeHeroSlide(id, type='product') {
       if (!confirm('إزالة هذه الشريحة من Main Hero؟')) return;
-      const card = document.getElementById('ahc-' + id);
-      if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
-      try {
-        const { error } = await sb.from('products').update({ hero_status: 'rejected' }).eq('id', id);
-        if (error) throw error;
-        toast('✓ تمت الإزالة');
-        loadApprovedHero();
-      } catch (e) {
-        toast('خطأ: ' + e.message);
-        if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
-      }
+      const table=type==='outfit'?'outfits':type==='editorial'?'hero_editorial_slides':'products';
+      const update=type==='outfit'?{hero_status:'rejected'}:{hero_status:'rejected'};
+      sb.from(table).update(update).eq('id',id).then(()=>loadApprovedHero());
     }
 
     // ── ADD SLIDE MODAL ──
@@ -1434,11 +1482,11 @@
     // ── APPROVE / REJECT ──
     async function doAction(type, id, status) {
       if (status === 'rejected' && !confirm('متأكد؟')) return;
-      const cardId = (type === 'seller' ? 'sc-' : 'pc-') + id;
+      const cardId = (type === 'seller' ? 'sc-' : type === 'outfit' ? 'oc-' : 'pc-') + id;
       const card = document.getElementById(cardId);
       if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
       try {
-        const table = type === 'seller' ? 'sellers' : 'products';
+        const table = type === 'seller' ? 'sellers' : type === 'outfit' ? 'outfits' : 'products';
         let updateData;
         if (type === 'seller') {
           updateData = { approval_status: status };

@@ -1,11 +1,11 @@
-const CACHE_VERSION = 'wardro-v1068';
+const CACHE_VERSION = 'wardro-v1070';
 
 // Core app shell — paths only (no query params); icons rarely change
 const SHELL = [
   './',
   './index.html',
-  './style.css?v=1068',
-  './app.js?v=1068',
+  './style.css?v=1070',
+  './app.js?v=1070',
   './offline.html',
   './manifest.json',
   './icons/icon-192.png',
