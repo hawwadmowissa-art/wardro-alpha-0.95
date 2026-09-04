@@ -2893,10 +2893,11 @@ function openOutfitOrderForm(){
     name:s.product?.name||'',
     size:s.chosenSize,
     price:Number(s.product?.price||0),
+    isExclusive:s.product?.is_exclusive===true,
     chosenImg:s.chosenImg||s.product?.image||''
   }));
   const total=pieces.reduce((sum,pc)=>sum+pc.price,0);
-  _cfOutfitContext={outfitId:o.id,outfitName:o.name||'',pieces,total};
+  _cfOutfitContext={outfitId:o.id,outfitName:o.name||'',pieces,total,totalPiecesCount:_odSelection.length,totalPrice:o.total_price||0};
   _cfPopulateWilayas();
   ['cf-name','cf-phone','cf-address'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const wilayaSel=document.getElementById('cf-wilaya');if(wilayaSel)wilayaSel.value='';
@@ -2944,6 +2945,17 @@ async function cfConfirmOrder(){
     const orderGroupId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));
     const timestamp=new Date().toISOString();
     const outfitLink='https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?store='+sellerId+'&outfit='+ctx.outfitId;
+    const allSelected=ctx.pieces.length===ctx.totalPiecesCount;
+    const hasExclusive=ctx.pieces.some(pc=>pc.isExclusive);
+    const nonExclusiveSum=ctx.pieces.reduce((sum,pc)=>pc.isExclusive?sum:sum+Number(pc.price||0),0);
+    let totalOutfitPrice;
+    if(allSelected&&Number(ctx.totalPrice||0)>0){
+      totalOutfitPrice=Number(ctx.totalPrice).toLocaleString()+' دج';
+    }else if(hasExclusive){
+      totalOutfitPrice='أكثر من '+nonExclusiveSum.toLocaleString()+' دج';
+    }else{
+      totalOutfitPrice=nonExclusiveSum.toLocaleString()+' دج';
+    }
     const payloads=ctx.pieces.map((pc,i)=>({
       orderNumber,
       orderGroupId,
@@ -2956,6 +2968,7 @@ async function cfConfirmOrder(){
       size:pc.size,
       quantity:1,
       price:pc.price,
+      totalOutfitPrice,
       customerName:name,
       customerPhone:phone,
       wilaya,
