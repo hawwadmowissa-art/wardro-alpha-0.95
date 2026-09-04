@@ -2897,7 +2897,7 @@ function openOutfitOrderForm(){
     chosenImg:s.chosenImg||s.product?.image||''
   }));
   const total=pieces.reduce((sum,pc)=>sum+pc.price,0);
-  _cfOutfitContext={outfitId:o.id,outfitName:o.name||'',pieces,total,totalPiecesCount:_odSelection.length,totalPrice:o.total_price||0};
+  _cfOutfitContext={outfitId:o.id,outfitName:o.name||'',pieces,total,totalPiecesCount:_odSelection.length,totalPrice:o.total_price||0,sheetUrl:_storeShare?.sheet_url||null,sellerId:_storeShare?.id||o.seller_id||null};
   _cfPopulateWilayas();
   ['cf-name','cf-phone','cf-address'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const wilayaSel=document.getElementById('cf-wilaya');if(wilayaSel)wilayaSel.value='';
@@ -2940,8 +2940,8 @@ async function cfConfirmOrder(){
 
   if(_cfOutfitContext){
     const ctx=_cfOutfitContext;
-    const sellerId=_storeShare.id;
-    const sheetUrl=_storeShare.sheet_url;
+    const sellerId=ctx.sellerId||_storeShare?.id;
+    const sheetUrl=ctx.sheetUrl||_storeShare?.sheet_url;
     const orderGroupId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));
     const timestamp=new Date().toISOString();
     const outfitLink='https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?store='+sellerId+'&outfit='+ctx.outfitId;
