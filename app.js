@@ -2960,20 +2960,20 @@ async function cfConfirmOrder(){
     }else{
       totalOutfitPrice=nonExclusiveSum.toLocaleString()+' دج';
     }
-    const payloads=ctx.pieces.map((pc,i)=>({
+    if(!sheetUrl){
+      ocStart(true,orderNumber);
+      _cfOutfitContext=null;
+      return;
+    }
+    ocStart(false,orderNumber);
+    const combinedPayload={
+      orderSource:'outfit',
       orderNumber,
       orderGroupId,
-      orderSource:'outfit',
       outfitId:ctx.outfitId,
-      outfitName:ctx.outfitName,
+      outfitName:ctx.outfitName||'',
       outfitCoverImage:ctx.coverImage||'',
-      isFirstPiece:i===0,
-      pieceIndex:i+1,
-      pieceCount:ctx.pieces.length,
-      productName:pc.name,
-      size:pc.size,
-      quantity:1,
-      price:pc.price,
+      outfitLink,
       totalOutfitPrice,
       customerName:name,
       customerPhone:phone,
@@ -2982,20 +2982,18 @@ async function cfConfirmOrder(){
       address,
       deliveryMethod:_cfDelivery,
       timestamp,
-      storeName:_storeShare.name||'',
-      imageUrl:pc.chosenImg||'',
-      productLink:pc.productId?('https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?product='+pc.productId):'',
-      outfitLink
-    }));
-    if(!sheetUrl){
-      ocStart(true,orderNumber);
-      _cfOutfitContext=null;
-      return;
-    }
-    ocStart(false,orderNumber);
-    Promise.all(payloads.map(payload=>fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})))
-      .then(results=>{
-        if(results.every(r=>r.ok)){
+      storeName:_storeShare?.name||'',
+      pieces:ctx.pieces.map(pc=>({
+        productName:pc.name||'',
+        size:pc.size||'',
+        price:pc.price||0,
+        imageUrl:pc.chosenImg||'',
+        productLink:pc.productId?('https://hawwadmowissa-art.github.io/wardro-alpha-0.95/?product='+pc.productId):''
+      }))
+    };
+    fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(combinedPayload)})
+      .then(res=>{
+        if(res.ok){
           ocShowSuccess();
           try{_logEvent('form_order',{productId:null,sellerId});}catch(_){}
           _cfOutfitContext=null;
